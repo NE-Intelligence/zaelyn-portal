@@ -29,9 +29,10 @@ const trazo = {
   strokeLinejoin: 'round' as const,
 }
 
-const VISTAS: { k: string; icono: React.ReactNode }[] = [
+const VISTAS: { k: string; v: string; icono: React.ReactNode }[] = [
   {
     k: 'v1',
+    v: '',
     icono: (
       <svg {...trazo}>
         <path d="M4 19V9M10 19V5M16 19v-7M4 19h16" />
@@ -40,6 +41,7 @@ const VISTAS: { k: string; icono: React.ReactNode }[] = [
   },
   {
     k: 'v2',
+    v: '?v=tablero',
     icono: (
       <svg {...trazo}>
         <rect x="3" y="4.5" width="18" height="15" rx="2" />
@@ -49,6 +51,7 @@ const VISTAS: { k: string; icono: React.ReactNode }[] = [
   },
   {
     k: 'v3',
+    v: '?v=gantt',
     icono: (
       <svg {...trazo}>
         <path d="M4 7h8M7 12h10M4 17h6" />
@@ -57,6 +60,7 @@ const VISTAS: { k: string; icono: React.ReactNode }[] = [
   },
   {
     k: 'v4',
+    v: '?v=ruta',
     icono: (
       <svg {...trazo}>
         <circle cx="5.5" cy="6" r="2" />
@@ -68,6 +72,7 @@ const VISTAS: { k: string; icono: React.ReactNode }[] = [
   },
   {
     k: 'v5',
+    v: '?v=equipo',
     icono: (
       <svg {...trazo}>
         <circle cx="9" cy="8.5" r="3" />
@@ -77,6 +82,7 @@ const VISTAS: { k: string; icono: React.ReactNode }[] = [
   },
   {
     k: 'v6',
+    v: '?v=bitacora',
     icono: (
       <svg {...trazo}>
         <path d="M12 7v5l3.2 1.9" />
@@ -103,13 +109,22 @@ export default function Proyectos() {
           </h1>
           <p className="st-bajada">{t('pr.hero.sub')}</p>
           <div className="st-acciones">
-            <Link className="st-btn st-btn-1" href="/app/andes">
+            <Link className="st-btn st-btn-1" href="/demo">
               {t('pr.hero.cta1')}
             </Link>
             <a className="st-btn st-btn-2" href="#archivo">
               {t('pr.hero.cta2')}
             </a>
           </div>
+
+          <nav className="st-vistas" aria-label="Entrar directo a una vista del portal">
+            <Link href="/demo">Resumen</Link>
+            <Link href="/demo?v=tablero">Tablero</Link>
+            <Link href="/demo?v=gantt">Gantt</Link>
+            <Link href="/demo?v=ruta">Ruta crítica</Link>
+            <Link href="/demo?v=equipo">Equipo</Link>
+            <Link href="/demo?v=bitacora">Bitácora</Link>
+          </nav>
         </div>
       </section>
 
@@ -141,17 +156,18 @@ export default function Proyectos() {
           </div>
           <div className="st-rejilla-3" style={{ marginTop: '2.4rem' }}>
             {VISTAS.map((v) => (
-              <article className="st-producto" key={v.k}>
+              <Link className="st-producto st-tocable" key={v.k} href={`/demo${v.v}`}>
                 <span className="st-ico" aria-hidden="true">
                   {v.icono}
                 </span>
                 <h3 style={{ fontSize: '1.1rem' }}>{t(`pr.${v.k}.t` as Clave)}</h3>
                 <p>{t(`pr.${v.k}.p` as Clave)}</p>
-              </article>
+                <span className="st-abrir">Abrir esta vista</span>
+              </Link>
             ))}
           </div>
           <div className="st-acciones" style={{ justifyContent: 'flex-start', marginTop: '2.2rem' }}>
-            <Link className="st-btn st-btn-1" href="/app/andes">
+            <Link className="st-btn st-btn-1" href="/demo">
               {t('pr.fin.cta')}
             </Link>
           </div>
@@ -206,7 +222,7 @@ export default function Proyectos() {
           <h2>{t('pr.fin.h2')}</h2>
           <p className="st-bajada">{t('pr.fin.sub')}</p>
           <div className="st-acciones">
-            <Link className="st-btn st-btn-1" href="/app/andes">
+            <Link className="st-btn st-btn-1" href="/demo">
               {t('pr.fin.cta')}
             </Link>
           </div>

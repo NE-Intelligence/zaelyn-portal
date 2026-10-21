@@ -200,3 +200,22 @@
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.01ms !important; transition-duration:.01ms !important}
 }
+
+/* Una tarjeta que ES un enlace. Si lleva a algún lado, tiene que parecerlo:
+   una tarjeta muda que resulta ser clicable se descubre por accidente. */
+.st-tocable{text-decoration:none; cursor:pointer}
+.st-abrir{
+  margin-top:auto; padding-top:.7rem; font-size:12.5px; font-weight:500;
+  color:var(--cian); display:inline-flex; align-items:center; gap:.4rem;
+}
+.st-abrir::after{content:"→"; transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.st-tocable:hover .st-abrir::after{transform:translateX(3px)}
+.st-vistas{
+  display:flex; gap:.5rem; flex-wrap:wrap; justify-content:center; margin-top:1.6rem;
+}
+.st-vistas a{
+  font-size:12.5px; font-weight:500; padding:.42rem .85rem; border-radius:999px;
+  text-decoration:none; color:var(--tinta-2); box-shadow:inset 0 0 0 1px var(--linea);
+  transition:color .18s, box-shadow .18s;
+}
+.st-vistas a:hover{color:var(--tinta); box-shadow:inset 0 0 0 1px #3A3A4D}

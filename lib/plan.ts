@@ -1,48 +1,123 @@
 /**
- * El contrato de lectura.
+ * El contrato de lectura — la forma REAL que devuelve Zaelyn.
  *
- * `EstadoPlan` es lo que Zaelyn devuelve ya medido: avance, avance esperado,
- * criticidad, holgura y atraso vienen hechos. **El portal no calcula ninguno
- * de esos números y no consulta la base.** Si el chat dice 34%, la pantalla
- * dice 34%, porque las dos leen esto mismo.
+ * Ref: Zaelyn DECISIONS #164, #167, #168, #169
  *
- * Mientras el endpoint no exista, `lib/demo.ts` arma un objeto de esta forma
- * con datos de ejemplo, y la pantalla lo dice en voz alta.
+ * ── ESTE ARCHIVO ES UN ESPEJO, NO UN DISEÑO ────────────────────────────
+ *
+ * Cada tipo de aquí es el mismo que `src/services/plan-estado.ts` y
+ * `src/services/portal.ts` declaran en Zaelyn, con los mismos nombres de
+ * campo y los mismos valores. No se traduce nada: un `estatus` que allá vale
+ * `en_curso` aquí vale `en_curso`, aunque la píldora diga «En curso».
+ *
+ * La versión anterior de este archivo era un contrato INVENTADO, escrito
+ * antes de que el motor tuviera fases, hitos ni holgura. Tenía campos que
+ * ninguna consulta podía llenar —`atraso` en días, `prioridad` en cuatro
+ * cubetas, `critica` como bandera— y la pantalla los iba a calcular sola.
+ * Eso es la segunda verdad: el día que el chat dijera 40% y la pantalla 43%,
+ * nadie podría decir cuál está mal. Por eso ahora el espejo es literal.
+ *
+ * ── LO ÚNICO QUE SE HACE AQUÍ ES PRESENTACIÓN ──────────────────────────
+ *
+ * Nombres legibles, clases de CSS, iniciales de una persona, el color de una
+ * fase. Nada de eso es un número: son maneras de pintar un dato que ya vino
+ * medido. Si alguna vez hace falta una CUENTA que no esté en el payload, la
+ * respuesta no es hacerla aquí — es pedirla al contrato.
  */
 
-export type Estado = 'pendiente' | 'curso' | 'revision' | 'detenida' | 'hecha'
-export type Prioridad = 'critica' | 'alta' | 'media' | 'baja'
-export type Rol = 'observa' | 'ejecuta' | 'lidera' | 'administra'
+// ── los valores, tal como los dice el motor ─────────────────────────────────
+
+export type Estatus = 'abierto' | 'en_curso' | 'bloqueado' | 'hecho' | 'cancelado'
+export const ABIERTOS: readonly Estatus[] = ['abierto', 'en_curso', 'bloqueado']
+
+export type Criticidad = 'ninguna' | 'atencion' | 'critica'
+export type Confianza = 'alta' | 'media' | 'baja'
+export type Veredicto = 'sin_fechas' | 'atrasado' | 'al_dia' | 'adelantado'
+
+export type Senal =
+  | 'atrasado' | 'vencido' | 'bloqueado' | 'sin_dueno' | 'eterno'
+  | 'estancado' | 'sin_declarar' | 'salto' | 'retroceso'
+
 export type Vista = 'resumen' | 'tablero' | 'gantt' | 'ruta' | 'equipo' | 'bitacora'
 
-export const ESTADO_NOMBRE: Record<Estado, string> = {
-  pendiente: 'Sin iniciar',
-  curso: 'En curso',
-  revision: 'En revisión',
-  detenida: 'Detenida',
-  hecha: 'Hecha',
+export const ESTATUS_NOMBRE: Record<Estatus, string> = {
+  abierto: 'Sin iniciar',
+  en_curso: 'En curso',
+  bloqueado: 'Detenida',
+  hecho: 'Hecha',
+  cancelado: 'Cancelada',
 }
 
-export const PRIORIDAD_NOMBRE: Record<Prioridad, string> = {
+/**
+ * La clase de CSS de cada estatus.
+ *
+ * El CSS se escribió con otras palabras (`pendiente`, `curso`, `detenida`,
+ * `hecha`) y aquí está el único puente entre los dos vocabularios. Va en una
+ * tabla y no esparcido por las vistas a propósito: un puente que se ve es un
+ * puente que se puede cruzar de vuelta.
+ */
+export const CLASE_ESTATUS: Record<Estatus, string> = {
+  abierto: 'pendiente',
+  en_curso: 'curso',
+  bloqueado: 'detenida',
+  hecho: 'hecha',
+  cancelado: 'cancelada',
+}
+
+export const CRITICIDAD_NOMBRE: Record<Criticidad, string> = {
+  ninguna: 'Normal',
+  atencion: 'Atención',
   critica: 'Crítica',
-  alta: 'Alta',
-  media: 'Media',
-  baja: 'Baja',
 }
 
-export const ROL_NOMBRE: Record<Rol, string> = {
-  observa: 'Observa',
-  ejecuta: 'Ejecuta',
-  lidera: 'Lidera',
-  administra: 'Administra',
+export const VEREDICTO_NOMBRE: Record<Veredicto, string> = {
+  sin_fechas: 'Sin fechas',
+  atrasado: 'Atrasado',
+  al_dia: 'En tiempo',
+  adelantado: 'Adelantado',
 }
 
-/** Lo que cada rol puede pedirle a Zaelyn. El portal nunca escribe. */
-export const ROL_PUEDE: Record<Rol, string> = {
-  observa: 'Preguntar lo que quiera. No puede interrumpir a una persona.',
-  ejecuta: 'Reportar el avance de sus actividades.',
-  lidera: 'Asignar, priorizar y pedirle avance a una persona.',
-  administra: 'Todo lo anterior, más roles y alta de proyectos.',
+/** La etiqueta corta, para una píldora. Con sus acentos: «sin dueno» no es una palabra. */
+export const SENAL_CORTO: Record<Senal, string> = {
+  atrasado: 'atrasado',
+  vencido: 'vencido',
+  bloqueado: 'esperando',
+  sin_dueno: 'sin dueño',
+  eterno: 'porcentaje eterno',
+  estancado: 'estancado',
+  sin_declarar: 'sin declarar',
+  salto: 'subió de golpe',
+  retroceso: 'retrocedió',
+}
+
+export const SENAL_NOMBRE: Record<Senal, string> = {
+  atrasado: 'Va por debajo de lo esperado',
+  vencido: 'La fecha ya pasó',
+  bloqueado: 'Espera a algo',
+  sin_dueno: 'Nadie la tiene',
+  eterno: 'Lleva mucho con el mismo porcentaje',
+  estancado: 'Nada se ha movido',
+  sin_declarar: 'Debería haber empezado y nadie ha dicho nada',
+  salto: 'Subió de golpe',
+  retroceso: 'El porcentaje bajó',
+}
+
+/**
+ * Los roles de Zaelyn, con lo que cada uno puede PEDIRLE a Zaelyn.
+ *
+ * El portal nunca escribe, así que el rol no habilita un botón: explica qué
+ * puede hacer esa persona hablando. Son los nombres reales del motor (#160),
+ * no cuatro categorías redondeadas.
+ */
+export const ROL_PUEDE: Record<string, string> = {
+  observador: 'Puede preguntar lo que quiera. No puede interrumpir a nadie.',
+  miembro: 'Puede reportar el avance de lo suyo.',
+  integrante: 'Puede reportar el avance de lo suyo.',
+  a_cargo: 'Puede reportar el avance de lo suyo.',
+  apoyo: 'Puede asignar y pedir avance.',
+  lider: 'Puede asignar, priorizar y pedirle avance a una persona.',
+  responsable: 'Todo lo anterior, más roles y alta de planes.',
+  administrador: 'Todo lo anterior, más roles y alta de planes.',
 }
 
 export const VISTA_NOMBRE: Record<Vista, string> = {
@@ -54,101 +129,226 @@ export const VISTA_NOMBRE: Record<Vista, string> = {
   bitacora: 'Bitácora',
 }
 
-export type Persona = {
+// ── el payload ──────────────────────────────────────────────────────────────
+
+/** Un renglón del plan, YA MEDIDO. Espejo de `RenglonDePlan`. */
+export type Renglon = {
   id: string
-  nombre: string
-  corto: string
-  iniciales: string
-  rol: Rol
-  /** 1–6: elige el color de fase/avatar. */
-  color: number
-  canal?: string
-  puesto?: string
-}
-
-export type Fase = { id: string; nombre: string; color: number }
-
-export type Nota = { autor: string; fecha: string; canal: string; texto: string }
-
-export type Actividad = {
-  id: string
-  clave: string
-  nombre: string
-  fase: string
-  responsable?: string
-  estado: Estado
-  prioridad: Prioridad
-  inicio: string
-  fin: string
-  /** Lo declarado por quien la trae. */
-  avance: number
-  /** Lo que tocaría hoy según las fechas. Lo calcula Zaelyn, no la pantalla. */
-  esperado: number
-  depende: string[]
-  hito: boolean
-  critica: boolean
-  /** Días de holgura. 0 = manda sobre la fecha final. */
-  holgura: number
-  /** Días de atraso contra la fecha de vencimiento. */
-  atraso: number
-  /** Qué la detiene, cuando está detenida. */
-  bloqueo?: string
-  /** Horas estimadas. `null` cuando nadie las ha puesto: por eso la ruta no da total. */
+  clave: string | null
+  texto: string
+  estatus: Estatus
+  abierto: boolean
+  planId: string
+  plan: string
+  personaId: string | null
+  quien: string | null
+  prioridad: number
+  inicia: string | null
+  vence: string | null
   minutos: number | null
-  notas: Nota[]
+  antecesores: string[]
+  fase: string | null
+  faseOrden: number | null
+  hito: boolean
+  /** Días que puede recorrerse sin empujar nada. `null` = no se puede saber. */
+  holgura: number | null
+  /** Holgura cero: manda sobre la fecha final. */
+  manda: boolean
+  /** Qué la detiene, con el texto de lo que espera. */
+  espera: string | null
+  avance: number
+  avanceEn: string | null
+  /** Lo que tocaría hoy. `null` sin fecha límite: no se le puede medir. */
+  esperado: number | null
+  base: 'inicia' | 'creado' | null
+  senales: Senal[]
+  confianza: Confianza
+  criticidad: Criticidad
+  gravedad: number
+  /** Cuántas notas lleva. Los textos van en la bitácora. */
+  notas: number
+  creadoEn: string
+  movidoEn: string
 }
 
-export type Proyecto = {
+export type Punto = {
+  esperado: number | null
+  declarado: number
+  comprobado: number
+  base: 'minutos' | 'cantidad'
+  sinEstimacion: number
+  sinFecha: number
+  total: number
+  cerrados: number
+  cancelados: number
+  senales: Partial<Record<Senal, number>>
+  dudosos: number
+  dichoSinCerrar: number
+}
+
+export type PersonaEnPlan = {
   id: string
-  corto: string
   nombre: string
-  grupo: string
-  inicio: string
-  fin: string
-  hoy: string
-  salud: 'bien' | 'riesgo' | 'mal'
-  avance: { real: number; esperado: number }
-  actualizado: string
+  rol: string | null
+  nivel: number
+  tieneCuenta: boolean
+  abiertos: number
+  cerrados: number
+  atrasados: number
 }
 
-export type EstadoPlan = {
-  proyecto: Proyecto
-  personas: Persona[]
-  fases: Fase[]
-  actividades: Actividad[]
-  curva: { fecha: string; esperado: number; real?: number }[]
-  bitacora: { fecha: string; hora: string; autor: string; canal: string; texto: string; actividad?: string }[]
-  zaelyn: { resumen: string; puntos: string[] }
-  /** Cuántos renglones abiertos le faltan datos. Lo que impide calcular la ruta. */
+export type Eslabon = {
+  id: string
+  texto: string
+  quien: string | null
+  estatus: Estatus
+  abierto: boolean
+  minutos: number | null
+  vence: string | null
+  criticidad: Criticidad
+}
+
+export type Ruta = {
+  cadena: Eslabon[]
+  /** Holgura cero: lo que de verdad manda sobre la fecha final. */
+  manda: Eslabon[]
+  minutos: number | null
+  minutosRestantes: number | null
+  faltanEstimacion: number
+  base: 'dias' | 'eslabones'
+  holguraDesconocida: number
+  sinVence: number
+  sinInicioDelSucesor: number
+  ciclo: boolean
+  enCiclo: string[]
+  dependencias: number
+  sueltos: number
+  vence: string | null
+  venceElPlan: string | null
+}
+
+export type PuntoDeCurva = {
+  fecha: string
+  esperado: number | null
+  /** `null` de hoy en adelante: la curva no proyecta. */
+  real: number | null
+  comprobado: number | null
+}
+
+export type Curva = {
+  puntos: PuntoDeCurva[]
+  paso: number
+  desde: string | null
+  sinBitacora: number
+  base: 'minutos' | 'cantidad'
+}
+
+export type FaseDePlan = {
+  /** `null` = los renglones que no traen fase. No se esconden. */
+  nombre: string | null
+  orden: number | null
+  punto: Punto
+  total: number
+  abiertos: number
+  hitos: number
+}
+
+export type Narrativa = { resumen: string; puntos: string[] }
+
+export type Suceso = {
+  pendienteId: string
+  pendiente: string
+  clave: string | null
+  evento: string
+  texto: string | null
+  avance: number | null
+  en: string
+  quien: string | null
+}
+
+export type EstadoDePlan = {
+  grupo: { id: string; nombre: string }
+  plan: { id: string; clave: string; nombre: string } | null
+  planes: Array<{ id: string; clave: string; nombre: string }>
+  hoy: string
+  punto: Punto
+  veredicto: Veredicto
+  renglones: Renglon[]
+  personas: PersonaEnPlan[]
   falta: { estimacion: number; fecha: number; inicio: number; dueno: number }
 }
 
-export type Grupo = {
-  id: string
-  nombre: string
-  tipo: 'proyecto' | 'familia' | 'personal'
-  rol: Rol
-  planes: { id: string; nombre: string; avance: number; esperado: number; salud: Proyecto['salud']; abiertos: number }[]
+export type VistaDePlan = {
+  estado: EstadoDePlan
+  ruta: Ruta
+  curva: Curva
+  fases: FaseDePlan[]
+  narrativa: Narrativa
+  bitacora: Suceso[]
+  /** Los ids de lo abierto, ordenados por lo que cuesta no verlo hoy. */
+  riesgo: string[]
+  rol: string | null
+  nivel: number
 }
 
-// ── lecturas derivadas que NO son números nuevos, solo recortes ──────────────
+export type GrupoEnPortal = {
+  id: string
+  nombre: string
+  /** family | work | study | other. Decide qué vistas tiene el lienzo. */
+  clase: string
+  rol: string | null
+  nivel: number
+  planes: Array<{
+    id: string
+    clave: string
+    nombre: string
+    abiertos: number
+    vencidos: number
+    hasta: string | null
+  }>
+}
 
-export const porFase = (p: EstadoPlan, fase: string) =>
-  p.actividades.filter((a) => a.fase === fase)
+// ── recortes: ni uno de éstos es un número nuevo ────────────────────────────
 
-export const abiertas = (p: EstadoPlan) =>
-  p.actividades.filter((a) => a.estado !== 'hecha')
+export const abiertas = (e: EstadoDePlan) => e.renglones.filter(r => r.abierto)
 
-export const enRiesgo = (p: EstadoPlan) =>
-  p.actividades
-    .filter((a) => a.estado !== 'hecha' && (a.atraso > 0 || a.estado === 'detenida'))
-    .sort((x, y) => y.atraso - x.atraso || (y.estado === 'detenida' ? 1 : 0))
+/** El orden del riesgo lo decidió el contrato; aquí solo se resuelven los ids. */
+export const enRiesgo = (v: VistaDePlan): Renglon[] => {
+  const porId = new Map(v.estado.renglones.map(r => [r.id, r]))
+  return v.riesgo.map(id => porId.get(id)).filter((r): r is Renglon => r !== undefined)
+}
 
-export const cadenaCritica = (p: EstadoPlan) =>
-  p.actividades.filter((a) => a.critica).sort((x, y) => x.inicio.localeCompare(y.inicio))
+export const deFase = (e: EstadoDePlan, fase: string | null) =>
+  e.renglones.filter(r => (r.fase ?? null) === fase)
 
-export const persona = (p: EstadoPlan, id?: string) =>
-  p.personas.find((x) => x.id === id)
+export const persona = (e: EstadoDePlan, id?: string | null) =>
+  id ? e.personas.find(p => p.id === id) : undefined
 
-export const actividad = (p: EstadoPlan, id: string) =>
-  p.actividades.find((x) => x.id === id)
+/** El color de una fase sale de su ORDEN, que es un dato del archivo. */
+export const colorDeFase = (orden: number | null): number =>
+  orden === null ? 6 : ((orden - 1) % 5) + 1
+
+/** Dos iniciales de un nombre. Presentación, no dato. */
+export const iniciales = (nombre: string): string =>
+  nombre.replace(/^@/, '').split(/[\s._-]+/).filter(Boolean).slice(0, 2)
+    .map(x => x[0]!.toUpperCase()).join('') || '?'
+
+export const corto = (nombre: string): string => {
+  const limpio = nombre.replace(/^@/, '')
+  const [uno, dos] = limpio.split(/\s+/)
+  return dos ? `${uno} ${dos[0]!.toUpperCase()}.` : limpio
+}
+
+/**
+ * El veredicto como salud, para las tres palabras de la etiqueta.
+ *
+ * `sin_fechas` NO se pinta como «en tiempo»: un plan al que no se le puede
+ * medir el tiempo no está en tiempo, y teñirlo de verde sería la mentira más
+ * cómoda de toda la pantalla.
+ */
+export const SALUD: Record<Veredicto, 'bien' | 'riesgo' | 'mal' | 'mudo'> = {
+  adelantado: 'bien',
+  al_dia: 'bien',
+  atrasado: 'mal',
+  sin_fechas: 'mudo',
+}

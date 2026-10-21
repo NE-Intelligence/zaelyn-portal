@@ -1131,3 +1131,112 @@ a.pt-plan:hover {
     gap: 4px;
   }
 }
+
+/* ── lo que trajo el motor real ───────────────────────────────────────────
+ *
+ * Tres estados y un bloque de navegación que la primera versión no tenía,
+ * porque el contrato inventado no los contemplaba:
+ *
+ *   · `cancelada` — Zaelyn distingue cancelar de terminar, y con razón:
+ *     cancelar es dejar de hacer algo, no haberlo hecho. Pintarla del verde
+ *     de «hecha» convertiría la forma más rápida de acabar un plan en
+ *     cancelar lo que falta. Toma el morado que ocupaba `revision`, un
+ *     estado que el motor no tiene.
+ *   · `atencion` / `ninguna` — la criticidad del motor son tres escalones,
+ *     no cuatro cubetas de prioridad.
+ *   · `mudo` — un plan sin fechas NO está «en tiempo». Teñirlo de verde
+ *     sería la mentira más cómoda de toda la pantalla, así que va en gris:
+ *     el color de «no se puede decir».
+ *   · `.pt-atajos` — llegar al Gantt costaba tres clics y había que
+ *     adivinar dónde estaba.
+ */
+:root {
+  --st-cancelada-bg: var(--st-revision-bg);
+  --st-cancelada-ink: var(--st-revision-ink);
+  --st-cancelada: var(--st-revision);
+}
+
+.pt-pill.cancelada {
+  background: var(--st-cancelada-bg);
+  color: var(--st-cancelada-ink);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.pt-prio.atencion {
+  color: var(--prio-alta);
+}
+.pt-prio.ninguna {
+  color: var(--prio-baja);
+}
+
+.pt-salud.mudo {
+  background: var(--st-pendiente-bg);
+  color: var(--st-pendiente-ink);
+}
+
+.pt-atajos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin-top: 8px;
+}
+.pt-atajos a {
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  background: var(--surface);
+  transition: border-color 0.14s, color 0.14s, background 0.14s;
+}
+.pt-atajos a:hover {
+  border-color: var(--brand);
+  color: var(--brand-ink);
+  background: var(--brand-soft);
+}
+
+/* El renglón de un plan en la tarjeta de grupo dejó de ser un enlace entero
+   —ahora lleva atajos dentro— así que el hover va en el título. */
+.pt-plan .t:hover {
+  color: var(--brand-ink);
+}
+
+/* Una bandera CALMADA, para lo que no es una alarma.
+ *
+ * `.pt-bandera` es coral, y coral quiere decir «mira esto». «12 días de
+ * margen» es la noticia contraria: con el mismo tono, una cadena entera de
+ * actividades holgadas se veía como una cadena entera en problemas. */
+.pt-bandera.ok {
+  background: var(--surface-2);
+  color: var(--ink-3);
+  border: 1px solid var(--line);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+/* La clave no se parte en dos renglones: «A-01» cabe, y partido se lee «A / 01».
+   Pasa en el Gantt y en el Tablero, y en el teléfono pasa siempre. */
+.pt-gantt .lista .ren .pt-mono,
+.pt-tabla .nombre .pt-mono {
+  white-space: nowrap;
+}
+
+/* «Salir» es un botón de formulario y no un enlace, para que nada que siga
+   enlaces pueda cerrarle la sesión a nadie. Se viste como el resto de la
+   barra: la diferencia es de método HTTP, no de apariencia. */
+.pt-salir {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--ink-3);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+.pt-salir:hover {
+  color: var(--brand-ink);
+  text-decoration: underline;
+}

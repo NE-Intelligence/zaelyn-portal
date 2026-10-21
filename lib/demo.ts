@@ -1,212 +1,359 @@
 /**
- * Datos de ejemplo.
+ * El ejemplo: un `VistaDePlan` inventado, con la forma exacta del real.
  *
- * Esto NO es de nadie: el proyecto, las personas y las fechas están
- * inventados. Existe para que el portal se pueda ver y revisar antes de que
- * exista el endpoint que devuelve `estadoDePlan()` desde Zaelyn.
+ * ── ESTE ARCHIVO HACE DE SERVIDOR, NO DE PANTALLA ──────────────────────
  *
- * La pantalla lo dice en voz alta con la cinta de «datos de ejemplo». El día
- * que el endpoint exista, se cambia la fuente y no se toca ni un componente,
- * porque los dos devuelven la misma forma: `EstadoPlan`.
+ * Aquí sí se calculan cosas —el esperado de cada renglón, la holgura, la
+ * curva— y eso no contradice nada: este módulo ocupa el lugar de Zaelyn, no
+ * el de la vista. Las vistas no saben de dónde viene el objeto, y ésa es la
+ * prueba: la misma pantalla pinta esto y pinta los datos reales sin cambiar
+ * una línea.
  *
- * Los números son consistentes a propósito: `esperado` sale de las fechas
- * contra el día de hoy, no de una cifra puesta a mano. Un dato de ejemplo que
- * se contradice enseña a desconfiar de la pantalla.
+ * Las fórmulas son las del motor (Zaelyn #151, #168): esperado lineal entre
+ * inicio y vencimiento, holgura hacia atrás desde el arranque del sucesor. Si
+ * algún día difieren, el ejemplo se verá raro y eso es justo lo que se quiere
+ * — un ejemplo que no puede estar mal no prueba nada.
  */
-import type { Actividad, EstadoPlan, Estado, Grupo, Prioridad } from './plan'
+import type {
+  Criticidad, Curva, EstadoDePlan, Estatus, FaseDePlan, GrupoEnPortal, Narrativa,
+  PersonaEnPlan, Punto, Renglon, Ruta, Senal, Suceso, VistaDePlan,
+} from './plan'
 
 const HOY = '2026-11-18'
-
-const dia = (s: string) => new Date(s + 'T00:00:00Z').getTime()
 const DIA = 86_400_000
+const dia = (s: string) => Date.parse(`${s}T00:00:00Z`)
 const dias = (a: string, b: string) => Math.round((dia(b) - dia(a)) / DIA)
-const suma = (s: string, n: number) => new Date(dia(s) + n * DIA).toISOString().slice(0, 10)
+const mas = (s: string, n: number) => new Date(dia(s) + n * DIA).toISOString().slice(0, 10)
 
-/** Lo que tocaría hoy según las fechas. Es lo que Zaelyn calcula; aquí se imita. */
-function esperadoDe(inicio: string, fin: string, hoy = HOY): number {
-  const total = Math.max(dias(inicio, fin), 1)
-  const corrido = dias(inicio, hoy)
-  if (corrido <= 0) return 0
-  if (corrido >= total) return 100
-  return Math.round((corrido / total) * 100)
-}
-
-type Fila = [
-  clave: string,
-  nombre: string,
-  fase: string,
-  responsable: string | undefined,
-  inicio: string,
-  fin: string,
-  avance: number,
-  estado: Estado,
-  prioridad: Prioridad,
-  depende: string[],
-  extra?: Partial<Actividad>,
+const PERSONAS: PersonaEnPlan[] = [
+  { id: 'p1', nombre: '@marcela', rol: 'responsable', nivel: 3, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
+  { id: 'p2', nombre: '@efrain', rol: 'lider', nivel: 2, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
+  { id: 'p3', nombre: '@lupita', rol: 'integrante', nivel: 1, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
+  { id: 'p4', nombre: 'Termika', rol: 'integrante', nivel: 1, tieneCuenta: false, abiertos: 0, cerrados: 0, atrasados: 0 },
+  { id: 'p5', nombre: '@rodrigo', rol: 'observador', nivel: 0, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
 ]
 
-const FILAS: Fila[] = [
-  ['A01', 'Levantar el proceso actual de compras', 'f1', 'mariana', '2026-09-28', '2026-10-09', 100, 'hecha', 'alta', [], { minutos: 2400 }],
-  ['A02', 'Mapear catálogos de proveedor', 'f1', 'rafa', '2026-10-05', '2026-10-16', 100, 'hecha', 'media', ['A01'], { minutos: 1800 }],
-  ['A03', 'Validar el diseño con el área usuaria', 'f1', 'mariana', '2026-10-12', '2026-10-23', 100, 'hecha', 'alta', ['A01'], { minutos: 1200, hito: true }],
-  ['A04', 'Definir la política de aprobaciones', 'f1', 'sofia', '2026-10-19', '2026-11-06', 70, 'curso', 'alta', ['A03'], { minutos: 1500 }],
+type Semilla = {
+  clave: string
+  texto: string
+  fase: string
+  quien: string | null
+  inicia: string
+  vence: string
+  estatus: Estatus
+  avance: number
+  horas: number | null
+  antecesores?: string[]
+  hito?: boolean
+  notas?: number
+}
 
-  ['A05', 'Construir el alta de solicitudes', 'f2', 'rafa', '2026-10-26', '2026-11-20', 65, 'curso', 'critica', ['A03'], { minutos: 4800, critica: true, holgura: 0 }],
-  ['A06', 'Construir el flujo de autorización', 'f2', 'rafa', '2026-11-09', '2026-12-04', 20, 'curso', 'critica', ['A05'], { minutos: 4200, critica: true, holgura: 0 }],
-  ['A07', 'Interfaz con el sistema contable', 'f2', 'beto', '2026-11-02', '2026-11-27', 15, 'detenida', 'critica', ['A04'], { minutos: null, bloqueo: 'esperando las credenciales del ambiente de pruebas' }],
-  ['A08', 'Reportes de seguimiento', 'f2', 'sofia', '2026-11-16', '2026-12-11', 0, 'pendiente', 'media', ['A05'], { minutos: 2100 }],
-  ['A09', 'Migrar el catálogo histórico', 'f2', 'beto', '2026-11-23', '2026-12-11', 0, 'pendiente', 'alta', ['A02'], { minutos: null }],
+/**
+ * Un proyecto creíble: tres fases, dos caminos que confluyen —para que la
+ * holgura se vea— un hito, un renglón sin horas y uno sin dueño.
+ */
+const SEMILLA: Semilla[] = [
+  { clave: 'A-01', texto: 'Levantar el alcance con el cliente', fase: 'Definición', quien: 'p1', inicia: '2026-09-07', vence: '2026-09-18', estatus: 'hecho', avance: 100, horas: 24 },
+  { clave: 'A-02', texto: 'Cerrar el cuadro de cargas', fase: 'Definición', quien: 'p2', inicia: '2026-09-21', vence: '2026-10-02', estatus: 'hecho', avance: 100, horas: 32, antecesores: ['A-01'] },
+  { clave: 'A-03', texto: 'Aprobación del comité técnico', fase: 'Definición', quien: 'p1', inicia: '2026-10-05', vence: '2026-10-09', estatus: 'hecho', avance: 100, horas: 8, antecesores: ['A-02'], hito: true },
 
-  ['A10', 'Plan de pruebas integrales', 'f3', 'sofia', '2026-11-30', '2026-12-18', 0, 'pendiente', 'alta', ['A06'], { minutos: 1800, critica: true, holgura: 0 }],
-  ['A11', 'Ejecutar pruebas con usuarios', 'f3', undefined, '2026-12-14', '2027-01-15', 0, 'pendiente', 'critica', ['A10'], { minutos: null, critica: true, holgura: 0 }],
-  ['A12', 'Corregir hallazgos de pruebas', 'f3', 'rafa', '2027-01-04', '2027-01-22', 0, 'pendiente', 'alta', ['A11'], { minutos: 2400, critica: true, holgura: 0 }],
+  { clave: 'B-01', texto: 'Ingeniería de detalle del tablero', fase: 'Ingeniería', quien: 'p2', inicia: '2026-10-12', vence: '2026-11-13', estatus: 'en_curso', avance: 70, horas: 120, antecesores: ['A-03'], notas: 3 },
+  { clave: 'B-02', texto: 'Memoria de cálculo y planos', fase: 'Ingeniería', quien: 'p3', inicia: '2026-10-12', vence: '2026-10-30', estatus: 'hecho', avance: 100, horas: 60, antecesores: ['A-03'] },
+  { clave: 'B-03', texto: 'Tramitar el permiso municipal', fase: 'Ingeniería', quien: 'p3', inicia: '2026-10-19', vence: '2026-11-06', estatus: 'hecho', avance: 100, horas: 16, antecesores: ['A-03'] },
+  { clave: 'B-04', texto: 'Revisión de interferencias en sitio', fase: 'Ingeniería', quien: null, inicia: '2026-11-02', vence: '2026-11-13', estatus: 'abierto', avance: 0, horas: null, antecesores: ['B-02'] },
 
-  ['A13', 'Material de capacitación', 'f4', 'mariana', '2026-12-07', '2027-01-08', 0, 'pendiente', 'media', ['A08'], { minutos: 1500 }],
-  ['A14', 'Capacitar a usuarios clave', 'f4', 'mariana', '2027-01-11', '2027-01-29', 0, 'pendiente', 'alta', ['A12', 'A13'], { minutos: 2400, critica: true, holgura: 0 }],
-
-  ['A15', 'Carga inicial en productivo', 'f5', 'beto', '2027-02-01', '2027-02-05', 0, 'pendiente', 'critica', ['A14'], { minutos: 960, critica: true, holgura: 0 }],
-  ['A16', 'Salida en vivo', 'f5', 'mariana', '2027-02-08', '2027-02-08', 0, 'pendiente', 'critica', ['A15'], { minutos: 480, hito: true, critica: true, holgura: 0 }],
+  { clave: 'C-01', texto: 'Fabricación del tablero principal', fase: 'Obra', quien: 'p4', inicia: '2026-11-16', vence: '2026-12-11', estatus: 'abierto', avance: 10, horas: 200, antecesores: ['B-01'] },
+  { clave: 'C-02', texto: 'Obra civil de la base', fase: 'Obra', quien: 'p4', inicia: '2026-11-09', vence: '2026-11-27', estatus: 'en_curso', avance: 25, horas: 80, antecesores: ['B-03'] },
+  { clave: 'C-03', texto: 'Montaje y conexionado', fase: 'Obra', quien: 'p2', inicia: '2026-12-12', vence: '2027-01-08', estatus: 'bloqueado', avance: 0, horas: 160, antecesores: ['C-01', 'C-02'] },
+  { clave: 'C-04', texto: 'Pruebas en vacío', fase: 'Obra', quien: 'p3', inicia: '2027-01-09', vence: '2027-01-20', estatus: 'abierto', avance: 0, horas: 40, antecesores: ['C-03'] },
+  { clave: 'C-05', texto: 'Energización y entrega', fase: 'Obra', quien: 'p1', inicia: '2027-01-21', vence: '2027-01-22', estatus: 'abierto', avance: 0, horas: 16, antecesores: ['C-04'], hito: true },
 ]
 
-const NOTAS: Record<string, { autor: string; fecha: string; canal: string; texto: string }[]> = {
-  A05: [
-    { autor: 'rafa', fecha: '2026-11-14', canal: 'Telegram', texto: 'El alta ya guarda, falta la validación de duplicados.' },
-  ],
-  A07: [
-    { autor: 'beto', fecha: '2026-11-10', canal: 'Telegram', texto: 'Pedí las credenciales por correo, sin respuesta todavía.' },
-    { autor: 'mariana', fecha: '2026-11-17', canal: 'Telegram', texto: 'Lo subo a la junta del jueves.' },
-  ],
+// ── las mismas cuentas que hace el motor ────────────────────────────────────
+
+const esperadoDe = (s: Semilla, cuando: string): number => {
+  const total = dias(s.inicia, s.vence)
+  if (total <= 0) return dias(cuando, s.vence) <= 0 ? 100 : 0
+  const corridos = dias(s.inicia, cuando)
+  if (corridos <= 0) return 0
+  if (corridos >= total) return 100
+  return Math.round((corridos / total) * 100)
 }
 
-function armarActividades(): Actividad[] {
-  return FILAS.map(([clave, nombre, fase, responsable, inicio, fin, avance, estado, prioridad, depende, extra]) => {
-    const esperado = estado === 'hecha' ? 100 : esperadoDe(inicio, fin)
-    const atraso = estado !== 'hecha' && fin < HOY ? dias(fin, HOY) : 0
-    return {
-      id: clave,
-      clave,
-      nombre,
-      fase,
-      responsable,
-      estado,
-      prioridad,
-      inicio,
-      fin,
-      avance,
-      esperado,
-      depende,
-      hito: false,
-      critica: false,
-      holgura: 6,
-      atraso,
-      minutos: 0,
-      notas: NOTAS[clave] ?? [],
-      ...extra,
-    } satisfies Actividad
-  })
+const senalesDe = (s: Semilla, esperado: number): Senal[] => {
+  if (s.estatus === 'hecho' || s.estatus === 'cancelado') return []
+  const out: Senal[] = []
+  if (esperado - s.avance >= 15) out.push('atrasado')
+  if (s.vence < HOY) out.push('vencido')
+  if (s.estatus === 'bloqueado') out.push('bloqueado')
+  if (!s.quien) out.push('sin_dueno')
+  return out
 }
 
-const ACTIVIDADES = armarActividades()
+const critDe = (se: Senal[]): Criticidad => {
+  const duras = se.filter(x => x === 'vencido' || x === 'sin_dueno' || x === 'bloqueado').length
+  if (se.includes('vencido') && duras >= 2) return 'critica'
+  if (se.length >= 2) return 'critica'
+  return se.length ? 'atencion' : 'ninguna'
+}
 
-/** La curva: esperado y real por semana. El real se corta en hoy, no se proyecta. */
-function armarCurva() {
-  const puntos: EstadoPlan['curva'] = []
-  const inicio = '2026-09-28'
-  for (let i = 0; i <= 20; i++) {
-    const fecha = suma(inicio, i * 7)
-    const vivas = ACTIVIDADES.filter((a) => a.inicio <= fecha)
-    const esperado = vivas.length
-      ? Math.round(vivas.reduce((s, a) => s + esperadoDe(a.inicio, a.fin, fecha), 0) / ACTIVIDADES.length)
-      : 0
-    const real =
-      fecha <= HOY
-        ? Math.round(
-            ACTIVIDADES.reduce(
-              (s, a) => s + (a.inicio <= fecha ? Math.min(a.avance, esperadoDe(a.inicio, a.fin, fecha)) : 0),
-              0,
-            ) / ACTIVIDADES.length,
-          )
-        : undefined
-    puntos.push({ fecha, esperado, real })
+/** El paso hacia atrás, igual que `cpm.ts`: del final al principio. */
+function holguras(): Map<string, number | null> {
+  const porClave = new Map(SEMILLA.map(s => [s.clave, s]))
+  const sucesores = new Map<string, string[]>()
+  for (const s of SEMILLA) {
+    for (const a of s.antecesores ?? []) {
+      sucesores.set(a, [...(sucesores.get(a) ?? []), s.clave])
+    }
   }
-  return puntos
+  const fin = SEMILLA.map(s => s.vence).sort().at(-1)!
+  const out = new Map<string, number | null>()
+  for (const s of [...SEMILLA].reverse()) {
+    const detras = (sucesores.get(s.clave) ?? []).map(c => porClave.get(c)!)
+    if (!detras.length) { out.set(s.clave, dias(s.vence, fin)); continue }
+    out.set(s.clave, Math.min(...detras.map(d =>
+      dias(s.vence, d.inicia) - 1 + (out.get(d.clave) ?? 0))))
+  }
+  return out
 }
 
-const media = (xs: number[]) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : 0)
+const HOLGURA = holguras()
+const ID = new Map(SEMILLA.map((s, i) => [s.clave, `r${i + 1}`]))
 
-export const DEMO: EstadoPlan = {
-  proyecto: {
-    id: 'andes',
-    corto: 'Andes',
-    nombre: 'Andes · Compras y aprobaciones',
-    grupo: 'Implementación Andes',
-    inicio: '2026-09-28',
-    fin: '2027-02-08',
-    hoy: HOY,
-    salud: 'riesgo',
-    avance: {
-      real: media(ACTIVIDADES.map((a) => a.avance)),
-      esperado: media(ACTIVIDADES.map((a) => a.esperado)),
-    },
-    actualizado: '2026-11-18T09:12:00-06:00',
-  },
-  personas: [
-    { id: 'mariana', nombre: 'Mariana Esquivel', corto: 'Mariana', iniciales: 'ME', rol: 'lidera', color: 1, canal: 'Telegram', puesto: 'Líder del proyecto' },
-    { id: 'rafa', nombre: 'Rafael Ponce', corto: 'Rafa', iniciales: 'RP', rol: 'ejecuta', color: 2, canal: 'Telegram', puesto: 'Desarrollo' },
-    { id: 'sofia', nombre: 'Sofía Cantú', corto: 'Sofía', iniciales: 'SC', rol: 'ejecuta', color: 3, canal: 'Telegram', puesto: 'Procesos' },
-    { id: 'beto', nombre: 'Alberto Nava', corto: 'Beto', iniciales: 'AN', rol: 'ejecuta', color: 4, canal: 'Telegram', puesto: 'Infraestructura' },
-    { id: 'paty', nombre: 'Patricia Rentería', corto: 'Paty', iniciales: 'PR', rol: 'observa', color: 5, canal: 'Telegram', puesto: 'Dirección' },
-  ],
-  fases: [
-    { id: 'f1', nombre: 'Diseño', color: 1 },
-    { id: 'f2', nombre: 'Construcción', color: 2 },
-    { id: 'f3', nombre: 'Pruebas', color: 3 },
-    { id: 'f4', nombre: 'Capacitación', color: 4 },
-    { id: 'f5', nombre: 'Salida en vivo', color: 5 },
-  ],
-  actividades: ACTIVIDADES,
-  curva: armarCurva(),
-  bitacora: [
-    { fecha: '2026-11-18', hora: '09:12', autor: 'rafa', canal: 'Telegram', texto: 'Puso «Construir el alta de solicitudes» en 65%', actividad: 'A05' },
-    { fecha: '2026-11-17', hora: '18:40', autor: 'mariana', canal: 'Telegram', texto: 'Dejó una nota en «Interfaz con el sistema contable»', actividad: 'A07' },
-    { fecha: '2026-11-17', hora: '08:05', autor: 'Zaelyn', canal: 'Escalamiento', texto: 'Avisó a Mariana: «Interfaz con el sistema contable» lleva 5 días detenida', actividad: 'A07' },
-    { fecha: '2026-11-16', hora: '11:22', autor: 'sofia', canal: 'Telegram', texto: 'Puso «Definir la política de aprobaciones» en 70%', actividad: 'A04' },
-    { fecha: '2026-11-14', hora: '16:51', autor: 'rafa', canal: 'Telegram', texto: 'Movió el vencimiento de «Construir el flujo de autorización» al 4 de diciembre', actividad: 'A06' },
-    { fecha: '2026-11-12', hora: '09:30', autor: 'mariana', canal: 'Excel', texto: 'Importó el plan: 16 renglones, 2 nuevos, 5 cambiaron' },
-    { fecha: '2026-11-10', hora: '14:08', autor: 'beto', canal: 'Telegram', texto: 'Marcó «Interfaz con el sistema contable» como detenida', actividad: 'A07' },
-  ],
-  zaelyn: {
-    resumen:
-      'El plan va 9 puntos abajo de lo esperado y la causa está concentrada: dos de las tres actividades que mandan sobre la fecha final vienen retrasadas.',
+const RENGLONES: Renglon[] = SEMILLA.map(s => {
+  const abierto = s.estatus === 'abierto' || s.estatus === 'en_curso' || s.estatus === 'bloqueado'
+  const esperado = esperadoDe(s, HOY)
+  const senales = senalesDe(s, esperado)
+  const h = HOLGURA.get(s.clave) ?? null
+  const fases = [...new Set(SEMILLA.map(x => x.fase))]
+  return {
+    id: ID.get(s.clave)!,
+    clave: s.clave,
+    texto: s.texto,
+    estatus: s.estatus,
+    abierto,
+    planId: 'plan-andes',
+    plan: 'Subestación Andes',
+    personaId: s.quien,
+    quien: PERSONAS.find(p => p.id === s.quien)?.nombre ?? null,
+    prioridad: 100,
+    inicia: s.inicia,
+    vence: s.vence,
+    minutos: s.horas === null ? null : s.horas * 60,
+    antecesores: (s.antecesores ?? []).map(c => ID.get(c)!),
+    fase: s.fase,
+    faseOrden: fases.indexOf(s.fase) + 1,
+    hito: s.hito ?? false,
+    holgura: h,
+    manda: h !== null && h <= 0,
+    espera: (s.antecesores ?? [])
+      .map(c => SEMILLA.find(x => x.clave === c))
+      .filter(x => x && x.estatus !== 'hecho' && x.estatus !== 'cancelado')
+      .map(x => x!.texto).join(', ') || null,
+    avance: s.avance,
+    avanceEn: abierto && s.avance > 0 ? `${mas(HOY, -9)}T16:20:00.000Z` : null,
+    esperado: abierto ? esperado : null,
+    base: 'inicia',
+    senales,
+    confianza: senales.includes('atrasado') ? 'media' : 'alta',
+    criticidad: critDe(senales),
+    gravedad: senales.length * 20,
+    notas: s.notas ?? 0,
+    creadoEn: '2026-09-01T17:00:00.000Z',
+    movidoEn: `${mas(HOY, -4)}T15:00:00.000Z`,
+  }
+})
+
+function puntoDe(rs: Renglon[], cuando = HOY): Punto {
+  const vivos = rs.filter(r => r.estatus !== 'cancelado')
+  const sinEstimacion = vivos.filter(r => !r.minutos).length
+  const base: Punto['base'] = sinEstimacion === 0 && vivos.length ? 'minutos' : 'cantidad'
+  const peso = (r: Renglon) => (base === 'minutos' ? (r.minutos ?? 1) : 1)
+  const total = vivos.reduce((s, r) => s + peso(r), 0) || 1
+  let conFecha = 0, espAcum = 0
+  const senales: Partial<Record<Senal, number>> = {}
+  for (const r of vivos) {
+    const s = SEMILLA.find(x => ID.get(x.clave) === r.id)!
+    const esp = esperadoDe(s, cuando)
+    conFecha += peso(r); espAcum += peso(r) * esp
+    for (const x of r.senales) senales[x] = (senales[x] ?? 0) + 1
+  }
+  return {
+    esperado: conFecha ? Math.round(espAcum / conFecha) : null,
+    declarado: Math.round(vivos.reduce((s, r) => s + peso(r) * r.avance, 0) / total),
+    comprobado: Math.round(vivos.reduce((s, r) => s + peso(r) * (r.estatus === 'hecho' ? 100 : 0), 0) / total),
+    base,
+    sinEstimacion,
+    sinFecha: 0,
+    total: vivos.length,
+    cerrados: vivos.filter(r => r.estatus === 'hecho').length,
+    cancelados: rs.length - vivos.length,
+    senales,
+    dudosos: vivos.filter(r => r.confianza === 'baja').length,
+    dichoSinCerrar: vivos.filter(r => r.abierto && r.avance >= 100).length,
+  }
+}
+
+const PUNTO = puntoDe(RENGLONES)
+
+const FASES: FaseDePlan[] = [...new Set(SEMILLA.map(s => s.fase))].map((nombre, i) => {
+  const rs = RENGLONES.filter(r => r.fase === nombre)
+  return {
+    nombre, orden: i + 1, punto: puntoDe(rs), total: rs.length,
+    abiertos: rs.filter(r => r.abierto).length,
+    hitos: rs.filter(r => r.hito).length,
+  }
+})
+
+const porId = new Map(RENGLONES.map(r => [r.id, r]))
+const eslabon = (r: Renglon) => ({
+  id: r.id, texto: r.texto, quien: r.quien, estatus: r.estatus,
+  abierto: r.abierto, minutos: r.minutos, vence: r.vence, criticidad: r.criticidad,
+})
+
+/** La cadena más larga en días, desde A-01 hasta la entrega. */
+const CADENA = ['A-01', 'A-02', 'A-03', 'B-01', 'C-01', 'C-03', 'C-04', 'C-05']
+  .map(c => porId.get(ID.get(c)!)!)
+
+const RUTA: Ruta = {
+  cadena: CADENA.map(eslabon),
+  manda: RENGLONES.filter(r => r.manda).map(eslabon),
+  minutos: CADENA.some(r => r.minutos === null) ? null : CADENA.reduce((s, r) => s + (r.minutos ?? 0), 0),
+  minutosRestantes: CADENA.filter(r => r.abierto).some(r => r.minutos === null)
+    ? null : CADENA.filter(r => r.abierto).reduce((s, r) => s + (r.minutos ?? 0), 0),
+  faltanEstimacion: CADENA.filter(r => r.minutos === null).length,
+  base: 'dias',
+  holguraDesconocida: 0,
+  sinVence: 0,
+  sinInicioDelSucesor: 0,
+  ciclo: false,
+  enCiclo: [],
+  dependencias: SEMILLA.reduce((s, x) => s + (x.antecesores?.length ?? 0), 0),
+  sueltos: 0,
+  vence: CADENA.at(-1)!.vence,
+  venceElPlan: RENGLONES.map(r => r.vence!).sort().at(-1)!,
+}
+
+/** La curva, semana a semana. La real se corta en hoy: no se proyecta. */
+function curva(): Curva {
+  const ini = SEMILLA.map(s => s.inicia).sort()[0]!
+  const fin = RUTA.venceElPlan!
+  const puntos: Curva['puntos'] = []
+  for (let d = 0; d <= dias(ini, fin); d += 7) {
+    const f = mas(ini, d)
+    const futuro = f > HOY
+    const p = puntoDe(RENGLONES, f)
+    // Lo declarado «a esa fecha» se simula con lo cerrado para entonces más lo
+    // que hoy se declara de lo que ya había arrancado. Es un ejemplo, y lo
+    // único que tiene que ser verdad es la FORMA.
+    const real = Math.round(
+      RENGLONES.filter(r => r.inicia! <= f)
+        .reduce((s, r) => s + (r.vence! <= f && r.estatus === 'hecho' ? 100 : r.avance), 0)
+      / (RENGLONES.length || 1))
+    puntos.push({
+      fecha: f,
+      esperado: p.esperado,
+      real: futuro ? null : real,
+      comprobado: futuro ? null : Math.round(
+        RENGLONES.filter(r => r.estatus === 'hecho' && r.vence! <= f).length / RENGLONES.length * 100),
+    })
+  }
+  if (puntos.at(-1)!.fecha !== fin) {
+    puntos.push({ fecha: fin, esperado: 100, real: null, comprobado: null })
+  }
+  return { puntos, paso: 7, desde: '2026-09-14', sinBitacora: 0, base: PUNTO.base }
+}
+
+function narrativa(): Narrativa {
+  const abiertos = RENGLONES.filter(r => r.abierto)
+  const mandan = RENGLONES.filter(r => r.manda && r.abierto)
+  const criticos = abiertos.filter(r => r.criticidad === 'critica')
+  const huecos: string[] = []
+  const sinDueno = abiertos.filter(r => !r.personaId).length
+  const sinHoras = abiertos.filter(r => r.minutos === null).length
+  if (sinDueno) huecos.push(`${sinDueno} sin dueño`)
+  if (sinHoras) huecos.push(`${sinHoras} sin horas estimadas`)
+  return {
+    resumen: `Va al ${PUNTO.declarado}% cuando hoy tocaba ${PUNTO.esperado}%. `
+      + (PUNTO.base === 'minutos'
+        ? 'El porcentaje está ponderado por las horas estimadas.'
+        : `El porcentaje cuenta por número de actividades: ${PUNTO.sinEstimacion} no traen `
+          + 'estimación, así que no se puede ponderar por esfuerzo.'),
     puntos: [
-      '«Interfaz con el sistema contable» lleva 8 días detenida esperando credenciales. Es la única detenida y ya se escaló a Mariana.',
-      '«Construir el flujo de autorización» va en 20% y hoy tocaba 36%. Está en la ruta crítica.',
-      '«Ejecutar pruebas con usuarios» no tiene responsable y arranca en 26 días.',
-      'Faltan las horas de 3 renglones, así que no se puede dar la duración total de la cadena.',
+      ...(mandan.length
+        ? [`${mandan.length} actividad(es) no tienen margen: si se mueven, se mueve la `
+          + `fecha final. La primera es «${mandan[0]!.texto}».`]
+        : []),
+      ...(criticos.length
+        ? [`${criticos.length} requiere(n) atención hoy, empezando por `
+          + `«${criticos[0]!.texto}»${criticos[0]!.quien ? ` (${criticos[0]!.quien})` : ''}.`]
+        : []),
+      ...(huecos.length
+        ? [`De las ${abiertos.length} abiertas: ${huecos.join(', ')}. `
+          + 'Mientras falten, hay cuentas que prefiero no hacer.']
+        : []),
     ],
-  },
-  falta: { estimacion: 3, fecha: 0, inicio: 0, dueno: 1 },
+  }
 }
 
-/** Los grupos del usuario. Personal y Familia existen pero todavía no tienen vistas. */
-export const GRUPOS: Grupo[] = [
-  {
-    id: 'andes',
-    nombre: 'Implementación Andes',
-    tipo: 'proyecto',
-    rol: 'lidera',
-    planes: [
-      { id: 'andes', nombre: 'Andes · Compras y aprobaciones', avance: DEMO.proyecto.avance.real, esperado: DEMO.proyecto.avance.esperado, salud: 'riesgo', abiertos: 13 },
-      { id: 'andes-2', nombre: 'Andes · Fase II inventarios', avance: 4, esperado: 6, salud: 'bien', abiertos: 11 },
-    ],
+const BITACORA: Suceso[] = [
+  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'avance', texto: null, avance: 25, en: `${mas(HOY, -1)}T18:12:00.000Z`, quien: 'Termika' },
+  { pendienteId: ID.get('B-01')!, pendiente: 'Ingeniería de detalle del tablero', clave: 'B-01', evento: 'comentado', texto: 'el cliente pidió cambiar el interruptor principal, ya está en el plano', avance: null, en: `${mas(HOY, -2)}T22:40:00.000Z`, quien: '@efrain' },
+  { pendienteId: ID.get('B-03')!, pendiente: 'Tramitar el permiso municipal', clave: 'B-03', evento: 'hecho', texto: null, avance: null, en: `${mas(HOY, -12)}T17:05:00.000Z`, quien: '@lupita' },
+  { pendienteId: ID.get('B-01')!, pendiente: 'Ingeniería de detalle del tablero', clave: 'B-01', evento: 'avance', texto: null, avance: 70, en: `${mas(HOY, -9)}T16:20:00.000Z`, quien: '@efrain' },
+  { pendienteId: ID.get('C-03')!, pendiente: 'Montaje y conexionado', clave: 'C-03', evento: 'bloqueado', texto: null, avance: null, en: `${mas(HOY, -15)}T15:00:00.000Z`, quien: '@marcela' },
+  { pendienteId: ID.get('B-02')!, pendiente: 'Memoria de cálculo y planos', clave: 'B-02', evento: 'hecho', texto: null, avance: null, en: '2026-10-30T19:30:00.000Z', quien: '@lupita' },
+  { pendienteId: ID.get('A-03')!, pendiente: 'Aprobación del comité técnico', clave: 'A-03', evento: 'hecho', texto: null, avance: null, en: '2026-10-09T20:00:00.000Z', quien: '@marcela' },
+]
+
+const ESTADO: EstadoDePlan = {
+  grupo: { id: 'g-andes', nombre: 'Andes' },
+  plan: { id: 'plan-andes', clave: 'ANDES', nombre: 'Subestación Andes' },
+  planes: [{ id: 'plan-andes', clave: 'ANDES', nombre: 'Subestación Andes' }],
+  hoy: HOY,
+  punto: PUNTO,
+  veredicto: PUNTO.esperado !== null && PUNTO.declarado < PUNTO.esperado - 5 ? 'atrasado' : 'al_dia',
+  renglones: RENGLONES,
+  personas: PERSONAS.map(p => ({
+    ...p,
+    abiertos: RENGLONES.filter(r => r.personaId === p.id && r.abierto).length,
+    cerrados: RENGLONES.filter(r => r.personaId === p.id && r.estatus === 'hecho').length,
+    atrasados: RENGLONES.filter(r => r.personaId === p.id && r.abierto && r.vence! < HOY).length,
+  })),
+  falta: {
+    estimacion: RENGLONES.filter(r => r.abierto && r.minutos === null).length,
+    fecha: 0,
+    inicio: 0,
+    dueno: RENGLONES.filter(r => r.abierto && !r.personaId).length,
   },
+}
+
+export const DEMO: VistaDePlan = {
+  estado: ESTADO,
+  ruta: RUTA,
+  curva: curva(),
+  fases: FASES,
+  narrativa: narrativa(),
+  // En orden, como viene el real (`ORDER BY en DESC`). A mano se coló un
+  // «6 nov» antes de un «9 nov» y la bitácora se leía como si saltara.
+  bitacora: [...BITACORA].sort((a, b) => b.en.localeCompare(a.en)),
+  riesgo: [...RENGLONES]
+    .filter(r => r.abierto)
+    .sort((a, b) => b.gravedad - a.gravedad
+      || (a.vence ?? '9999').localeCompare(b.vence ?? '9999'))
+    .map(r => r.id),
+  rol: 'responsable',
+  nivel: 3,
+}
+
+export const GRUPOS_DEMO: GrupoEnPortal[] = [
   {
-    id: 'meridiano',
-    nombre: 'Meridiano',
-    tipo: 'proyecto',
-    rol: 'observa',
-    planes: [{ id: 'meridiano', nombre: 'Meridiano · Portal de clientes', avance: 61, esperado: 58, salud: 'bien', abiertos: 9 }],
+    id: 'g-andes', nombre: 'Andes', clase: 'work', rol: 'responsable', nivel: 3,
+    planes: [{
+      id: 'plan-andes', clave: 'ANDES', nombre: 'Subestación Andes',
+      abiertos: RENGLONES.filter(r => r.abierto).length,
+      vencidos: RENGLONES.filter(r => r.abierto && r.vence! < HOY).length,
+      hasta: RUTA.venceElPlan,
+    }],
   },
-  { id: 'casa', nombre: 'Casa', tipo: 'familia', rol: 'administra', planes: [] },
-  { id: 'mio', nombre: 'Lo mío', tipo: 'personal', rol: 'administra', planes: [] },
 ]

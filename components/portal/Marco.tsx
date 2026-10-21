@@ -1,16 +1,31 @@
 import Link from 'next/link'
 
-/** La barra superior del portal y el pie. Sin controles que escriban. */
-export function Barra({ migas }: { migas: { texto: string; href?: string }[] }) {
+/**
+ * La barra superior del portal y el pie. Sin un solo control que escriba.
+ *
+ * El aviso de «datos de ejemplo» es una PROP y no algo que esté siempre
+ * puesto: cuando la pantalla trae datos reales, decir que son inventados es
+ * exactamente igual de dañino que lo contrario.
+ */
+export function Barra({
+  migas, ejemplo = false, sesion = false,
+}: {
+  migas: { texto: string; href?: string }[]
+  ejemplo?: boolean
+  sesion?: boolean
+}) {
   return (
     <>
-      <div className="pt-aviso">
-        <b>Datos de ejemplo</b>
-        <span>
-          El proyecto, las personas y las fechas de esta pantalla están inventados. Cuando Zaelyn entregue el estado
-          real del plan, la pantalla es la misma: cambia de dónde salen los números, no cómo se pintan.
-        </span>
-      </div>
+      {ejemplo && (
+        <div className="pt-aviso">
+          <b>Datos de ejemplo</b>
+          <span>
+            El proyecto, las personas y las fechas de esta pantalla están inventados.
+            Con tus datos reales la pantalla es la misma: cambia de dónde salen los
+            números, no cómo se pintan.
+          </span>
+        </div>
+      )}
       <header className="pt-barra">
         <Link className="pt-marca" href="/">
           <span className="campo">
@@ -23,7 +38,9 @@ export function Barra({ migas }: { migas: { texto: string; href?: string }[] }) 
           {migas.map((m, i) => (
             <span key={i} style={{ display: 'contents' }}>
               {i > 0 && <span className="sep">/</span>}
-              {m.href ? <Link href={m.href}>{m.texto}</Link> : <span style={{ color: 'var(--ink)' }}>{m.texto}</span>}
+              {m.href
+                ? <Link href={m.href}>{m.texto}</Link>
+                : <span style={{ color: 'var(--ink)' }}>{m.texto}</span>}
             </span>
           ))}
         </nav>
@@ -31,12 +48,8 @@ export function Barra({ migas }: { migas: { texto: string; href?: string }[] }) 
           <span className="pt-overline" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <span
               style={{
-                width: 18,
-                height: 18,
-                borderRadius: '50%',
-                background: 'var(--zaelyn)',
-                display: 'grid',
-                placeItems: 'center',
+                width: 18, height: 18, borderRadius: '50%',
+                background: 'var(--zaelyn)', display: 'grid', placeItems: 'center',
               }}
             >
               <svg viewBox="0 0 24 24" style={{ width: 10, height: 10, fill: 'var(--surface)' }} aria-hidden="true">
@@ -45,6 +58,12 @@ export function Barra({ migas }: { migas: { texto: string; href?: string }[] }) 
             </span>
             Solo lectura
           </span>
+          {/* Un FORMULARIO y no un enlace: ver `app/salir/route.ts`. */}
+          {sesion && (
+            <form action="/salir" method="post" style={{ display: 'contents' }}>
+              <button type="submit" className="pt-salir pt-overline">Salir</button>
+            </form>
+          )}
         </div>
       </header>
     </>

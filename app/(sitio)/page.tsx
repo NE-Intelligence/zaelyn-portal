@@ -59,6 +59,9 @@ export default function Portada() {
             <a className="st-btn st-btn-2" href="#como">
               {t('hero.cta2')}
             </a>
+            <Link className="st-btn st-btn-2" href="/demo">
+              {t('nav.portal')}
+            </Link>
           </div>
 
           <div className="st-canales">
@@ -282,10 +285,19 @@ export default function Portada() {
             <Link className="st-btn st-btn-1" href="/proyectos">
               {t('fin.cta')}
             </Link>
-            <Link className="st-btn st-btn-2" href="/app">
+            <Link className="st-btn st-btn-2" href="/demo">
               {t('nav.portal')}
             </Link>
           </div>
+
+          <nav className="st-vistas" aria-label="Entrar directo a una vista del portal">
+            <Link href="/demo">Resumen</Link>
+            <Link href="/demo?v=tablero">Tablero</Link>
+            <Link href="/demo?v=gantt">Gantt</Link>
+            <Link href="/demo?v=ruta">Ruta crítica</Link>
+            <Link href="/demo?v=equipo">Equipo</Link>
+            <Link href="/demo?v=bitacora">Bitácora</Link>
+          </nav>
         </div>
       </section>
     </main>
