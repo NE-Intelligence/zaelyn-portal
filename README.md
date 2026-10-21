@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# zaelyn-portal
 
-## Getting Started
+El sitio público de Zaelyn y el portal de proyectos. Vive en `zaelyn.ai`.
 
-First, run the development server:
+## Qué hay aquí
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+app/(sitio)/        el sitio público, oscuro siempre
+  page.tsx            portada: los tres productos
+  proyectos/          Zaelyn Proyectos, el producto que ya existe
+  familia/            área marcada: qué funciona hoy, qué falta
+  personal/           área marcada
+app/app/            el portal, claro y oscuro
+  page.tsx            los grupos y planes de la persona
+  [plan]/             un plan: resumen, tablero, gantt, ruta crítica, equipo, bitácora
+components/sitio/   el marco y las piezas del sitio
+components/portal/  los átomos y las vistas del portal
+lib/plan.ts         EL CONTRATO: la forma de EstadoPlan
+lib/demo.ts         datos de ejemplo, mientras no exista el endpoint
+lib/copy.ts         el texto por idioma
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Dos registros, una marca
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+El **sitio** es oscuro siempre y todo cuelga de `.st`. No es una preferencia:
+el logotipo es luz sobre negro y sobre blanco no sobrevive.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+El **portal** trae el sistema de diseño «Zaelyn Proyectos» —cobalto y coral,
+claro y oscuro— y todo cuelga de `.pt`. Los dos juegos de tokens no se tocan.
 
-## Learn More
+El degradado morado→cian del logotipo es el momento de marca y **nunca** se usa
+como estado de interfaz.
 
-To learn more about Next.js, take a look at the following resources:
+## La regla que no se negocia
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**El portal no tiene consultas propias.** Cada vista recibe un `EstadoPlan` ya
+medido: avance, avance esperado, criticidad, holgura y atraso vienen hechos
+desde Zaelyn. Ninguna vista abre una consulta ni vuelve a calcular. Si el chat
+dice 34%, la pantalla dice 34%, porque las dos leen el mismo objeto.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Mientras el endpoint no exista, `lib/demo.ts` arma ese objeto con datos
+inventados y la pantalla lo dice en voz alta. Cambiar a datos reales es cambiar
+de dónde sale el objeto; ningún componente se entera.
 
-## Deploy on Vercel
+## Correr
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm install
+npm run dev     # http://localhost:3000
+npm run build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Las fuentes (MuseoModerno, Prompt, JetBrains Mono) viven en `lib/fuentes/`, no
+se piden a Google al compilar. Las tres son OFL y sus licencias están al lado.

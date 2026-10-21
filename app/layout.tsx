@@ -1,48 +1,26 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { DM_Sans, DM_Serif_Display, DM_Mono, Syne, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
-
-const dmSans = DM_Sans({ subsets: ["latin"], weight: ["300","400","500"], variable: "--font-dm-sans", display: "swap" });
-const dmSerif = DM_Serif_Display({ subsets: ["latin"], weight: ["400"], style: ["normal","italic"], variable: "--font-dm-serif", display: "swap" });
-const dmMono = DM_Mono({ subsets: ["latin"], weight: ["400"], variable: "--font-dm-mono", display: "swap" });
-const syne = Syne({ subsets: ["latin"], weight: ["400","500","600","700","800"], variable: "--font-syne", display: "swap" });
-const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["400","500"], variable: "--font-jetbrains", display: "swap" });
+import type { Metadata } from 'next'
+import { display, texto, dato } from '@/lib/fuentes'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: "Zaelyn — Tu inteligencia personal",
-  description: "Zaelyn aprende de ti, recuerda lo que importa y te acompaña en cada área de tu vida.",
-  keywords: ["IA", "privacidad", "inteligencia personal", "diario", "inteligencia artificial"],
-  openGraph: {
-    title: "Zaelyn — Tu inteligencia personal",
-    description: "Zaelyn aprende de ti, recuerda lo que importa y te acompaña en cada área de tu vida.",
-    siteName: "Zaelyn",
-    images: ["/og-image.png"],
-    locale: "es_MX",
-    type: "website",
-  },
-};
+  metadataBase: new URL('https://www.zaelyn.ai'),
+  title: { default: 'Zaelyn', template: '%s · Zaelyn' },
+  description:
+    'Sube el Excel que ya tienes y lleva el seguimiento hablando. Proyectos, familia y pendientes en un solo lugar, con un número que no se inventa.',
+  icons: { icon: '/favicon.ico', apple: '/apple-touch-icon.png' },
+}
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export const viewport = {
+  themeColor: '#07070C',
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover' as const,
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${dmSans.variable} ${dmSerif.variable} ${dmMono.variable} ${syne.variable} ${jetbrains.variable}`} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: `
-          try {
-            var sys = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            var saved = localStorage.getItem('zae-theme');
-            var theme = saved || (sys ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', theme);
-            if (theme === 'dark') document.documentElement.classList.add('dark');
-            else document.documentElement.classList.remove('dark');
-          } catch(e) {
-            document.documentElement.setAttribute('data-theme','dark');
-            document.documentElement.classList.add('dark');
-          }
-        `}} />
-      </head>
-      {/* Suspense wraps all pages — required for useSearchParams() in child components */}
-      <body><Suspense>{children}</Suspense></body>
+    <html lang="es" className={`${display.variable} ${texto.variable} ${dato.variable}`}>
+      <body>{children}</body>
     </html>
-  );
+  )
 }

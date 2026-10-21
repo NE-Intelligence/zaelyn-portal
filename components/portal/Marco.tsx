@@ -1,0 +1,61 @@
+import Link from 'next/link'
+
+/** La barra superior del portal y el pie. Sin controles que escriban. */
+export function Barra({ migas }: { migas: { texto: string; href?: string }[] }) {
+  return (
+    <>
+      <div className="pt-aviso">
+        <b>Datos de ejemplo</b>
+        <span>
+          El proyecto, las personas y las fechas de esta pantalla están inventados. Cuando Zaelyn entregue el estado
+          real del plan, la pantalla es la misma: cambia de dónde salen los números, no cómo se pintan.
+        </span>
+      </div>
+      <header className="pt-barra">
+        <Link className="pt-marca" href="/">
+          <span className="campo">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo/zaelyn-wordmark-320.png" alt="zælyn" width={320} height={110} />
+          </span>
+          <span className="pt-etq">Proyectos</span>
+        </Link>
+        <nav className="pt-migas" aria-label="Dónde estoy">
+          {migas.map((m, i) => (
+            <span key={i} style={{ display: 'contents' }}>
+              {i > 0 && <span className="sep">/</span>}
+              {m.href ? <Link href={m.href}>{m.texto}</Link> : <span style={{ color: 'var(--ink)' }}>{m.texto}</span>}
+            </span>
+          ))}
+        </nav>
+        <div className="pt-der">
+          <span className="pt-overline" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <span
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: '50%',
+                background: 'var(--zaelyn)',
+                display: 'grid',
+                placeItems: 'center',
+              }}
+            >
+              <svg viewBox="0 0 24 24" style={{ width: 10, height: 10, fill: 'var(--surface)' }} aria-hidden="true">
+                <path d="M12 2.6l2.1 5.9 5.9 2.1-5.9 2.1-2.1 5.9-2.1-5.9L4 10.6l5.9-2.1z" />
+              </svg>
+            </span>
+            Solo lectura
+          </span>
+        </div>
+      </header>
+    </>
+  )
+}
+
+export function Pie() {
+  return (
+    <footer className="pt-pie">
+      <span>Zaelyn es un producto de NE Intelligence</span>
+      <span className="der">Se cambia hablando, no aquí: el portal solo muestra.</span>
+    </footer>
+  )
+}
