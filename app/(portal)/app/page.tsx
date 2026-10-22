@@ -44,6 +44,10 @@ export default async function Grupos() {
                 <span>El rol se da por grupo, y quien lo cambia es quien administra</span>
               </div>
             </div>
+            <div className="ed-cab-acciones">
+              <Link href="/app/editor" className="ed-btn suave">Mis proyectos</Link>
+              <Link href="/app/editor/nuevo" className="ed-btn primario">+ Nuevo proyecto</Link>
+            </div>
           </div>
         </div>
 
@@ -51,8 +55,9 @@ export default async function Grupos() {
           <div className="pt-vacio" style={{ maxWidth: 560 }}>
             <b>Todavía no estás en ningún grupo</b>
             <span>
-              Un proyecto en Zaelyn es un grupo. Dile por el chat «crea el grupo
-              Obra Norte» y después «invita a Obra Norte» para meter a tu equipo.
+              Arma tu primer proyecto con «Nuevo proyecto»: al liberarlo creas el grupo
+              e invitas a tu equipo desde ahí. También puedes decirle por el chat «crea
+              el grupo Obra Norte».
             </span>
           </div>
         )}

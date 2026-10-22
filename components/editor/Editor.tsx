@@ -14,17 +14,18 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Doc, Ficha, Metodologia, Nodo, PersonaDelEditor, PlantillaBase, Propuesta, Tarjeta, TipoNodo } from '@/lib/editor/tipos'
+import type { Doc, Ficha, Liberado, Metodologia, Nodo, PersonaDelEditor, PlantillaBase, Propuesta, Tarjeta, TipoNodo } from '@/lib/editor/tipos'
 import { METODOLOGIA_CORTA, TIPOS_NODO, TIPO_DICE, TIPO_NOMBRE } from '@/lib/editor/tipos'
 import {
-  arbol, cabe, cambiar, comoPlantilla, correrA, desenlazar, enlazar, entre, hoyISO, insertar,
-  medir, nuevoId, programar, quitar, recolocar, rutaCritica, type Destino,
+  arbol, arrancarEn, cabe, cambiar, comoPlantilla, correrA, desenlazar, enlazar, entre, finProyecto as finDelProyecto, hoyISO,
+  inicioProyecto, insertar, medir, nuevoId, programar, quitar, recolocar, rutaCritica, terminarEn, type Destino,
 } from '@/lib/editor/programar'
 import { empezar, terminar } from '@/lib/editor/arrastre'
 import { Lienzo } from './Lienzo'
 import { Tablero } from './Tablero'
 import { Inspector } from './Inspector'
 import { Asistente } from './Asistente'
+import { Liberar } from './Liberar'
 import { Chispa, IconoTipo, corta, decirError, escribir } from './comun'
 
 type Historia = { pasado: Doc[]; presente: Doc; futuro: Doc[]; clave: string | null; t: number }
@@ -40,13 +41,14 @@ const TITULO_NUEVO: Record<TipoNodo, string> = {
 export function Editor({
   grupo, personas, fichas, base, puede, ia, inicial, abrirZaelyn = false,
 }: {
-  grupo: { id: string; nombre: string }
+  /** El grupo del borrador, o null si es de la persona y el grupo se elige al liberar. */
+  grupo: { id: string; nombre: string } | null
   personas: PersonaDelEditor[]
   fichas: Ficha[]
   base: PlantillaBase[]
   puede: boolean
   ia: boolean
-  inicial: { id: string | null; nombre: string; metodologia: string; version: number | null; doc: Doc }
+  inicial: { id: string | null; nombre: string; metodologia: string; version: number | null; doc: Doc; liberado?: Liberado | null }
   abrirZaelyn?: boolean
 }) {
   const router = useRouter()
@@ -69,6 +71,8 @@ export function Editor({
   const [ultima, setUltima] = useState<Propuesta | null>(null)
   const [dialogo, setDialogo] = useState<'plantilla' | 'fabrica' | null>(null)
   const [aviso, setAviso] = useState('')
+  const [liberado, setLiberado] = useState<Liberado | null>(inicial.liberado ?? null)
+  const [liberando, setLiberando] = useState(false)
   const [versionRemota, setVersionRemota] = useState<number | null>(null)
 
   const medidas = useMemo(() => medir(doc), [doc])
@@ -77,7 +81,9 @@ export function Editor({
   const seleccionado = seleccion ? doc.nodos.find(n => n.id === seleccion) ?? null : null
 
   // ── historia
-  const comprometer = useCallback((nuevo: Doc, opciones: { base?: Doc; clave?: string } = {}) => {
+  const comprometer = useCallback((nuevo0: Doc, opciones: { base?: Doc; clave?: string } = {}) => {
+    // Con el arranque fijo, el go-live ES el fin del proyecto y se mueve solo.
+    const nuevo = nuevo0.fijar === 'golive' ? nuevo0 : { ...nuevo0, golive: finDelProyecto(nuevo0) }
     setVista(null)
     setH(x => {
       const ahora = Date.now()
@@ -108,30 +114,31 @@ export function Editor({
   // ── guardar
   const enVuelo = useRef(false)
   const otraVez = useRef(false)
-  const guardar = useCallback(async (forzarVersion?: number) => {
-    if (!puede) return
-    if (enVuelo.current) { otraVez.current = true; return }
+  const guardar = useCallback(async (forzarVersion?: number): Promise<{ id: string; version: number } | null> => {
+    if (!puede) return null
+    if (enVuelo.current) { otraVez.current = true; return null }
     enVuelo.current = true
     setGuardado('guardando')
     const cuerpo = {
-      tipo: 'borrador', id, groupId: grupo.id, nombre: nombre.trim() || 'Proyecto sin nombre',
+      tipo: 'borrador', id, groupId: grupo?.id ?? null, nombre: nombre.trim() || 'Proyecto sin nombre',
       metodologia, version: forzarVersion ?? version, doc: h.presente,
     }
     const r = await escribir<{ id: string; version: number; tarjeta: Tarjeta }>('guardar', cuerpo)
     enVuelo.current = false
     if (!r.ok) {
-      if (r.error === 'VERSION') { setGuardado('conflicto'); setError(decirError(r)); setVersionRemota(Number(r.cuerpo['version']) || null); return }
-      setGuardado('error'); setError(decirError(r)); return
+      if (r.error === 'VERSION') { setGuardado('conflicto'); setError(decirError(r)); setVersionRemota(Number(r.cuerpo['version']) || null); return null }
+      setGuardado('error'); setError(decirError(r)); return null
     }
     setVersion(r.dato.version)
     setError('')
     if (!id) {
       setId(r.dato.id)
-      router.replace(`/app/g/${grupo.id}/editor/${r.dato.id}`, { scroll: false })
+      router.replace(grupo ? `/app/g/${grupo.id}/editor/${r.dato.id}` : `/app/editor/${r.dato.id}`, { scroll: false })
     }
     setGuardado(otraVez.current ? 'sucio' : 'guardado')
     otraVez.current = false
-  }, [puede, id, grupo.id, nombre, metodologia, version, h.presente, router])
+    return { id: r.dato.id, version: r.dato.version }
+  }, [puede, id, grupo, nombre, metodologia, version, h.presente, router])
 
   // Guardado automático: un segundo y medio después del último cambio.
   useEffect(() => {
@@ -254,8 +261,9 @@ export function Editor({
     setAviso('Plantilla guardada. La encuentras al crear un proyecto nuevo, en cualquiera de tus grupos.')
   }
   function usarFabrica(p: PlantillaBase) {
-    const nuevo = correrA(p.doc, doc.inicio ?? hoyISO())
-    comprometer({ ...nuevo, golive: doc.golive ?? null, objetivo: doc.objetivo, alcance: doc.alcance } as Doc)
+    const base = { ...p.doc, objetivo: doc.objetivo, alcance: doc.alcance } as Doc
+    const nuevo = doc.fijar === 'golive' && doc.golive ? terminarEn(base, doc.golive) : arrancarEn(base, doc.inicio ?? hoyISO())
+    comprometer(nuevo)
     setMetodologia(p.metodologia)
     setDialogo(null)
     setRecien(new Set(nuevo.nodos.map(n => n.id)))
@@ -271,7 +279,7 @@ export function Editor({
   const totales = useMemo(() => {
     let piezas = 0; let sinDueno = 0; let horas = 0
     for (const n of doc.nodos) {
-      if (n.tipo === 'actividad') { piezas++; if (!n.responsable) sinDueno++; horas += n.horas ?? 0 }
+      if (n.tipo === 'actividad') { piezas++; if (!n.responsable && !n.puesto) sinDueno++; horas += n.horas ?? 0 }
       if (n.tipo === 'hito') piezas++
     }
     return { piezas, sinDueno, horas }
@@ -281,6 +289,17 @@ export function Editor({
   const estadoTexto: Record<EstadoGuardado, string> = {
     nuevo: 'Sin guardar', guardado: `Guardado${version ? ` · v${version}` : ''}`, sucio: 'Cambios sin guardar',
     guardando: 'Guardando…', conflicto: 'Conflicto de versión', error: 'No se guardó',
+  }
+
+  const fijaGolive = doc.fijar === 'golive'
+
+  async function abrirLiberar() {
+    // Se libera lo guardado: si hay cambios pendientes, primero se guardan.
+    if (!id || guardado === 'sucio' || guardado === 'nuevo' || guardado === 'error') {
+      const r = await guardar()
+      if (!r) return
+    }
+    setLiberando(true)
   }
 
   const cambiarDoc = (c: Partial<Doc>, clave?: string) => comprometer(programar({ ...h.presente, ...c }), clave ? { clave } : {})
@@ -298,15 +317,28 @@ export function Editor({
                 {fichas.map(f => <option key={f.clave} value={f.clave}>{f.nombre}</option>)}
               </select>
             </label>
-            <label title="Cambiar el arranque corre todo el proyecto, respetando el calendario">
-              <span>Arranque · mueve todo</span>
-              <input type="date" value={doc.inicio ?? ''} disabled={!puede}
-                onChange={e => e.target.value && comprometer(correrA(h.presente, e.target.value))} />
+            <div className="ed-fijar" role="group" aria-label="Qué fecha manda">
+              <span>Programar</span>
+              <div className="ed-segmentos chico">
+                <button className={fijaGolive ? '' : 'on'} disabled={!puede} onClick={() => fijaGolive && comprometer({ ...h.presente, fijar: 'inicio' })}
+                  title="Pones el arranque; el go-live sale de sumar">Desde el arranque</button>
+                <button className={fijaGolive ? 'on' : ''} disabled={!puede} onClick={() => !fijaGolive && comprometer({ ...h.presente, fijar: 'golive', golive: h.presente.golive ?? finDelProyecto(h.presente) })}
+                  title="Pones el go-live; el arranque sale de restar">Hacia atrás desde el go-live</button>
+              </div>
+            </div>
+            <label className={fijaGolive ? 'calculada' : ''} title={fijaGolive ? 'Sale de restar desde el go-live' : 'Mueve todo el proyecto, respetando el calendario'}>
+              <span>Arranque{fijaGolive ? ' · calculado' : ''}</span>
+              <input type="date" value={(fijaGolive ? inicioProyecto(doc) : doc.inicio) ?? ''} disabled={!puede || fijaGolive}
+                onChange={e => e.target.value && comprometer(arrancarEn(h.presente, e.target.value))} />
             </label>
-            <label>
-              <span>Fecha comprometida</span>
-              <input type="date" value={doc.golive ?? ''} disabled={!puede} onChange={e => cambiarDoc({ golive: e.target.value || null })} />
+            <label className={fijaGolive ? '' : 'calculada'} title={fijaGolive ? 'Mueve todo para terminar ese día' : 'Sale de sumar desde el arranque'}>
+              <span>Go-live{fijaGolive ? '' : ' · calculado'}</span>
+              <input type="date" value={(fijaGolive ? doc.golive : finDelProyecto(doc)) ?? ''} disabled={!puede || !fijaGolive}
+                onChange={e => e.target.value && comprometer(terminarEn(h.presente, e.target.value))} />
             </label>
+            {fijaGolive && inicioProyecto(doc) && inicioProyecto(doc)! < hoyISO() && (
+              <span className="ed-alerta">Para salir ese día tendrías que haber arrancado el {corta(inicioProyecto(doc))}</span>
+            )}
             <label className="ed-interruptor">
               <input type="checkbox" checked={doc.habiles} disabled={!puede} onChange={e => cambiarDoc({ habiles: e.target.checked })} />
               <span>Solo días hábiles</span>
@@ -321,7 +353,9 @@ export function Editor({
             ? <button className="ed-btn suave" onClick={() => void guardar()} disabled={guardado === 'guardando'}>Guardar</button>
             : <button className="ed-btn primario" onClick={() => void guardar()} disabled={guardado === 'guardando'}>Guardar borrador</button>)}
           {puede && <button className="ed-btn suave" onClick={() => { setNombrePlantilla(nombre); setDialogo('plantilla') }} disabled={!doc.nodos.length}>Guardar como plantilla</button>}
-          <button className="ed-btn liberar" disabled title="Liberar el plan a Zaelyn llega en la siguiente fase">Liberar a Zaelyn</button>
+          {puede && <button className="ed-btn liberar on" onClick={abrirLiberar} disabled={!doc.nodos.length || guardado === 'guardando'}>
+            <Chispa />{liberado ? 'Liberar cambios' : 'Liberar a Zaelyn'}
+          </button>}
         </div>
       </div>
 
@@ -333,6 +367,16 @@ export function Editor({
             {versionRemota && <button className="ed-btn suave" onClick={() => { setVersion(versionRemota); void guardar(versionRemota) }}>Quedarme con la mía</button>}
           </>}
           {guardado === 'error' && <button className="ed-btn suave" onClick={() => void guardar()}>Reintentar</button>}
+        </div>
+      )}
+      {liberado && (
+        <div className="ed-banda liberado">
+          <span>
+            Liberado a Zaelyn el {corta(liberado.en.slice(0, 10))}{version && liberado.version && version > liberado.version ? ' · tiene cambios sin liberar' : ' · Zaelyn ya lo sigue'}.
+          </span>
+          {liberado.groupId && liberado.planId && (
+            <a className="ed-btn suave" href={`/app/g/${liberado.groupId}/${liberado.planId}`}>Ver el seguimiento</a>
+          )}
         </div>
       )}
       {ultima && recien.size > 0 && (
@@ -412,7 +456,7 @@ export function Editor({
 
           <div className="ed-pie-estado">
             <span><b className="mono">{totales.piezas}</b> actividades e hitos</span>
-            <span className={totales.sinDueno ? 'aviso' : ''}><b className="mono">{totales.sinDueno}</b> sin responsable</span>
+            <span className={totales.sinDueno ? 'aviso' : ''}><b className="mono">{totales.sinDueno}</b> sin responsable ni puesto</span>
             <span><b className="mono">{Math.round(totales.horas)}</b> h estimadas</span>
             <span><b className="mono">{critica.size}</b> en ruta crítica</span>
             <span>Termina <b className="mono">{corta(finProyecto)}</b></span>
@@ -430,7 +474,7 @@ export function Editor({
           </div>
           {panel === 'zaelyn' ? (
             <Asistente
-              groupId={grupo.id} nombre={nombre} doc={h.presente} metodologia={metodologia}
+              groupId={grupo?.id ?? null} nombre={nombre} doc={h.presente} metodologia={metodologia}
               fichas={fichas} ia={ia} puede={puede} ultima={ultima} onPropuesta={recibirPropuesta}
             />
           ) : seleccionado ? (
@@ -474,6 +518,14 @@ export function Editor({
       </div>
 
       {aviso && <div className="ed-toast" role="status">{aviso}</div>}
+
+      {liberando && id && version && (
+        <Liberar
+          id={id} version={version} nombre={nombre} grupoInicial={grupo?.id ?? liberado?.groupId ?? null}
+          onCerrar={() => setLiberando(false)}
+          onLiberado={(l) => { setLiberado(l); setAviso('Listo: Zaelyn ya sigue el plan. Cada responsable recibirá sus actividades por el chat.') }}
+        />
+      )}
 
       {dialogo && (
         <div className="ed-velo" onClick={() => setDialogo(null)}>

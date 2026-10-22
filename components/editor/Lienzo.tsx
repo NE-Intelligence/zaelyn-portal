@@ -379,7 +379,8 @@ export function Lienzo({
                       >{n.titulo || <i>Sin título</i>}</span>
                     )}
                     <span className="ed-meta">
-                      {n.tipo === 'actividad' && !n.responsable && <span className="ed-falta" title="Sin responsable">sin dueño</span>}
+                      {!p && n.puesto && <span className="ed-puesto" title={`Puesto: ${n.puesto}`}>{n.puesto}</span>}
+                      {n.tipo === 'actividad' && !n.responsable && !n.puesto && <span className="ed-falta" title="Sin responsable ni puesto">sin dueño</span>}
                       {p && <Avatar p={p} chico />}
                       {n.tipo === 'hito' ? <span className="ed-dur mono">◆ {corta(m?.inicio)}</span>
                         : n.tipo === 'subtarea' ? null

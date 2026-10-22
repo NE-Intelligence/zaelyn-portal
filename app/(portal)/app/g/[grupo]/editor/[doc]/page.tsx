@@ -3,7 +3,7 @@ import { Barra } from '@/components/portal/Marco'
 import { SinSesion } from '@/components/portal/SinSesion'
 import { Editor } from '@/components/editor/Editor'
 import { docDelEditor, mesaDelEditor } from '@/lib/api'
-import { correrA, hoyISO } from '@/lib/editor/programar'
+import { arrancarEn, hoyISO } from '@/lib/editor/programar'
 import type { Doc } from '@/lib/editor/tipos'
 
 export const dynamic = 'force-dynamic'
@@ -29,7 +29,7 @@ export default async function PaginaEditor({
   if (!m.ok) return <SinSesion fallo={m.fallo} />
   const mesa = m.dato
 
-  let inicial: { id: string | null; nombre: string; metodologia: string; version: number | null; doc: Doc }
+  let inicial: { id: string | null; nombre: string; metodologia: string; version: number | null; doc: Doc; liberado?: import('@/lib/editor/tipos').Liberado | null }
   if (docId === 'nuevo') {
     if (!mesa.puede) redirect(`/app/g/${grupo}/editor`)
     const arranque = /^\d{4}-\d{2}-\d{2}$/.test(s('arranque')) ? s('arranque') : hoyISO()
@@ -38,12 +38,12 @@ export default async function PaginaEditor({
     let nombre = s('nombre')
     const base = mesa.base.find(b => b.clave === s('base'))
     if (base) {
-      doc = correrA(base.doc, arranque)
+      doc = arrancarEn(base.doc, arranque)
       metodologia = base.metodologia
     } else if (s('plantilla')) {
       const p = await docDelEditor(s('plantilla'))
       if (p.ok && p.dato.tipo === 'plantilla') {
-        doc = correrA(p.dato.doc, arranque)
+        doc = arrancarEn(p.dato.doc, arranque)
         metodologia = p.dato.metodologia
         if (!nombre) nombre = p.dato.nombre
       }
@@ -53,7 +53,7 @@ export default async function PaginaEditor({
     const r = await docDelEditor(docId)
     if (!r.ok) return <SinSesion fallo={r.fallo} />
     if (r.dato.tipo !== 'borrador' || r.dato.groupId !== grupo) redirect(`/app/g/${grupo}/editor`)
-    inicial = { id: r.dato.id, nombre: r.dato.nombre, metodologia: r.dato.metodologia, version: r.dato.version, doc: r.dato.doc }
+    inicial = { id: r.dato.id, nombre: r.dato.nombre, metodologia: r.dato.metodologia, version: r.dato.version, doc: r.dato.doc, liberado: r.dato.liberado }
   }
 
   return (

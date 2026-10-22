@@ -445,3 +445,42 @@ export function rutaCritica(doc: Doc): Set<string> {
   for (const n of prog) if (tardio.get(n.id) === n.inicio) out.add(n.id)
   return out
 }
+
+/** El último día del proyecto: el fin más tardío de cualquier pieza. */
+export function finProyecto(doc: Doc): string | null {
+  let f: string | null = null
+  for (const m of medir(doc).values()) if (m.fin && (!f || m.fin > f)) f = m.fin
+  return f
+}
+
+/** El primer día con algo programado. */
+export function inicioProyecto(doc: Doc): string | null {
+  let f: string | null = null
+  for (const m of medir(doc).values()) if (m.inicio && (!f || m.inicio < f)) f = m.inicio
+  return f
+}
+
+/**
+ * Hacia atrás desde el go-live: corre el proyecto entero para que termine
+ * ese día, con el mismo calendario. Es lo que pidió el dueño del producto:
+ * «quiero salir en vivo el 31 y me dice arrancas el 25».
+ *
+ * No comprime nada: mueve. Si el plan no cabe entre hoy y el go-live, el
+ * arranque sale en el pasado y la pantalla lo dice — comprimir es decidir qué
+ * se acorta, y eso es de quien dirige (o de Zaelyn, en los cambios mayores).
+ */
+export function terminarEn(doc: Doc, golive: string): Doc {
+  const meta = aHabil(golive, doc.habiles)
+  const fin = finProyecto(doc)
+  if (!fin) return { ...doc, golive: meta, fijar: 'golive' }
+  const delta = entre(fin, meta, doc.habiles)
+  const nodos = doc.nodos.map(n => (n.inicio ? { ...n, inicio: aHabil(sumar(n.inicio, delta, doc.habiles), doc.habiles) } : n))
+  const corrido = programar({ ...doc, nodos })
+  return { ...corrido, inicio: inicioProyecto(corrido) ?? corrido.inicio, golive: meta, fijar: 'golive' }
+}
+
+/** Desde el arranque: corre al arranque y el go-live pasa a ser el fin calculado. */
+export function arrancarEn(doc: Doc, arranque: string): Doc {
+  const corrido = correrA(doc, arranque)
+  return { ...corrido, golive: finProyecto(corrido), fijar: 'inicio' }
+}

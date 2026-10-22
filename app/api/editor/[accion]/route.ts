@@ -5,18 +5,20 @@
  *
  * El navegador manda aquí y este servidor reenvía a Zaelyn con la cookie
  * convertida en Bearer: el token nunca llega al JavaScript de la página.
- * Tres acciones y ninguna más — una lista cerrada, para que esta ruta no se
+ * Una lista cerrada de acciones, para que esta ruta no se
  * vuelva un proxy abierto hacia cualquier rincón de la API.
  */
 import { NextResponse, type NextRequest } from 'next/server'
-import { escribirEditor } from '@/lib/api'
+import { escribirEditor, type AccionEditor } from '@/lib/api'
 
 export const dynamic = 'force-dynamic'
 // La propuesta del modelo puede tardar más de un minuto.
 export const maxDuration = 160
 
-const ACCIONES = new Set(['guardar', 'baja', 'proponer'] as const)
-type Accion = 'guardar' | 'baja' | 'proponer'
+const ACCIONES = new Set<string>([
+  'guardar', 'baja', 'proponer', 'mios', 'liberar-vista', 'liberar', 'grupo-crear', 'persona', 'invitar',
+])
+type Accion = AccionEditor
 
 export async function POST(req: NextRequest, ctx: { params: Promise<{ accion: string }> }) {
   const { accion } = await ctx.params

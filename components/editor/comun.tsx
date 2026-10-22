@@ -4,6 +4,7 @@
  * cliente de escritura.
  */
 import type { Doc, PersonaDelEditor, TipoNodo } from '@/lib/editor/tipos'
+import type { AccionEditor } from '@/lib/api'
 
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 const ANO = new Date().getFullYear()
@@ -67,7 +68,7 @@ export function Chispa({ className }: { className?: string }) {
 export type RespuestaEditor<T> = { ok: true; dato: T } | { ok: false; status: number; error: string; cuerpo: Record<string, unknown> }
 
 /** POST a la ruta del editor de este mismo sitio. */
-export async function escribir<T>(accion: 'guardar' | 'baja' | 'proponer', cuerpo: unknown): Promise<RespuestaEditor<T>> {
+export async function escribir<T>(accion: AccionEditor, cuerpo: unknown): Promise<RespuestaEditor<T>> {
   try {
     const r = await fetch(`/api/editor/${accion}`, {
       method: 'POST',
@@ -97,7 +98,13 @@ export function decirError(e: { status: number; error: string; cuerpo: Record<st
     case 'SIN_PRESUPUESTO': return 'Hoy ya se usó el presupuesto de IA de tu plan. Mañana se reinicia; mientras, puedes armar a mano o desde una plantilla.'
     case 'SIN_IA': return 'La ayuda de Zaelyn para armar no está conectada en este servidor.'
     case 'FALLO': return `Zaelyn no pudo armar la propuesta (${String(e.cuerpo['detalle'] ?? 'sin detalle')}). Vuelve a intentarlo.`
-    case 'NO_LO_ENCUENTRO': return 'Ese borrador ya no existe o no es de un grupo tuyo.'
+    case 'NO_LO_ENCUENTRO': return String(e.cuerpo['detalle'] ?? 'Eso ya no existe o no es de un grupo tuyo.')
+    case 'PLAN_EXISTE': return `Ese grupo ya tiene un plan llamado «${String(e.cuerpo['detalle'] ?? '')}». Ponle otro nombre o actualiza ese plan.`
+    case 'VACIO': return 'El borrador no tiene actividades ni hitos que liberar.'
+    case 'YA_EXISTE': return 'Ya tienes un grupo con ese nombre.'
+    case 'DEMASIADOS': return 'Llegaste al máximo de grupos.'
+    case 'LLENO': return `El grupo ya tiene el máximo de personas de tu plan (${String(e.cuerpo['max'] ?? '')}).`
+    case 'YA_TIENE_CUENTA': return 'Esa persona ya entró con su cuenta: no necesita código.'
     case 'RED': case 'CAIDO': return 'No hay conexión con Zaelyn ahora mismo.'
     default: return `Algo falló (${e.error}).`
   }

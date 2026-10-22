@@ -38,6 +38,7 @@ export function Inspector({
   const subs = (hijos.get(n.id) ?? []).filter(h => h.tipo === 'subtarea')
   const hijosPosibles = TIPOS_NODO.filter(t => puedeVivir(t, n.tipo))
   const sucesores = doc.nodos.filter(x => x.depende?.includes(n.id))
+  const puestos = useMemo(() => [...new Set(doc.nodos.map(x => x.puesto).filter((x): x is string => !!x))].sort(), [doc.nodos])
 
   const candidatos = useMemo(() => {
     if (!programable) return []
@@ -96,18 +97,29 @@ export function Inspector({
 
       {(programable || n.tipo === 'sprint') && (
         <div className="ed-rejilla">
-          {n.tipo === 'actividad' && (
+          {(n.tipo === 'actividad' || n.tipo === 'hito') && (
             <label className="ancho">
-              <span>Responsable</span>
+              <span>Puesto <em>quién la hace, sin nombre propio</em></span>
+              <input list="ed-puestos" value={n.puesto ?? ''} disabled={!puede} placeholder="Ej.: Analista de datos maestros"
+                onChange={e => onCambiar(n.id, { puesto: e.target.value || undefined })} />
+              <datalist id="ed-puestos">{puestos.map(p => <option key={p} value={p} />)}</datalist>
+            </label>
+          )}
+          {n.tipo === 'actividad' && personas.length > 0 && (
+            <label className="ancho">
+              <span>Responsable <em>persona del grupo</em></span>
               <div className="ed-resp">
                 <Avatar p={personas.find(p => p.id === n.responsable)} />
                 <select value={n.responsable ?? ''} disabled={!puede}
                   onChange={e => onCambiar(n.id, { responsable: e.target.value || null })}>
-                  <option value="">Sin responsable</option>
+                  <option value="">{n.puesto ? `Se asigna al liberar (${n.puesto})` : 'Sin responsable'}</option>
                   {personas.map(p => <option key={p.id} value={p.id}>{p.nombre}{p.rol ? ` · ${p.rol}` : ''}</option>)}
                 </select>
               </div>
             </label>
+          )}
+          {n.tipo === 'actividad' && personas.length === 0 && (
+            <p className="ed-nota ancho">Este borrador todavía no es de un grupo: pon el puesto y la persona se elige al liberarlo.</p>
           )}
           <label>
             <span>{n.tipo === 'hito' ? 'Fecha' : 'Inicio'}</span>

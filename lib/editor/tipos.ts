@@ -41,6 +41,8 @@ export type Nodo = {
   relevancia?: string
   terminado?: string
   responsable?: string | null
+  /** El puesto que la hace: viaja en las plantillas; la persona se elige al liberar. */
+  puesto?: string
   inicio?: string | null
   dias?: number | null
   horas?: number | null
@@ -56,6 +58,8 @@ export type Doc = {
   inicio: string | null
   golive?: string | null
   habiles: boolean
+  /** Qué fecha manda: el arranque o el go-live. */
+  fijar?: 'inicio' | 'golive'
   nodos: Nodo[]
 }
 
@@ -78,6 +82,8 @@ export type PlantillaBase = {
   doc: Doc
 }
 
+export type Liberado = { groupId: string | null; planId: string | null; en: string; version: number }
+
 export type Tarjeta = {
   id: string
   tipo: 'borrador' | 'plantilla'
@@ -88,6 +94,8 @@ export type Tarjeta = {
   termina: string | null
   version: number
   movidoEn: string
+  groupId: string | null
+  liberado: Liberado | null
 }
 
 export type Abierto = Tarjeta & { groupId: string | null; doc: Doc; puede: boolean }
@@ -97,6 +105,7 @@ export type PersonaDelEditor = { id: string; nombre: string; rol: string | null;
 export type Mesa = {
   grupo: { id: string; nombre: string }
   puede: boolean
+  administra: boolean
   rol: string | null
   personas: PersonaDelEditor[]
   borradores: Tarjeta[]
@@ -149,3 +158,48 @@ export const METODOLOGIA_CORTA: Record<string, string> = {
 }
 
 export const puedeVivir = (tipo: TipoNodo, padre: TipoNodo | null): boolean => PADRES[tipo].includes(padre)
+
+export type GrupoDestino = {
+  id: string
+  nombre: string
+  clase: string
+  rol: string | null
+  puede: boolean
+  administra: boolean
+  planes: Array<{ id: string; clave: string; nombre: string }>
+}
+
+export type MisProyectos = {
+  borradores: Tarjeta[]
+  deGrupos: Array<Tarjeta & { grupo: string }>
+  plantillas: Tarjeta[]
+  grupos: GrupoDestino[]
+  metodologias: Ficha[]
+  base: PlantillaBase[]
+  ia: boolean
+}
+
+export type VistaLiberar = {
+  grupo: { id: string; nombre: string }
+  personas: PersonaDelEditor[]
+  puestos: Array<{ puesto: string; huella: string; actividades: number; asignado: string | null }>
+  conservaResponsables: boolean
+  plan: { modo: 'nuevo'; nombre: string } | { modo: 'existente'; planId: string; nombre: string }
+  anterior: { planId: string; nombre: string } | null
+  choque: string | null
+  planes: Array<{ id: string; nombre: string }>
+  resumen: {
+    renglones: number; nuevos: number; cambios: number; iguales: number
+    desaparecidos: number; sinDueno: number
+    detalle: Array<{ texto: string; campos: string[] }>
+  }
+  fechas: { inicia: string | null; termina: string | null }
+}
+
+export const ROLES_DE_PROYECTO = ['integrante', 'lider', 'administrador', 'observador'] as const
+export const ROL_DICE: Record<string, string> = {
+  integrante: 'Ejecuta lo suyo y reporta avance',
+  lider: 'Asigna, prioriza y pide avance',
+  administrador: 'Todo, más invitar y cambiar roles',
+  observador: 'Solo consulta; no interrumpe a nadie',
+}

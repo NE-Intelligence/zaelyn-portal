@@ -13,7 +13,7 @@
  */
 import { cookies } from 'next/headers'
 import type { GrupoEnPortal, VistaDePlan } from './plan'
-import type { Abierto, Mesa } from './editor/tipos'
+import type { Abierto, Mesa, MisProyectos } from './editor/tipos'
 
 /** La cookie donde vive la sesión. Solo la lee este servidor. */
 export const COOKIE = 'zpt'
@@ -161,23 +161,54 @@ export const docDelEditor = (id: string) =>
  * servidor, nunca con Zaelyn—. Devuelve el código y el cuerpo de Zaelyn sin
  * interpretarlos: quien decide si un documento es válido es el motor.
  */
+export type AccionEditor =
+  | 'guardar' | 'baja' | 'proponer' | 'mios'
+  | 'liberar-vista' | 'liberar' | 'grupo-crear' | 'persona' | 'invitar'
+
+/** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
+function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
+  const g = typeof cuerpo['groupId'] === 'string' ? encodeURIComponent(cuerpo['groupId']) : ''
+  switch (accion) {
+    case 'guardar': case 'baja': case 'proponer': return { metodo: 'POST', ruta: `/portal/editor/${accion}` }
+    case 'mios': return { metodo: 'GET', ruta: '/portal/editor/mios' }
+    case 'liberar-vista': return { metodo: 'POST', ruta: '/portal/editor/liberar/vista' }
+    case 'liberar': return { metodo: 'POST', ruta: '/portal/editor/liberar' }
+    case 'grupo-crear': return { metodo: 'POST', ruta: '/portal/grupos/crear' }
+    case 'persona': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/persona` } : null
+    case 'invitar': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/invitar` } : null
+  }
+}
+
+/**
+ * Una ESCRITURA del editor, reenviada a Zaelyn con la sesión puesta.
+ *
+ * La llama la ruta `app/api/editor/[accion]` —el navegador habla con este
+ * servidor, nunca con Zaelyn—. Devuelve el código y el cuerpo de Zaelyn sin
+ * interpretarlos: quien decide si algo es válido es el motor.
+ */
 export async function escribirEditor(
-  accion: 'guardar' | 'baja' | 'proponer', cuerpo: string,
+  accion: AccionEditor, cuerpo: string,
 ): Promise<{ status: number; cuerpo: string }> {
   if (!hayApi()) return { status: 503, cuerpo: JSON.stringify({ error: 'SIN_API' }) }
   const token = (await cookies()).get(COOKIE)?.value
   if (!token) return { status: 401, cuerpo: JSON.stringify({ error: 'SIN_SESION' }) }
+  let datos: Record<string, unknown> = {}
+  try { datos = cuerpo ? JSON.parse(cuerpo) as Record<string, unknown> : {} } catch { return { status: 400, cuerpo: JSON.stringify({ error: 'INVALIDO' }) } }
+  const destino = rutaDe(accion, datos)
+  if (!destino) return { status: 400, cuerpo: JSON.stringify({ error: 'INVALIDO' }) }
   try {
-    const r = await fetch(`${base()}/portal/editor/${accion}`, {
-      method: 'POST',
-      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
-      body: cuerpo,
+    const r = await fetch(`${base()}${destino.ruta}`, {
+      method: destino.metodo,
+      headers: { authorization: `Bearer ${token}`, ...(destino.metodo === 'POST' ? { 'content-type': 'application/json' } : {}) },
+      ...(destino.metodo === 'POST' ? { body: cuerpo } : {}),
       cache: 'no-store',
-      // La propuesta del modelo tarda; el resto contesta en milisegundos.
-      signal: AbortSignal.timeout(accion === 'proponer' ? 150_000 : 20_000),
+      // La propuesta del modelo tarda; el resto contesta en segundos.
+      signal: AbortSignal.timeout(accion === 'proponer' ? 150_000 : 30_000),
     })
     return { status: r.status, cuerpo: r.status === 204 ? '' : await r.text() }
   } catch {
     return { status: 502, cuerpo: JSON.stringify({ error: 'CAIDO' }) }
   }
 }
+
+export const misProyectos = () => leer<MisProyectos>('/portal/editor/mios')

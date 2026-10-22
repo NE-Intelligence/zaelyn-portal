@@ -92,7 +92,7 @@ export function Tablero({ doc, medidas, personas, seleccion, onSeleccion, critic
           <span className="mono">{n.tipo === 'hito' ? `◆ ${corta(m?.inicio)}` : `${corta(m?.inicio)} · ${m?.dias ?? 0} d`}</span>
           {subs.length > 0 && <span className="mono">☑ {subs.filter(s => s.hecho).length}/{subs.length}</span>}
           {critica.has(n.id) && <span className="crit">crítica</span>}
-          {p ? <Avatar p={p} chico /> : n.tipo === 'actividad' ? <span className="ed-falta">sin dueño</span> : null}
+          {p ? <Avatar p={p} chico /> : n.puesto ? <span className="ed-puesto">{n.puesto}</span> : n.tipo === 'actividad' ? <span className="ed-falta">sin dueño</span> : null}
         </span>
       </div>
     )

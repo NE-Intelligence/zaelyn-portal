@@ -23,7 +23,7 @@ const ESPERA = [
 export function Asistente({
   groupId, nombre, doc, metodologia, fichas, ia, puede, ultima, onPropuesta,
 }: {
-  groupId: string
+  groupId: string | null
   nombre: string
   doc: Doc
   metodologia: string
