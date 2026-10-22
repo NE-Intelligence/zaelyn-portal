@@ -13,6 +13,7 @@
  */
 import { cookies } from 'next/headers'
 import type { GrupoEnPortal, VistaDePlan } from './plan'
+import type { Abierto, Mesa } from './editor/tipos'
 
 /** La cookie donde vive la sesión. Solo la lee este servidor. */
 export const COOKIE = 'zpt'
@@ -143,4 +144,40 @@ export async function salir(): Promise<void> {
     headers: { authorization: `Bearer ${token}` },
     cache: 'no-store',
   }).catch(() => {})
+}
+
+// ─────────────────────────────────────────────── el editor de proyectos (#174)
+
+export const mesaDelEditor = (groupId: string) =>
+  leer<Mesa>(`/portal/editor/grupo/${encodeURIComponent(groupId)}`)
+
+export const docDelEditor = (id: string) =>
+  leer<Abierto>(`/portal/editor/doc/${encodeURIComponent(id)}`)
+
+/**
+ * Una ESCRITURA del editor, reenviada tal cual a Zaelyn con la sesión puesta.
+ *
+ * La llama la ruta `app/api/editor/[accion]` —el navegador habla con este
+ * servidor, nunca con Zaelyn—. Devuelve el código y el cuerpo de Zaelyn sin
+ * interpretarlos: quien decide si un documento es válido es el motor.
+ */
+export async function escribirEditor(
+  accion: 'guardar' | 'baja' | 'proponer', cuerpo: string,
+): Promise<{ status: number; cuerpo: string }> {
+  if (!hayApi()) return { status: 503, cuerpo: JSON.stringify({ error: 'SIN_API' }) }
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return { status: 401, cuerpo: JSON.stringify({ error: 'SIN_SESION' }) }
+  try {
+    const r = await fetch(`${base()}/portal/editor/${accion}`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: cuerpo,
+      cache: 'no-store',
+      // La propuesta del modelo tarda; el resto contesta en milisegundos.
+      signal: AbortSignal.timeout(accion === 'proponer' ? 150_000 : 20_000),
+    })
+    return { status: r.status, cuerpo: r.status === 204 ? '' : await r.text() }
+  } catch {
+    return { status: 502, cuerpo: JSON.stringify({ error: 'CAIDO' }) }
+  }
 }

@@ -15,13 +15,17 @@ export const dynamic = 'force-dynamic'
  * más para elegir entre una sola opción es justo la fricción de la que se
  * quejó la primera versión.
  */
-export default async function Grupo({ params }: { params: Promise<{ grupo: string }> }) {
+export default async function Grupo({ params, searchParams }: {
+  params: Promise<{ grupo: string }>
+  searchParams: Promise<{ quedarme?: string }>
+}) {
   const { grupo } = await params
+  const q = await searchParams
   const r = await elPlan(grupo)
   if (!r.ok) return <SinSesion fallo={r.fallo} />
 
   const e = r.dato.estado
-  if (e.planes.length === 1) redirect(`/app/g/${grupo}/${e.planes[0]!.id}`)
+  if (e.planes.length === 1 && !q.quedarme) redirect(`/app/g/${grupo}/${e.planes[0]!.id}`)
 
   return (
     <>
@@ -36,6 +40,7 @@ export default async function Grupo({ params }: { params: Promise<{ grupo: strin
                 {r.dato.rol && <span>Tu rol aquí: {r.dato.rol}</span>}
               </div>
             </div>
+            <Link href={`/app/g/${grupo}/editor`} className="ed-btn primario">Editor de proyectos</Link>
           </div>
         </div>
 
@@ -43,8 +48,8 @@ export default async function Grupo({ params }: { params: Promise<{ grupo: strin
           <div className="pt-vacio" style={{ maxWidth: 560 }}>
             <b>Este grupo no tiene planes</b>
             <span>
-              Dile a Zaelyn «crea el plan Obra civil en {e.grupo.nombre}», o súbele
-              un Excel y te lo importa.
+              Ármalo en el <Link href={`/app/g/${grupo}/editor`}>editor de proyectos</Link>, o dile a
+              Zaelyn «crea el plan Obra civil en {e.grupo.nombre}», o súbele un Excel.
             </span>
           </div>
         ) : (

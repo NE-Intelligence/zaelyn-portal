@@ -1,0 +1,224 @@
+'use client'
+/**
+ * El inspector: todo lo que se puede decir de un objeto, y sobre todo PARA
+ * QUÉ existe. Objetivo, relevancia y criterio de terminado son lo primero que
+ * se lee, no un campo escondido al final: es lo que alguien nuevo en el
+ * proyecto necesita para entender por qué esa actividad está ahí.
+ */
+import { useMemo, useState } from 'react'
+import type { Doc, Nodo, PersonaDelEditor, TipoNodo } from '@/lib/editor/tipos'
+import { PROGRAMABLES, TIPOS_NODO, TIPO_DICE, TIPO_NOMBRE, puedeVivir } from '@/lib/editor/tipos'
+import { arbol, cerrariaCiclo, type Medida } from '@/lib/editor/programar'
+import { Avatar, IconoTipo, corta } from './comun'
+
+export function Inspector({
+  doc, nodo, medida, personas, puede, critica,
+  onCambiar, onQuitar, onAgregarDentro, onEnlazar, onDesenlazar, onSeleccion, onSubtarea,
+}: {
+  doc: Doc
+  nodo: Nodo
+  medida: Medida | undefined
+  personas: PersonaDelEditor[]
+  puede: boolean
+  critica: boolean
+  onCambiar: (id: string, c: Partial<Nodo>) => void
+  onQuitar: (id: string) => void
+  onAgregarDentro: (padre: string, tipo: TipoNodo) => void
+  onEnlazar: (sucesor: string, antecesor: string) => void
+  onDesenlazar: (sucesor: string, antecesor: string) => void
+  onSeleccion: (id: string) => void
+  onSubtarea: (padre: string, titulo: string) => void
+}) {
+  const { hijos, porId } = useMemo(() => arbol(doc), [doc])
+  const [nuevaSub, setNuevaSub] = useState('')
+  const [buscar, setBuscar] = useState('')
+  const n = nodo
+  const programable = PROGRAMABLES.includes(n.tipo)
+  const contenedor = n.tipo === 'fase' || n.tipo === 'grupo' || n.tipo === 'sprint'
+  const subs = (hijos.get(n.id) ?? []).filter(h => h.tipo === 'subtarea')
+  const hijosPosibles = TIPOS_NODO.filter(t => puedeVivir(t, n.tipo))
+  const sucesores = doc.nodos.filter(x => x.depende?.includes(n.id))
+
+  const candidatos = useMemo(() => {
+    if (!programable) return []
+    const q = buscar.trim().toLowerCase()
+    return doc.nodos
+      .filter(x => PROGRAMABLES.includes(x.tipo) && x.id !== n.id && !n.depende?.includes(x.id) && !cerrariaCiclo(doc, n.id, x.id))
+      .filter(x => !q || x.titulo.toLowerCase().includes(q))
+      .slice(0, 8)
+  }, [doc, n, buscar, programable])
+
+  const campo = (k: keyof Nodo) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    onCambiar(n.id, { [k]: e.target.value } as Partial<Nodo>)
+
+  const ruta: Nodo[] = []
+  for (let p = n.padre ? porId.get(n.padre) : undefined; p; p = p.padre ? porId.get(p.padre) : undefined) ruta.unshift(p)
+
+  return (
+    <div className={`ed-inspector t-${n.tipo}`}>
+      <div className="ed-ins-cab">
+        <span className={`ed-chip t-${n.tipo}`}><IconoTipo tipo={n.tipo} />{TIPO_NOMBRE[n.tipo]}</span>
+        {critica && <span className="ed-chip critica">Ruta crítica</span>}
+        {medida?.desborda && <span className="ed-chip aviso">Algo se sale del sprint</span>}
+      </div>
+      {ruta.length > 0 && (
+        <div className="ed-ruta">
+          {ruta.map(r => <button key={r.id} onClick={() => onSeleccion(r.id)}>{r.titulo}</button>)}
+        </div>
+      )}
+      <textarea
+        className="ed-ins-titulo" value={n.titulo} rows={2} disabled={!puede} placeholder="Título"
+        onChange={campo('titulo')}
+      />
+      <p className="ed-dice">{TIPO_DICE[n.tipo]}</p>
+
+      <fieldset className="ed-para">
+        <label>
+          <span>Para qué <em>objetivo</em></span>
+          <textarea rows={2} value={n.objetivo ?? ''} disabled={!puede} onChange={campo('objetivo')}
+            placeholder={contenedor ? '¿Qué tiene que quedar logrado al cerrar esta etapa?' : '¿Qué resuelve esta actividad?'} />
+        </label>
+        {n.tipo !== 'subtarea' && (
+          <label>
+            <span>Por qué importa <em>relevancia</em></span>
+            <textarea rows={2} value={n.relevancia ?? ''} disabled={!puede} onChange={campo('relevancia')}
+              placeholder="¿Qué pasa con el proyecto si esto no se hace o se hace tarde?" />
+          </label>
+        )}
+        {n.tipo !== 'subtarea' && (
+          <label>
+            <span>Cómo sabemos que terminó <em>criterio</em></span>
+            <textarea rows={2} value={n.terminado ?? ''} disabled={!puede} onChange={campo('terminado')}
+              placeholder="El entregable o la condición que lo cierra" />
+          </label>
+        )}
+      </fieldset>
+
+      {(programable || n.tipo === 'sprint') && (
+        <div className="ed-rejilla">
+          {n.tipo === 'actividad' && (
+            <label className="ancho">
+              <span>Responsable</span>
+              <div className="ed-resp">
+                <Avatar p={personas.find(p => p.id === n.responsable)} />
+                <select value={n.responsable ?? ''} disabled={!puede}
+                  onChange={e => onCambiar(n.id, { responsable: e.target.value || null })}>
+                  <option value="">Sin responsable</option>
+                  {personas.map(p => <option key={p.id} value={p.id}>{p.nombre}{p.rol ? ` · ${p.rol}` : ''}</option>)}
+                </select>
+              </div>
+            </label>
+          )}
+          <label>
+            <span>{n.tipo === 'hito' ? 'Fecha' : 'Inicio'}</span>
+            <input type="date" value={n.inicio ?? ''} disabled={!puede}
+              onChange={e => onCambiar(n.id, { inicio: e.target.value || null })} />
+          </label>
+          {n.tipo !== 'hito' && (
+            <label>
+              <span>Duración ({doc.habiles ? 'días hábiles' : 'días'})</span>
+              <input type="number" min={1} max={3650} value={n.dias ?? 1} disabled={!puede}
+                onChange={e => onCambiar(n.id, { dias: Math.max(1, Number(e.target.value) || 1) })} />
+            </label>
+          )}
+          {n.tipo === 'actividad' && (
+            <label>
+              <span>Esfuerzo (horas)</span>
+              <input type="number" min={0} step={0.5} value={n.horas ?? ''} disabled={!puede} placeholder="—"
+                onChange={e => onCambiar(n.id, { horas: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) })} />
+            </label>
+          )}
+          <div className="ed-fin">
+            <span>Termina</span>
+            <b className="mono">{corta(medida?.fin)}</b>
+          </div>
+        </div>
+      )}
+
+      {contenedor && medida && (
+        <div className="ed-resumen-ins">
+          <div><b className="mono">{corta(medida.inicio)} – {corta(medida.fin)}</b><span>abarca</span></div>
+          <div><b className="mono">{medida.dias}</b><span>días</span></div>
+          <div><b className="mono">{medida.piezas}</b><span>actividades e hitos</span></div>
+          <div><b className="mono">{Math.round(medida.horas)}</b><span>horas estimadas</span></div>
+          {medida.sinDueno > 0 && <div className="aviso"><b className="mono">{medida.sinDueno}</b><span>sin responsable</span></div>}
+        </div>
+      )}
+
+      {programable && (
+        <section className="ed-deps">
+          <h4>Depende de</h4>
+          {!n.depende?.length && <p className="ed-nada">Puede empezar sin esperar a nadie.</p>}
+          {n.depende?.map(d => {
+            const a = porId.get(d)
+            if (!a) return null
+            return (
+              <div className="ed-dep" key={d}>
+                <button onClick={() => onSeleccion(d)}><IconoTipo tipo={a.tipo} />{a.titulo}</button>
+                {puede && <button className="x" onClick={() => onDesenlazar(n.id, d)} aria-label="Quitar dependencia">×</button>}
+              </div>
+            )
+          })}
+          {puede && (
+            <div className="ed-buscar">
+              <input value={buscar} onChange={e => setBuscar(e.target.value)} placeholder="Agregar: busca una actividad o hito…" />
+              {buscar && (
+                <div className="ed-opciones">
+                  {candidatos.map(c => (
+                    <button key={c.id} onClick={() => { onEnlazar(n.id, c.id); setBuscar('') }}>
+                      <IconoTipo tipo={c.tipo} />{c.titulo}
+                    </button>
+                  ))}
+                  {!candidatos.length && <span className="ed-nada">Nada que encaje sin crear un ciclo.</span>}
+                </div>
+              )}
+            </div>
+          )}
+          {sucesores.length > 0 && (
+            <>
+              <h4>La esperan</h4>
+              {sucesores.map(s => (
+                <div className="ed-dep" key={s.id}><button onClick={() => onSeleccion(s.id)}><IconoTipo tipo={s.tipo} />{s.titulo}</button></div>
+              ))}
+            </>
+          )}
+        </section>
+      )}
+
+      {n.tipo === 'actividad' && (
+        <section className="ed-subs">
+          <h4>Subtareas {subs.length > 0 && <span className="mono">{subs.filter(s => s.hecho).length}/{subs.length}</span>}</h4>
+          {subs.map(s => (
+            <label key={s.id} className="ed-sub">
+              <input type="checkbox" checked={!!s.hecho} disabled={!puede} onChange={e => onCambiar(s.id, { hecho: e.target.checked || undefined })} />
+              <input className="txt" value={s.titulo} disabled={!puede} onChange={e => onCambiar(s.id, { titulo: e.target.value })} />
+              {puede && <button className="x" onClick={() => onQuitar(s.id)} aria-label="Quitar subtarea">×</button>}
+            </label>
+          ))}
+          {puede && (
+            <form className="ed-sub nueva" onSubmit={e => { e.preventDefault(); if (nuevaSub.trim()) { onSubtarea(n.id, nuevaSub.trim()); setNuevaSub('') } }}>
+              <span className="mas">+</span>
+              <input className="txt" value={nuevaSub} onChange={e => setNuevaSub(e.target.value)} placeholder="Agregar subtarea y Enter" />
+            </form>
+          )}
+        </section>
+      )}
+
+      <label className="ed-notas">
+        <span>Notas</span>
+        <textarea rows={3} value={n.notas ?? ''} disabled={!puede} onChange={campo('notas')} placeholder="Supuestos, acuerdos, ligas…" />
+      </label>
+
+      {puede && (
+        <div className="ed-ins-acciones">
+          {hijosPosibles.filter(t => t !== 'subtarea').map(t => (
+            <button key={t} className="ed-btn suave" onClick={() => onAgregarDentro(n.id, t)}>+ {TIPO_NOMBRE[t]} dentro</button>
+          ))}
+          <button className="ed-btn peligro" onClick={() => onQuitar(n.id)}>
+            Quitar{(hijos.get(n.id) ?? []).length ? ' con todo lo de adentro' : ''}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
