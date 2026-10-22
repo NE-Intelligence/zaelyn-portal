@@ -743,6 +743,12 @@ const EVENTO: Record<string, string> = {
   prorroga_pedida: 'pidió una prórroga para',
   prorroga_aprobada: 'aprobó la prórroga de',
   prorroga_negada: 'negó la prórroga de',
+  // El cambio de responsable (#176). `soltado` es un acto consumado; los tres
+  // `cesion_*` son la petición y su resolución.
+  soltado: 'soltó',
+  cesion_pedida: 'pidió cambiar al responsable de',
+  cesion_aprobada: 'aprobó el cambio de responsable de',
+  cesion_negada: 'negó el cambio de responsable de',
 }
 
 export function Bitacora({ v }: { v: VistaDePlan }) {
