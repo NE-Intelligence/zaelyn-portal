@@ -3,7 +3,8 @@
  * Piezas chicas del editor: íconos por tipo, avatar, fechas cortas y el
  * cliente de escritura.
  */
-import type { Doc, PersonaDelEditor, TipoNodo } from '@/lib/editor/tipos'
+import type { Doc, Nodo, PersonaDelEditor, TipoNodo } from '@/lib/editor/tipos'
+import { SEGUIMIENTO_DICE } from '@/lib/editor/tipos'
 import type { AccionEditor } from '@/lib/api'
 
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
@@ -111,3 +112,13 @@ export function decirError(e: { status: number; error: string; cuerpo: Record<st
 }
 
 export const vacio = (inicio: string | null): Doc => ({ v: 1, inicio, habiles: true, nodos: [] })
+
+/** Cómo va en el seguimiento, para un plan reabierto (#178). */
+export function ChipSeguimiento({ n }: { n: Nodo }) {
+  const s = n.seguimiento
+  if (!s) return null
+  const txt = s.estatus === 'hecho' ? 'Hecha'
+    : s.estatus === 'en_curso' || s.avance > 0 ? `${s.avance}%`
+      : SEGUIMIENTO_DICE[s.estatus]
+  return <span className={`ed-seg st-${s.estatus}${s.avance > 0 && s.estatus !== 'hecho' ? ' avanza' : ''}`} title={`En seguimiento: ${SEGUIMIENTO_DICE[s.estatus]}${s.avance ? ` · ${s.avance}%` : ''}`}>{txt}</span>
+}

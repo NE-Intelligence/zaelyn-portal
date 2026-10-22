@@ -1,6 +1,7 @@
 import { Barra, Pie } from '@/components/portal/Marco'
 import { Lienzo, esVista } from '@/components/portal/Plan'
 import { SinSesion } from '@/components/portal/SinSesion'
+import { Reabrir } from '@/components/editor/Reabrir'
 import { elPlan } from '@/lib/api'
 
 export const dynamic = 'force-dynamic'
@@ -20,6 +21,9 @@ export default async function Plan({
   if (!r.ok) return <SinSesion fallo={r.fallo} />
 
   const e = r.dato.estado
+  // Solo quien puede mover el plan de los demás lo reorganiza; el motor lo
+  // vuelve a comprobar al abrir.
+  const dirige = !!r.dato.rol && !['observador', 'miembro', 'integrante', 'a_cargo'].includes(r.dato.rol)
   return (
     <>
       <Barra
@@ -31,6 +35,7 @@ export default async function Plan({
         sesion
       />
       <main className="pt-lienzo">
+        {dirige && e.plan && <Reabrir grupo={grupo} plan={e.plan.id} />}
         <Lienzo v={r.dato} vista={vista} base={`/app/g/${grupo}/${plan}`} leido={leido} />
       </main>
       <Pie />

@@ -17,6 +17,7 @@ export const maxDuration = 160
 
 const ACCIONES = new Set<string>([
   'guardar', 'baja', 'proponer', 'mios', 'liberar-vista', 'liberar', 'grupo-crear', 'persona', 'invitar',
+  'reabrir', 'reorganizar',
 ])
 type Accion = AccionEditor
 

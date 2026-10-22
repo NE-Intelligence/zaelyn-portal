@@ -7,9 +7,9 @@
  */
 import { useMemo, useState } from 'react'
 import type { Doc, Nodo, PersonaDelEditor, TipoNodo } from '@/lib/editor/tipos'
-import { PROGRAMABLES, TIPOS_NODO, TIPO_DICE, TIPO_NOMBRE, puedeVivir } from '@/lib/editor/tipos'
+import { PROGRAMABLES, SEGUIMIENTO_DICE, TIPOS_NODO, TIPO_DICE, TIPO_NOMBRE, avanzo, puedeVivir } from '@/lib/editor/tipos'
 import { arbol, cerrariaCiclo, type Medida } from '@/lib/editor/programar'
-import { Avatar, IconoTipo, corta } from './comun'
+import { Avatar, ChipSeguimiento, IconoTipo, corta } from './comun'
 
 export function Inspector({
   doc, nodo, medida, personas, puede, critica,
@@ -61,7 +61,14 @@ export function Inspector({
         <span className={`ed-chip t-${n.tipo}`}><IconoTipo tipo={n.tipo} />{TIPO_NOMBRE[n.tipo]}</span>
         {critica && <span className="ed-chip critica">Ruta crítica</span>}
         {medida?.desborda && <span className="ed-chip aviso">Algo se sale del sprint</span>}
+        <ChipSeguimiento n={n} />
       </div>
+      {n.seguimiento && (
+        <p className="ed-nota seg">
+          En seguimiento: <b>{SEGUIMIENTO_DICE[n.seguimiento.estatus]}{n.seguimiento.avance ? ` · ${n.seguimiento.avance}%` : ''}</b>.
+          {' '}El avance lo reporta la gente por el chat; liberar cambios no lo pisa.
+        </p>
+      )}
       {ruta.length > 0 && (
         <div className="ed-ruta">
           {ruta.map(r => <button key={r.id} onClick={() => onSeleccion(r.id)}>{r.titulo}</button>)}
@@ -226,9 +233,13 @@ export function Inspector({
           {hijosPosibles.filter(t => t !== 'subtarea').map(t => (
             <button key={t} className="ed-btn suave" onClick={() => onAgregarDentro(n.id, t)}>+ {TIPO_NOMBRE[t]} dentro</button>
           ))}
-          <button className="ed-btn peligro" onClick={() => onQuitar(n.id)}>
-            Quitar{(hijos.get(n.id) ?? []).length ? ' con todo lo de adentro' : ''}
-          </button>
+          {avanzo(n)
+            ? <span className="ed-nota">Ya avanzó en el seguimiento: no se quita desde aquí. Si ya no aplica, cancélala con Zaelyn en el chat.</span>
+            : (
+              <button className="ed-btn peligro" onClick={() => onQuitar(n.id)}>
+                Quitar{(hijos.get(n.id) ?? []).length ? ' con todo lo de adentro' : ''}
+              </button>
+            )}
         </div>
       )}
     </div>

@@ -7,7 +7,7 @@
  * se puede deshacer con un clic. Nada se guarda solo.
  */
 import { useState } from 'react'
-import type { Brief, Doc, Ficha, Metodologia, Propuesta } from '@/lib/editor/tipos'
+import type { Brief, Doc, Ficha, Metodologia, Propuesta, Reorganizacion } from '@/lib/editor/tipos'
 import { METODOLOGIA_CORTA } from '@/lib/editor/tipos'
 import { Chispa, decirError, escribir } from './comun'
 
@@ -20,8 +20,16 @@ const ESPERA = [
   'Revisando que quepa en la fecha comprometida…',
 ]
 
+const ESPERA_REORG = [
+  'Leyendo el plan como está hoy…',
+  'Viendo qué ya avanzó y qué no se puede tocar…',
+  'Buscando qué puede ir en paralelo…',
+  'Revisando la ruta que manda sobre la fecha final…',
+  'Armando los cambios mínimos para lograrlo…',
+]
+
 export function Asistente({
-  groupId, nombre, doc, metodologia, fichas, ia, puede, ultima, onPropuesta,
+  groupId, nombre, doc, metodologia, fichas, ia, puede, ultima, onPropuesta, onReorganizar,
 }: {
   groupId: string | null
   nombre: string
@@ -32,7 +40,12 @@ export function Asistente({
   puede: boolean
   ultima: Propuesta | null
   onPropuesta: (p: Propuesta, nombre: string) => void
+  onReorganizar: (r: Reorganizacion) => void
 }) {
+  const hayPlan = doc.nodos.length > 0
+  const [modo, setModo] = useState<'reorganizar' | 'armar'>(hayPlan ? 'reorganizar' : 'armar')
+  const [pide, setPide] = useState('')
+  const [reorg, setReorg] = useState<Reorganizacion | null>(null)
   const [b, setB] = useState<Brief>({
     nombre,
     objetivo: doc.objetivo ?? '',
@@ -58,6 +71,24 @@ export function Asistente({
     onPropuesta(r.dato, b.nombre.trim())
   }
 
+  async function reorganizar(texto: string) {
+    setEstado('pensando'); setError(''); setFrase(0); setReorg(null)
+    const reloj = setInterval(() => setFrase(f => (f + 1) % ESPERA_REORG.length), 4200)
+    const r = await escribir<Reorganizacion>('reorganizar', { groupId, doc, instruccion: texto })
+    clearInterval(reloj)
+    if (!r.ok) { setEstado('error'); setError(decirError(r)); return }
+    setEstado('listo')
+    setReorg(r.dato)
+  }
+
+  const atajos = [
+    ...(doc.golive ? [`Comprímelo para terminar a más tardar el ${doc.golive}. Si no cabe, dime qué alcance mover.`] : []),
+    'Paraleliza lo que pueda ir en paralelo sin perder el control de calidad.',
+    'Revisa qué le falta: entregables, pruebas, aprobaciones y hitos de control.',
+    'Organízalo en sprints de dos semanas, manteniendo las fases.',
+    'Equilibra la carga: que nadie tenga dos actividades al mismo tiempo.',
+  ]
+
   const set = <K extends keyof Brief>(k: K, v: Brief[K]) => setB(x => ({ ...x, [k]: v }))
   const dias = b.inicio && b.golive ? Math.round((Date.parse(b.golive) - Date.parse(b.inicio)) / 86_400_000) : null
 
@@ -66,18 +97,95 @@ export function Asistente({
       <div className="ed-as-cab">
         <span className={`ed-orbe${estado === 'pensando' ? ' pensando' : ''}`}><Chispa /></span>
         <div>
-          <b>Armar con Zaelyn</b>
-          <span>Cuéntale el proyecto; te propone estructura, metodología, dependencias y para qué sirve cada cosa.</span>
+          <b>{hayPlan ? 'Zaelyn, tu PMO' : 'Armar con Zaelyn'}</b>
+          <span>{hayPlan
+            ? 'Pídele que lo comprima, lo reorganice o lo revise; te propone los cambios y tú decides.'
+            : 'Cuéntale el proyecto; te propone estructura, metodología, dependencias y para qué sirve cada cosa.'}</span>
         </div>
       </div>
 
       {!ia && <div className="ed-aviso">La ayuda de Zaelyn para armar no está conectada en este servidor. Puedes armar a mano o desde una plantilla.</div>}
       {!puede && <div className="ed-aviso">Tu rol en este grupo es de consulta: puedes ver el borrador, no cambiarlo.</div>}
 
-      {estado === 'pensando' ? (
+      {hayPlan && (
+        <div className="ed-segmentos panel ed-as-modo">
+          <button className={modo === 'reorganizar' ? 'on' : ''} onClick={() => setModo('reorganizar')} disabled={estado === 'pensando'}>Reorganizar este plan</button>
+          <button className={modo === 'armar' ? 'on' : ''} onClick={() => setModo('armar')} disabled={estado === 'pensando'}>Armar desde cero</button>
+        </div>
+      )}
+
+      {modo === 'reorganizar' && hayPlan && (estado === 'pensando' ? (
         <div className="ed-pensando">
           <div className="ed-ondas"><span /><span /><span /></div>
-          <p>{ESPERA[frase]}</p>
+          <p>{ESPERA_REORG[frase % ESPERA_REORG.length]}</p>
+          <small>Suele tardar entre 20 segundos y un minuto.</small>
+        </div>
+      ) : (
+        <div className="ed-reorg">
+          {!reorg && (
+            <form className="ed-brief" onSubmit={e => { e.preventDefault(); if (ia && puede && pide.trim().length >= 4) reorganizar(pide.trim()) }}>
+              <label><span>¿Qué quieres cambiar? <em>en tus palabras</em></span>
+                <textarea rows={4} value={pide} onChange={e => setPide(e.target.value)}
+                  placeholder="Ej.: Salimos en vivo el 12 de diciembre; comprímelo sin tocar las pruebas integrales." />
+              </label>
+              <div className="ed-atajos">
+                {atajos.map(a => <button type="button" key={a} onClick={() => setPide(a)}>{a}</button>)}
+              </div>
+              <small className="ed-nota">Zaelyn propone cambios; tú los revisas antes de aplicarlos. Lo que ya avanzó en el seguimiento no se quita.</small>
+              {estado === 'error' && <div className="ed-error">{error}</div>}
+              <button type="submit" className="ed-btn zaelyn" disabled={!ia || !puede || pide.trim().length < 4}>
+                <Chispa />Proponer cambios
+              </button>
+            </form>
+          )}
+          {reorg && (
+            <div className="ed-recomienda ed-propuesta-reorg">
+              <span className="ed-overline">Lo que Zaelyn propone</span>
+              {reorg.resumen && <p>{reorg.resumen}</p>}
+              <div className="ed-dif">
+                <span className="mas"><b className="mono">{reorg.dif.agregados.length}</b> nuevos</span>
+                <span className="cambia"><b className="mono">{reorg.dif.modificados.length}</b> cambian</span>
+                <span className="menos"><b className="mono">{reorg.dif.quitados.length}</b> se quitan</span>
+              </div>
+              {reorg.cambios.length > 0 && <ul>{reorg.cambios.map((c, i) => <li key={i}>{c}</li>)}</ul>}
+              {(reorg.dif.agregados.length + reorg.dif.modificados.length + reorg.dif.quitados.length) > 0 && (
+                <details className="ed-dif-lista">
+                  <summary>Ver objeto por objeto</summary>
+                  {reorg.dif.agregados.map(x => <div key={`a${x.id}`} className="mas">+ {x.titulo}</div>)}
+                  {reorg.dif.modificados.map(x => <div key={`m${x.id}`} className="cambia">~ {x.titulo} <em>{x.campos.join(', ')}</em></div>)}
+                  {reorg.dif.quitados.map(x => <div key={`q${x.id}`} className="menos">− {x.titulo}</div>)}
+                </details>
+              )}
+              {reorg.dif.protegidos.length > 0 && (
+                <p className="alt">No quité {reorg.dif.protegidos.join(', ')}: ya avanzó en el seguimiento.</p>
+              )}
+              {reorg.riesgos.length > 0 && (
+                <>
+                  <span className="ed-overline">Riesgos que vio</span>
+                  <ul>{reorg.riesgos.map((r, i) => <li key={i}>{r}</li>)}</ul>
+                </>
+              )}
+              {reorg.descartados > 0 && <p className="alt">Mencionó {reorg.descartados} persona{reorg.descartados === 1 ? '' : 's'} que no están en el grupo; no las asigné.</p>}
+              <small className="mono">costo de IA US$ {reorg.costoUsd.toFixed(3)}</small>
+              <div className="ed-reorg-acciones">
+                {(reorg.dif.agregados.length + reorg.dif.modificados.length + reorg.dif.quitados.length) > 0 && (
+                  <button className="ed-btn zaelyn" onClick={() => { onReorganizar(reorg); setReorg(null); setPide('') }}>
+                    <Chispa />Aplicar cambios
+                  </button>
+                )}
+                <button className="ed-btn suave" onClick={() => setReorg(null)}>
+                  {(reorg.dif.agregados.length + reorg.dif.modificados.length + reorg.dif.quitados.length) > 0 ? 'Descartar' : 'Listo'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {modo === 'armar' && (estado === 'pensando' ? (
+        <div className="ed-pensando">
+          <div className="ed-ondas"><span /><span /><span /></div>
+          <p>{ESPERA[frase % ESPERA.length]}</p>
           <small>Un plan completo tarda entre 30 segundos y un minuto y medio.</small>
         </div>
       ) : (
@@ -121,9 +229,9 @@ export function Asistente({
             <Chispa />{ultima ? 'Armar otra propuesta' : 'Armar el plan'}
           </button>
         </form>
-      )}
+      ))}
 
-      {ultima && estado !== 'pensando' && (
+      {modo === 'armar' && ultima && estado !== 'pensando' && (
         <div className="ed-recomienda">
           <span className="ed-overline">Lo que Zaelyn propuso</span>
           <b>{METODOLOGIA_CORTA[ultima.metodologia] ?? ultima.metodologia}</b>

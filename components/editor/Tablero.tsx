@@ -9,7 +9,7 @@ import type { Doc, Nodo, PersonaDelEditor } from '@/lib/editor/tipos'
 import { CONTENEDORES, PROGRAMABLES } from '@/lib/editor/tipos'
 import { arbol, cabe, recolocar, type Medida } from '@/lib/editor/programar'
 import { carga, empezar, terminar, tipoDe, MARCA } from '@/lib/editor/arrastre'
-import { Avatar, IconoTipo, corta } from './comun'
+import { Avatar, ChipSeguimiento, IconoTipo, corta } from './comun'
 
 export function Tablero({ doc, medidas, personas, seleccion, onSeleccion, critica, recien, puede, onCommit }: {
   doc: Doc
@@ -92,6 +92,7 @@ export function Tablero({ doc, medidas, personas, seleccion, onSeleccion, critic
           <span className="mono">{n.tipo === 'hito' ? `◆ ${corta(m?.inicio)}` : `${corta(m?.inicio)} · ${m?.dias ?? 0} d`}</span>
           {subs.length > 0 && <span className="mono">☑ {subs.filter(s => s.hecho).length}/{subs.length}</span>}
           {critica.has(n.id) && <span className="crit">crítica</span>}
+          <ChipSeguimiento n={n} />
           {p ? <Avatar p={p} chico /> : n.puesto ? <span className="ed-puesto">{n.puesto}</span> : n.tipo === 'actividad' ? <span className="ed-falta">sin dueño</span> : null}
         </span>
       </div>

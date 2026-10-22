@@ -49,6 +49,18 @@ export type Nodo = {
   depende?: string[]
   notas?: string
   hecho?: boolean
+  /** Cómo va en el seguimiento, si el plan se reabrió (#178). Solo se lee. */
+  seguimiento?: { estatus: EstatusSeguimiento; avance: number }
+}
+
+export type EstatusSeguimiento = 'abierto' | 'en_curso' | 'bloqueado' | 'hecho' | 'cancelado'
+
+/** Ya avanzó en el seguimiento: no se quita desde el editor. */
+export const avanzo = (n: Nodo): boolean =>
+  !!n.seguimiento && (n.seguimiento.estatus === 'hecho' || n.seguimiento.estatus === 'en_curso' || n.seguimiento.avance > 0)
+
+export const SEGUIMIENTO_DICE: Record<EstatusSeguimiento, string> = {
+  abierto: 'Sin empezar', en_curso: 'En curso', bloqueado: 'En espera', hecho: 'Hecha', cancelado: 'Cancelada',
 }
 
 export type Doc = {
@@ -124,6 +136,26 @@ export type Propuesta = {
   descartados: number
   costoUsd: number
 }
+
+export type Diferencia = {
+  agregados: Array<{ id: string; titulo: string; tipo: TipoNodo }>
+  quitados: Array<{ id: string; titulo: string; tipo: TipoNodo }>
+  modificados: Array<{ id: string; titulo: string; campos: string[] }>
+  protegidos: string[]
+}
+
+/** Lo que Zaelyn propone cambiar sobre un plan que ya existe (#178). */
+export type Reorganizacion = {
+  doc: Doc
+  resumen: string
+  cambios: string[]
+  riesgos: string[]
+  dif: Diferencia
+  descartados: number
+  costoUsd: number
+}
+
+export type Reapertura = { ok: true; id: string; nuevo: boolean; actualizados: number; agregados: number; quitados: number }
 
 export type Brief = {
   nombre: string

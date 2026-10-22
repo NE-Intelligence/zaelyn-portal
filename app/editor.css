@@ -498,3 +498,27 @@
   .pt .ed-lib-puesto select { min-width: 0; width: 100%; }
 }
 .pt .ed-cab-acciones { margin-left: auto; }
+
+/* ── fase 3: reabrir y reorganizar (#178) ── */
+.pt .ed-reabrir { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 0 14px; padding: 10px 14px; background: var(--zaelyn-soft); border-radius: var(--r-md); }
+.pt .ed-reabrir small { color: var(--zaelyn-ink); font-size: 12.5px; flex: 1 1 220px; }
+.pt .ed-reabrir .ed-error { flex-basis: 100%; }
+.pt .ed-seg { font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: var(--r-pill); white-space: nowrap; background: var(--st-pendiente-bg, var(--sunken)); color: var(--st-pendiente-ink, var(--ink-2)); }
+.pt .ed-seg.st-hecho { background: var(--st-hecha-bg); color: var(--st-hecha-ink); }
+.pt .ed-seg.st-en_curso, .pt .ed-seg.avanza { background: var(--st-curso-bg); color: var(--st-curso-ink); }
+.pt .ed-nota.seg { background: var(--sunken); padding: 7px 10px; border-radius: var(--r-md); margin: 0; }
+.pt .ed-as-modo { width: 100%; }
+.pt .ed-as-modo button { flex: 1; justify-content: center; }
+.pt .ed-atajos { display: flex; flex-wrap: wrap; gap: 6px; }
+.pt .ed-atajos button { border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font: inherit; font-size: 11.5px; text-align: left; padding: 5px 9px; border-radius: var(--r-md); cursor: pointer; line-height: 1.35; }
+.pt .ed-atajos button:hover { border-color: var(--zaelyn); color: var(--zaelyn-ink); }
+.pt .ed-dif { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; }
+.pt .ed-dif span, .pt .ed-dif-lista div { padding: 2px 8px; border-radius: var(--r-pill); }
+.pt .ed-dif .mas, .pt .ed-dif-lista .mas { background: var(--st-hecha-bg); color: var(--st-hecha-ink); }
+.pt .ed-dif .cambia, .pt .ed-dif-lista .cambia { background: var(--st-curso-bg); color: var(--st-curso-ink); }
+.pt .ed-dif .menos, .pt .ed-dif-lista .menos { background: var(--st-detenida-bg, var(--critica-soft)); color: var(--st-detenida-ink, var(--critica)); }
+.pt .ed-dif-lista { font-size: 12px; display: flex; flex-direction: column; gap: 3px; }
+.pt .ed-dif-lista summary { cursor: pointer; color: var(--zaelyn-ink); font-weight: 500; margin-bottom: 4px; }
+.pt .ed-dif-lista div { border-radius: 6px; }
+.pt .ed-dif-lista em { opacity: 0.75; font-size: 11px; }
+.pt .ed-reorg-acciones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }

@@ -19,7 +19,7 @@ import {
   sumar, type Destino, type Medida,
 } from '@/lib/editor/programar'
 import { carga, empezar, terminar, tipoDe, MARCA } from '@/lib/editor/arrastre'
-import { Avatar, IconoTipo, corta, mesCorto } from './comun'
+import { Avatar, ChipSeguimiento, IconoTipo, corta, mesCorto } from './comun'
 
 const FILA = 38
 
@@ -379,6 +379,7 @@ export function Lienzo({
                       >{n.titulo || <i>Sin título</i>}</span>
                     )}
                     <span className="ed-meta">
+                      <ChipSeguimiento n={n} />
                       {!p && n.puesto && <span className="ed-puesto" title={`Puesto: ${n.puesto}`}>{n.puesto}</span>}
                       {n.tipo === 'actividad' && !n.responsable && !n.puesto && <span className="ed-falta" title="Sin responsable ni puesto">sin dueño</span>}
                       {p && <Avatar p={p} chico />}

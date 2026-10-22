@@ -18,7 +18,7 @@
  *  · El sprint sí: tiene inicio y duración fijos, y sus hijos viven adentro.
  */
 import type { Doc, Nodo, TipoNodo } from './tipos'
-import { PROGRAMABLES, puedeVivir } from './tipos'
+import { PROGRAMABLES, avanzo, puedeVivir } from './tipos'
 
 // ─────────────────────────────────────────────────────────────── calendario
 
@@ -356,6 +356,9 @@ export function recolocar(doc: Doc, id: string, destino: Destino): Doc {
 /** Borra un nodo con toda su rama, y las dependencias que apuntaban ahí. */
 export function quitar(doc: Doc, id: string): Doc {
   const fuera = new Set([id, ...descendientes(doc, id)])
+  // Lo que ya avanzó en el seguimiento no se quita desde el editor (#178): ni
+  // solo, ni dentro de un contenedor que se quita.
+  if (doc.nodos.some(n => fuera.has(n.id) && avanzo(n))) return doc
   const nodos = doc.nodos
     .filter(n => !fuera.has(n.id))
     .map(n => (n.depende?.some(d => fuera.has(d)) ? { ...n, depende: n.depende.filter(d => !fuera.has(d)) } : n))
@@ -483,4 +486,18 @@ export function terminarEn(doc: Doc, golive: string): Doc {
 export function arrancarEn(doc: Doc, arranque: string): Doc {
   const corrido = correrA(doc, arranque)
   return { ...corrido, golive: finProyecto(corrido), fijar: 'inicio' }
+}
+
+/**
+ * Vuelve a calcular las fechas lo más temprano que las dependencias dejan
+ * (#178). Lo que espera a otro suelta su fecha y se recalcula; lo que no
+ * espera a nadie y lo que ya avanzó en el seguimiento conservan la suya.
+ *
+ * `programar` solo empuja hacia adelante; esto es lo que hace que acortar una
+ * duración o quitar una dependencia ACERQUE la fecha final.
+ */
+export function compactar(doc: Doc): Doc {
+  const nodos = doc.nodos.map(n =>
+    PROGRAMABLES.includes(n.tipo) && n.depende?.length && !avanzo(n) ? { ...n, inicio: null } : n)
+  return programar({ ...doc, nodos })
 }

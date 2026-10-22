@@ -14,10 +14,10 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Doc, Ficha, Liberado, Metodologia, Nodo, PersonaDelEditor, PlantillaBase, Propuesta, Tarjeta, TipoNodo } from '@/lib/editor/tipos'
+import type { Doc, Ficha, Liberado, Metodologia, Nodo, PersonaDelEditor, PlantillaBase, Propuesta, Reorganizacion, Tarjeta, TipoNodo } from '@/lib/editor/tipos'
 import { METODOLOGIA_CORTA, TIPOS_NODO, TIPO_DICE, TIPO_NOMBRE } from '@/lib/editor/tipos'
 import {
-  arbol, arrancarEn, cabe, cambiar, comoPlantilla, correrA, desenlazar, enlazar, entre, finProyecto as finDelProyecto, hoyISO,
+  arbol, arrancarEn, cabe, compactar, cambiar, comoPlantilla, correrA, desenlazar, enlazar, entre, finProyecto as finDelProyecto, hoyISO,
   inicioProyecto, insertar, medir, nuevoId, programar, quitar, recolocar, rutaCritica, terminarEn, type Destino,
 } from '@/lib/editor/programar'
 import { empezar, terminar } from '@/lib/editor/arrastre'
@@ -39,7 +39,7 @@ const TITULO_NUEVO: Record<TipoNodo, string> = {
 }
 
 export function Editor({
-  grupo, personas, fichas, base, puede, ia, inicial, abrirZaelyn = false,
+  grupo, personas, fichas, base, puede, ia, inicial, abrirZaelyn = false, reabierto = null,
 }: {
   /** El grupo del borrador, o null si es de la persona y el grupo se elige al liberar. */
   grupo: { id: string; nombre: string } | null
@@ -49,6 +49,8 @@ export function Editor({
   puede: boolean
   ia: boolean
   inicial: { id: string | null; nombre: string; metodologia: string; version: number | null; doc: Doc; liberado?: Liberado | null }
+  /** Recién traído del seguimiento (#178): qué cambió desde el borrador de la vez pasada. */
+  reabierto?: { actualizados: number; agregados: number; quitados: number } | null
   abrirZaelyn?: boolean
 }) {
   const router = useRouter()
@@ -69,6 +71,8 @@ export function Editor({
   const [panel, setPanel] = useState<'detalle' | 'zaelyn'>(abrirZaelyn ? 'zaelyn' : 'detalle')
   const [recien, setRecien] = useState<Set<string>>(new Set())
   const [ultima, setUltima] = useState<Propuesta | null>(null)
+  const [traido, setTraido] = useState(reabierto)
+  const [reorgAplicada, setReorgAplicada] = useState<{ cambios: number; antes: string | null; despues: string | null } | null>(null)
   const [dialogo, setDialogo] = useState<'plantilla' | 'fabrica' | null>(null)
   const [aviso, setAviso] = useState('')
   const [liberado, setLiberado] = useState<Liberado | null>(inicial.liberado ?? null)
@@ -247,6 +251,20 @@ export function Editor({
     setTimeout(() => setRecien(new Set()), 7000)
   }
 
+  // ── cambios de Zaelyn sobre un plan que ya existe (#178)
+  const recibirReorganizacion = (r: Reorganizacion) => {
+    const antes = finDelProyecto(doc)
+    const nuevo = compactar(r.doc)
+    comprometer(nuevo)
+    setReorgAplicada({
+      cambios: r.dif.agregados.length + r.dif.modificados.length + r.dif.quitados.length,
+      antes, despues: finDelProyecto(nuevo),
+    })
+    setUltima(null)
+    setRecien(new Set([...r.dif.agregados, ...r.dif.modificados].map(x => x.id)))
+    setTimeout(() => setRecien(new Set()), 9000)
+  }
+
   // ── plantillas
   const [nombrePlantilla, setNombrePlantilla] = useState('')
   const [enviandoPlantilla, setEnviandoPlantilla] = useState(false)
@@ -379,6 +397,32 @@ export function Editor({
           )}
         </div>
       )}
+      {traido && (
+        <div className="ed-banda zaelyn">
+          <Chispa className="ch" />
+          <span>
+            Traje el plan como está hoy en el seguimiento: {traido.actualizados} al día
+            {traido.agregados ? `, ${traido.agregados} nueva${traido.agregados === 1 ? '' : 's'} desde el chat` : ''}
+            {traido.quitados ? `, ${traido.quitados} cancelada${traido.quitados === 1 ? '' : 's'} fuera` : ''}.
+            {' '}Lo que ya avanzó lleva su porcentaje y no se puede quitar. Reorganiza y luego libera los cambios.
+          </span>
+          <button className="ed-btn suave" onClick={() => setTraido(null)}>Entendido</button>
+        </div>
+      )}
+      {reorgAplicada && (
+        <div className="ed-banda zaelyn">
+          <Chispa className="ch" />
+          <span>
+            Apliqué {reorgAplicada.cambios} cambio{reorgAplicada.cambios === 1 ? '' : 's'} de Zaelyn
+            {reorgAplicada.antes && reorgAplicada.despues && reorgAplicada.antes !== reorgAplicada.despues
+              ? <> · termina el <b>{corta(reorgAplicada.despues)}</b> (antes {corta(reorgAplicada.antes)})</>
+              : reorgAplicada.despues ? <> · termina el <b>{corta(reorgAplicada.despues)}</b></> : null}.
+            {' '}Nada se guarda hasta que guardes.
+          </span>
+          <button className="ed-btn suave" onClick={() => { deshacer(); setReorgAplicada(null) }}>Deshacer</button>
+          <button className="ed-btn suave" onClick={() => setReorgAplicada(null)}>Cerrar</button>
+        </div>
+      )}
       {ultima && recien.size > 0 && (
         <div className="ed-banda zaelyn">
           <Chispa className="ch" />
@@ -476,6 +520,7 @@ export function Editor({
             <Asistente
               groupId={grupo?.id ?? null} nombre={nombre} doc={h.presente} metodologia={metodologia}
               fichas={fichas} ia={ia} puede={puede} ultima={ultima} onPropuesta={recibirPropuesta}
+              onReorganizar={recibirReorganizacion}
             />
           ) : seleccionado ? (
             <Inspector

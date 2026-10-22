@@ -164,12 +164,14 @@ export const docDelEditor = (id: string) =>
 export type AccionEditor =
   | 'guardar' | 'baja' | 'proponer' | 'mios'
   | 'liberar-vista' | 'liberar' | 'grupo-crear' | 'persona' | 'invitar'
+  | 'reabrir' | 'reorganizar'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
 function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
   const g = typeof cuerpo['groupId'] === 'string' ? encodeURIComponent(cuerpo['groupId']) : ''
   switch (accion) {
-    case 'guardar': case 'baja': case 'proponer': return { metodo: 'POST', ruta: `/portal/editor/${accion}` }
+    case 'guardar': case 'baja': case 'proponer': case 'reabrir': case 'reorganizar':
+      return { metodo: 'POST', ruta: `/portal/editor/${accion}` }
     case 'mios': return { metodo: 'GET', ruta: '/portal/editor/mios' }
     case 'liberar-vista': return { metodo: 'POST', ruta: '/portal/editor/liberar/vista' }
     case 'liberar': return { metodo: 'POST', ruta: '/portal/editor/liberar' }
