@@ -71,16 +71,16 @@ export default async function Grupos() {
                       </span>
                     )}
                   </header>
+                  <Link href={`/app/g/${g.id}/editor`} className="ed-entrada">
+                    <span>Editor de proyectos</span>
+                    <small>Armar, plantillas, borradores</small>
+                  </Link>
                   {g.planes.length === 0 && (
                     <div className="pt-vacio">
                       <b>Sin planes todavía</b>
                       <span>Ármalo en el editor —a mano, desde una plantilla o con Zaelyn—, o dile «crea el plan Obra civil en {g.nombre}».</span>
                     </div>
                   )}
-                  <Link href={`/app/g/${g.id}/editor`} className="ed-entrada">
-                    <span>Editor de proyectos</span>
-                    <small>Armar, plantillas, borradores</small>
-                  </Link>
                   {g.planes.map(p => (
                     <div className="pt-plan" key={p.id}>
                       <Link href={`/app/g/${g.id}/${p.id}`} className="t" style={{ color: 'inherit' }}>
