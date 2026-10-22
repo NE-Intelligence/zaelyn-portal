@@ -576,3 +576,52 @@
   .pt .pu-total { justify-content: stretch; }
   .pt .pu-total .ed-btn { width: 100%; }
 }
+/* #180 · participaciones, organización, anual */
+.pt .pu-atajos { display: flex; gap: 8px; flex-wrap: wrap; }
+.pt .pu-ajenas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pt .pu-ajenas li { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 13.5px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-md); }
+.pt .pu-ajenas li a { font-weight: 600; color: var(--ink); margin-right: auto; }
+.pt .pu-ajenas li span { color: var(--ink-2); }
+.pt .pu-chip { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: var(--r-pill); background: var(--brand-soft); color: var(--brand-ink) !important; }
+.pt .pu-plan .pu-anual { color: var(--ink-3); font-weight: 400; }
+.pt .mp-cajones { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+.pt .mp-tarjeta { border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; background: var(--surface-2); text-decoration: none; color: inherit; }
+.pt .mp-tarjeta:hover { border-color: var(--brand); }
+.pt .mp-tarjeta header { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.pt .mp-tarjeta header b { font-size: 15px; }
+.pt .mp-rol { font-size: 12px; font-weight: 600; color: var(--brand-ink); }
+.pt .mp-tarjeta small { color: var(--ink-3); font-size: 12px; }
+.pt .mp-cuentas { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12.5px; color: var(--ink-2); }
+.pt .mp-cuentas .mal { color: var(--critica); font-weight: 600; }
+.pt .tb-fila { display: grid; grid-template-columns: minmax(160px, 1.2fr) 1fr 1.6fr; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+.pt .tb-fila:first-of-type { border-top: 0; }
+.pt .tb-fila h3 { margin: 0 0 4px; font-size: 15px; }
+.pt .tb-ver { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: var(--r-pill); display: inline-block; }
+.pt .tb-ver.al_dia, .pt .tb-ver.adelantado { background: var(--st-hecha-bg); color: var(--st-hecha-ink); }
+.pt .tb-ver.atrasado { background: var(--st-detenida-bg); color: var(--st-detenida-ink); }
+.pt .tb-ver.sin_fechas { background: var(--sunken); color: var(--ink-2); }
+.pt .tb-avance { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink-2); }
+.pt .tb-lista { margin: 0; padding-left: 16px; font-size: 13px; color: var(--ink-2); }
+.pt .tb-lista li { margin: 2px 0; }
+.pt .tb-lista .tit { list-style: none; margin-left: -16px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); font-weight: 600; }
+.pt .og-tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pt .og-tabla th, .pt .og-tabla td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.pt .og-tabla th { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); font-weight: 600; }
+.pt .og-tabla td.num, .pt .og-tabla th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.pt .og-tabla-envoltura { overflow-x: auto; }
+.pt .og-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; align-items: end; }
+.pt .og-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--ink-2); }
+.pt .og-form input, .pt .og-form select { font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); color: var(--ink); }
+.pt .og-codigo { font-family: var(--mono, ui-monospace, monospace); font-size: 15px; font-weight: 600; letter-spacing: .04em; }
+.pt .og-check { flex-direction: row !important; align-items: center; gap: 8px !important; }
+@media (max-width: 720px) {
+  .pt .tb-fila { grid-template-columns: 1fr; }
+}
+.pt .pu-seccion { min-width: 0; }
+.pt .og-tabla-envoltura { max-width: 100%; }
+@media (max-width: 720px) {
+  .pt .og-tabla .og-opc { display: none; }
+  .pt .og-tabla td:last-child { white-space: normal !important; }
+  .pt .og-tabla td:last-child .ed-btn { margin: 2px 0; }
+}
+.pt .pu { min-width: 0; }

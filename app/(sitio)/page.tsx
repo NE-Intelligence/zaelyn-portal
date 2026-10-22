@@ -274,6 +274,7 @@ export default function Portada() {
             </ul>
           </div>
           <p className="st-nota">{t('pz.nota')}</p>
+          <p className="st-nota">{t('pz.anual')} {t('pz.org')}</p>
         </div>
       </section>
 

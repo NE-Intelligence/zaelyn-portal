@@ -154,6 +154,8 @@ const es = {
   'pz.comp.4': 'Stakeholder o Monitor extra · 1.99',
   'pz.comp.5': '15 créditos de IA · 4.99',
   'pz.comp.6': '100 avisos de WhatsApp · 4.99',
+  'pz.anual': 'Al año, PMO y sus lugares se pagan como 10 meses.',
+  'pz.org': 'Organizaciones: varios Sponsors en una sola factura, con los límites juntos en una bolsa y cada persona contada una vez.',
 
   'fin.h2': 'El plan deja de vivir en una hoja que alguien actualiza los viernes.',
   'fin.sub':

@@ -12,6 +12,7 @@ export type CuentaPmo = {
   ejecutores: number; lideres: number; stakeholders: number; monitores: number
   creditos: number; avisos: number
   complementos: Record<string, number>
+  sponsors: number; org: { id: string; nombre: string } | null; conPmoPropio: number
   topes: Topes
   informados: { usados: number; tope: number }
 }
@@ -19,8 +20,10 @@ export type CuentaPmo = {
 export type VistaPlan = {
   plan: { clave: string; nombre: string; queEs: string; precioUsd: number }
   cuenta: CuentaPmo | null
-  planes: Array<{ clave: string; nombre: string; queEs: string; precioUsd: number }>
-  complementos: Array<{ clave: string; nombre: string; precioUsd: number; da: number; dice: string }>
+  planes: Array<{ clave: string; nombre: string; queEs: string; precioUsd: number; mesesAnual: number }>
+  complementos: Array<{ clave: string; nombre: string; precioUsd: number; da: number; dice: string; mesesAnual: number }>
+  ajenas: Array<{ groupId: string; grupo: string; nombreRol: string; paga: Paga; ocupaLugar: boolean | null }>
+  organizacion: { id: string; nombre: string; esAdmin: boolean } | null
   cobro: { disponible: boolean; monedas: string[]; tipoCambio: Record<string, { valor: number; fecha: string; fuente: string }> }
   suscripcion: { estado: string; hasta: string | null; moneda: string | null; viva: boolean } | null
 }
@@ -40,3 +43,49 @@ export const NOMBRE_DE_ROL: Record<string, string> = {
   responsable: 'Guía', miembro: 'Integrante', a_cargo: 'A cargo', apoyo: 'Apoyo',
 }
 export const nombreDeRol = (r: string | null | undefined): string => (r ? NOMBRE_DE_ROL[r] ?? r : 'sin rol')
+
+// ─────────────────────────────── participaciones y organización (#180)
+
+export type Paga = { quien: 'tu' | 'sponsor' | 'organizacion'; nombre: string | null }
+
+export type Participacion = {
+  groupId: string; grupo: string; clase: string; rol: string | null; nombreRol: string
+  cajon: 'diriges' | 'ejecutas' | 'supervisas' | 'sigues'
+  propio: boolean; paga: Paga; ocupaLugar: boolean | null
+  proyectosActivos: number; misAbiertas: number; misVencidas: number
+}
+
+export type Ejecutivo = {
+  groupId: string; grupo: string; hoy: string
+  veredicto: 'sin_fechas' | 'atrasado' | 'al_dia' | 'adelantado'
+  punto: { esperado: number | null; declarado: number; comprobado: number; total: number; cerrados: number }
+  planes: string[]; abiertas: number
+  criticos: Array<{ texto: string; quien: string | null; vence: string | null }>
+  hitos: Array<{ texto: string; vence: string | null }>
+  paga: Paga
+}
+
+export type VistaParticipaciones = { participaciones: Participacion[]; tablero: Ejecutivo[] }
+
+export type UsoCuenta = {
+  grupos: number; proyectosActivos: number; ejecutores: number; lideres: number
+  stakeholders: number; monitores: number; creditos: number; avisos: number
+}
+
+export type VistaOrganizacion = {
+  id: string; nombre: string; esAdmin: boolean; soyCuenta: boolean
+  razonSocial: string | null; rfc: string | null; emailFactura: string | null
+  cobro: 'tarjeta' | 'factura'; facturaAutorizada: boolean
+  sponsors: number
+  cuentas: Array<{ userId: string; etiqueta: string | null; centroCostos: string | null; desde: string; soyYo: boolean; plan: string; uso: UsoCuenta }>
+  complementos: Record<string, number>
+  uso: UsoCuenta & { conPmoPropio: number }
+  topes: Topes | null
+  informados: { usados: number; tope: number } | null
+  invitaciones: Array<{ codigo: string; etiqueta: string | null; centroCostos: string | null; expira: string }> | null
+  suscripcion: { id: string | null; estado: string; hasta: string | null } | null
+  total: { mes: number; anio: number }
+}
+
+export const PAGA = (p: Paga): string =>
+  p.quien === 'tu' ? 'Tu cuenta' : p.quien === 'organizacion' ? `Lo paga ${p.nombre ?? 'su organización'}` : `Lo paga ${p.nombre ?? 'el Sponsor'}`
