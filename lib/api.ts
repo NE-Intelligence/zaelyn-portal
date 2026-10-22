@@ -76,13 +76,33 @@ export type Bienvenida = {
  * Si no contesta, se devuelve el hueco y la pantalla se queda con las
  * instrucciones escritas. Un botón roto es peor que ningún botón.
  */
+let recordado: { en: number; datos: Bienvenida } | null = null
+
 export async function bienvenida(): Promise<Bienvenida> {
   const vacia: Bienvenida = { telegram: null, whatsapp: null }
   if (!hayApi()) return vacia
+
+  const UNA_HORA = 3_600_000
+  if (recordado && Date.now() - recordado.en < UNA_HORA) return recordado.datos
+
   try {
-    const r = await fetch(`${base()}/portal/bienvenida`, { next: { revalidate: 3600 } })
+    /**
+     * ── UN FALLO NO SE GUARDA UNA HORA, Y ÉSE FUE EL DEFECTO ─────────────
+     *
+     * La primera versión pedía esto con `next: { revalidate: 3600 }`, y Next
+     * cachea la respuesta SEA CUAL SEA: cuando el motor todavía no tenía la
+     * ruta, el portal se guardó el 404 y siguió enseñando la pantalla sin
+     * botón durante una hora **después** de que el motor ya estaba listo.
+     * Desplegar dejaba de arreglar el síntoma, que es la peor clase de caché.
+     *
+     * Así que la petición no se cachea y el acierto sí: el nombre del bot no
+     * cambia, pero un hueco tiene que poder llenarse en el siguiente intento.
+     */
+    const r = await fetch(`${base()}/portal/bienvenida`, { cache: 'no-store' })
     if (!r.ok) return vacia
-    return (await r.json()) as Bienvenida
+    const datos = (await r.json()) as Bienvenida
+    if (datos.telegram) recordado = { en: Date.now(), datos }
+    return datos
   } catch {
     return vacia
   }
