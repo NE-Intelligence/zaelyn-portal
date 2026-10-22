@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Barra, Pie } from '@/components/portal/Marco'
+import { Entrar } from '@/components/portal/Entrar'
 
 /**
  * El pase no sirvió, y se dice cuál de los motivos fue.
@@ -56,6 +57,9 @@ export default async function No({
         <div className="pt-vacio" style={{ maxWidth: 620 }}>
           <b>{t.titulo}</b>
           <span>{t.cuerpo}</span>
+          {/* Pedir otro pase es lo que resuelve CUATRO de los seis motivos, y
+              no estorba en los otros dos. */}
+          <Entrar compacto />
           <div style={{ display: 'flex', gap: 14, marginTop: 8, flexWrap: 'wrap' }}>
             <Link href="/app" style={{ color: 'var(--brand)' }}>Probar con mi sesión</Link>
             <Link href="/demo" style={{ color: 'var(--brand)' }}>Ver el ejemplo</Link>

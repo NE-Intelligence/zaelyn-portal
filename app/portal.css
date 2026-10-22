@@ -1240,3 +1240,46 @@ a.pt-plan:hover {
   color: var(--brand-ink);
   text-decoration: underline;
 }
+
+/* ── entrar ───────────────────────────────────────────────────────────────
+ *
+ * La pantalla de «no tienes sesión» decía qué frase escribirle a Zaelyn y
+ * ahí se acababa. Una puerta sin contraseña, cerrada con una oración: quien
+ * no se acuerda de la frase no entra, y a diferencia de una contraseña, una
+ * frase no se guarda en el navegador. Ahora es un botón.
+ */
+.pt-entrar {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  margin-top: 14px;
+}
+.pt-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: var(--r-pill);
+  background: var(--brand);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.16s;
+}
+.pt-boton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px -10px var(--brand);
+  color: #fff;
+}
+.pt-entrar .nota {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-3);
+  max-width: 48ch;
+}
+.pt-entrar .nota.tenue {
+  color: var(--ink-3);
+  opacity: 0.75;
+}

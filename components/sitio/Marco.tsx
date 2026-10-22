@@ -6,11 +6,15 @@ import { IDIOMAS, NOMBRE_IDIOMA, type Idioma, textos, traducidos } from '@/lib/c
 export function Encabezado({ lang }: { lang: Idioma }) {
   const t = textos(lang)
   const listos = traducidos()
+  // Las tres áreas van en el menú. ENTRAR NO: ver qué es el producto y entrar
+  // a usarlo son dos intenciones distintas, y la segunda estaba escondida
+  // entre las otras tres como un enlace más — en un teléfono, detrás de una
+  // hamburguesa que además no abría.
   const enlaces = [
     { href: '/proyectos', texto: t('nav.proyectos') },
     { href: '/familia', texto: t('nav.familia') },
     { href: '/personal', texto: t('nav.personal') },
-    { href: '/app', texto: t('nav.portal') },
+    { href: '/demo', texto: t('nav.portal') },
   ]
 
   return (
@@ -29,6 +33,9 @@ export function Encabezado({ lang }: { lang: Idioma }) {
             <img src="/logo/zaelyn-wordmark-320.png" alt="zælyn" width={320} height={110} />
           </Link>
           <Menu enlaces={enlaces} etiqueta={t('nav.menu')} />
+          <Link className="st-btn st-btn-1 st-entrar" href="/app" title={t('nav.entrar.ayuda')}>
+            {t('nav.entrar')}
+          </Link>
           <div className="st-idiomas" role="group" aria-label={t('nav.idioma')}>
             {IDIOMAS.map((l) =>
               l === lang ? (

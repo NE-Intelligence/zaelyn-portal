@@ -21,6 +21,8 @@ const es = {
   'nav.personal': 'Personal',
   'nav.precios': 'Precios',
   'nav.portal': 'Ver el portal',
+  'nav.entrar': 'Entrar',
+  'nav.entrar.ayuda': 'Abrir mi portal de proyectos',
   'nav.menu': 'Abrir menú',
   'nav.inicio': 'zælyn, inicio',
   'nav.idioma': 'Idioma',

@@ -20,7 +20,14 @@ export default function Menu({ enlaces, etiqueta }: { enlaces: Enlace[]; etiquet
           <path d="M3 7h18M3 12h18M3 17h18" />
         </svg>
       </button>
-      <nav className={abierto ? 'st-menu st-abierto' : 'st-menu'} id="menu" onClick={() => setAbierto(false)}>
+      {/*
+        LA CLASE ES `abierto`, NO `st-abierto`.
+        El CSS la espera así (`.st-menu.abierto`), y con el prefijo puesto el
+        menú del teléfono no se abría: tocabas la hamburguesa y no pasaba
+        nada. No había error en ninguna parte — simplemente el sitio no tenía
+        navegación en un teléfono, que es donde lo abre la mayoría.
+      */}
+      <nav className={abierto ? 'st-menu abierto' : 'st-menu'} id="menu" onClick={() => setAbierto(false)}>
         {enlaces.map((e) => (
           <a key={e.href} href={e.href}>
             {e.texto}

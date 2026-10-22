@@ -57,6 +57,37 @@ async function leer<T>(ruta: string): Promise<{ ok: true; dato: T } | { ok: fals
 
 export const misGrupos = () => leer<{ grupos: GrupoEnPortal[] }>('/portal/grupos')
 
+export type Bienvenida = {
+  telegram: { usuario: string; enlace: string } | null
+  whatsapp: { enlace: string } | null
+}
+
+/**
+ * A qué chat mandar a quien no tiene sesión. SIN sesión, claro.
+ *
+ * ── POR QUÉ NO ESTÁ ESCRITO AQUÍ EL NOMBRE DEL BOT ─────────────────────
+ *
+ * Porque no está escrito en ninguna parte: sale del token de Telegram, que
+ * vive en los secretos de Fly. Ponerlo a mano aquí sería copiarlo de
+ * BotFather —ahí se cuela la errata que nadie revisa— y quedaría desfasado
+ * el día que cambie. Zaelyn es lo único que sabe qué bot es, así que se lo
+ * preguntamos.
+ *
+ * Si no contesta, se devuelve el hueco y la pantalla se queda con las
+ * instrucciones escritas. Un botón roto es peor que ningún botón.
+ */
+export async function bienvenida(): Promise<Bienvenida> {
+  const vacia: Bienvenida = { telegram: null, whatsapp: null }
+  if (!hayApi()) return vacia
+  try {
+    const r = await fetch(`${base()}/portal/bienvenida`, { next: { revalidate: 3600 } })
+    if (!r.ok) return vacia
+    return (await r.json()) as Bienvenida
+  } catch {
+    return vacia
+  }
+}
+
 export const elPlan = (groupId: string, planId?: string) =>
   leer<VistaDePlan>(`/portal/grupo/${encodeURIComponent(groupId)}`
     + (planId ? `?plan=${encodeURIComponent(planId)}` : ''))
