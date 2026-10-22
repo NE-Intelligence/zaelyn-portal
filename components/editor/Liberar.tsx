@@ -12,6 +12,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { GrupoDestino, Liberado, MisProyectos, VistaLiberar } from '@/lib/editor/tipos'
 import { ROLES_DE_PROYECTO, ROL_DICE } from '@/lib/editor/tipos'
+import { nombreDeRol } from '@/lib/plan-uso/tipos'
 import { Avatar, Chispa, corta, decirError, escribir } from './comun'
 
 type Invitacion = { codigo: string; expira: string; enlace: string | null }
@@ -185,7 +186,7 @@ export function Liberar({ id, version, nombre, grupoInicial, onCerrar, onLiberad
                   <button key={g.id} className={`ed-lib-grupo${g.id === grupoId ? ' on vivo' : ''}`}
                     onClick={() => { setGrupoId(g.id); setPlanTocado(false); setPlan({ modo: 'nuevo', nombre }); setAsignacion({}) }}>
                     <b>{g.nombre}</b>
-                    <span>{g.planes.length ? `${g.planes.length} plan${g.planes.length === 1 ? '' : 'es'}` : 'sin planes'} · {g.rol ?? 'sin rol'}</span>
+                    <span>{g.planes.length ? `${g.planes.length} plan${g.planes.length === 1 ? '' : 'es'}` : 'sin planes'} · {nombreDeRol(g.rol)}</span>
                   </button>
                 ))}
                 {nuevoGrupo ? (
@@ -272,7 +273,7 @@ export function Liberar({ id, version, nombre, grupoInicial, onCerrar, onLiberad
                             <Avatar p={per} chico />
                             <select value={sel} onChange={e => setAsignacion(a => ({ ...a, [p.huella]: e.target.value || null }))}>
                               <option value="">Sin asignar</option>
-                              {personas.map(x => <option key={x.id} value={x.id}>{x.nombre}{x.rol ? ` · ${x.rol}` : ''}{x.tieneCuenta ? '' : ' · sin cuenta'}</option>)}
+                              {personas.map(x => <option key={x.id} value={x.id}>{x.nombre}{x.rol ? ` · ${nombreDeRol(x.rol)}` : ''}{x.tieneCuenta ? '' : ' · sin cuenta'}</option>)}
                             </select>
                             {grupo.administra && (
                               <button className="ed-btn texto" onClick={() => setNuevaPersona({ nombre: '', rol: 'integrante', paraPuesto: p.huella })}>+ Persona</button>
@@ -289,7 +290,7 @@ export function Liberar({ id, version, nombre, grupoInicial, onCerrar, onLiberad
                       onChange={e => setNuevaPersona({ ...nuevaPersona, nombre: e.target.value })}
                       onKeyDown={e => { if (e.key === 'Enter') void agregarPersona() }} />
                     <select value={nuevaPersona.rol} onChange={e => setNuevaPersona({ ...nuevaPersona, rol: e.target.value })}>
-                      {ROLES_DE_PROYECTO.map(r => <option key={r} value={r}>{r} — {ROL_DICE[r]}</option>)}
+                      {ROLES_DE_PROYECTO.map(r => <option key={r} value={r}>{nombreDeRol(r)} — {ROL_DICE[r]}</option>)}
                     </select>
                     <button className="ed-btn texto" onClick={() => setNuevaPersona(null)}>Cancelar</button>
                     <button className="ed-btn primario" onClick={() => void agregarPersona()} disabled={enviando || nuevaPersona.nombre.trim().length < 2}>Agregar</button>
@@ -313,7 +314,7 @@ export function Liberar({ id, version, nombre, grupoInicial, onCerrar, onLiberad
                       <div className="ed-lib-persona" key={x.id}>
                         <Avatar p={x} chico />
                         <span className="n">{x.nombre}</span>
-                        <span className="r">{x.rol ?? '—'}</span>
+                        <span className="r">{x.rol ? nombreDeRol(x.rol) : '—'}</span>
                         {x.tieneCuenta ? <span className="ok">con cuenta</span>
                           : inv ? (
                             <span className="codigo">

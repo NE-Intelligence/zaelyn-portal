@@ -3,6 +3,7 @@ import { Barra, Pie } from '@/components/portal/Marco'
 import { SinSesion } from '@/components/portal/SinSesion'
 import { misGrupos } from '@/lib/api'
 import { ROL_PUEDE, VISTA_NOMBRE } from '@/lib/plan'
+import { nombreDeRol } from '@/lib/plan-uso/tipos'
 import { fecha } from '@/components/portal/atomos'
 
 export const dynamic = 'force-dynamic'
@@ -45,6 +46,7 @@ export default async function Grupos() {
               </div>
             </div>
             <div className="ed-cab-acciones">
+              <Link href="/app/plan" className="ed-btn suave">Plan y uso</Link>
               <Link href="/app/editor" className="ed-btn suave">Mis proyectos</Link>
               <Link href="/app/editor/nuevo" className="ed-btn primario">+ Nuevo proyecto</Link>
             </div>
@@ -72,7 +74,7 @@ export default async function Grupos() {
                     <h2>{g.nombre}</h2>
                     {g.rol && (
                       <span style={{ marginLeft: 'auto' }} className="pt-rol" title={ROL_PUEDE[g.rol] ?? undefined}>
-                        {g.rol}
+                        {nombreDeRol(g.rol)}
                       </span>
                     )}
                   </header>

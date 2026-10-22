@@ -110,14 +110,15 @@ export const SENAL_NOMBRE: Record<Senal, string> = {
  * no cuatro categorías redondeadas.
  */
 export const ROL_PUEDE: Record<string, string> = {
-  observador: 'Puede preguntar lo que quiera. No puede interrumpir a nadie.',
+  observador: 'Monitor: puede preguntar lo que quiera. No puede interrumpir a nadie.',
+  stakeholder: 'Stakeholder: pregunta lo que quiera, recibe el resumen ejecutivo de los lunes y manda comunicados al equipo.',
   miembro: 'Puede reportar el avance de lo suyo.',
-  integrante: 'Puede reportar el avance de lo suyo.',
+  integrante: 'Ejecutor: reporta el avance de lo suyo.',
   a_cargo: 'Puede reportar el avance de lo suyo.',
   apoyo: 'Puede asignar y pedir avance.',
-  lider: 'Puede asignar, priorizar y pedirle avance a una persona.',
+  lider: 'Líder: asigna, prioriza, mueve fechas y aprueba.',
   responsable: 'Todo lo anterior, más roles y alta de planes.',
-  administrador: 'Todo lo anterior, más roles y alta de planes.',
+  administrador: 'Sponsor: todo lo anterior, más roles, planes y la cuenta.',
 }
 
 export const VISTA_NOMBRE: Record<Vista, string> = {

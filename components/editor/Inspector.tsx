@@ -10,6 +10,7 @@ import type { Doc, Nodo, PersonaDelEditor, TipoNodo } from '@/lib/editor/tipos'
 import { PROGRAMABLES, SEGUIMIENTO_DICE, TIPOS_NODO, TIPO_DICE, TIPO_NOMBRE, avanzo, puedeVivir } from '@/lib/editor/tipos'
 import { arbol, cerrariaCiclo, type Medida } from '@/lib/editor/programar'
 import { Avatar, ChipSeguimiento, IconoTipo, corta } from './comun'
+import { nombreDeRol } from '@/lib/plan-uso/tipos'
 
 export function Inspector({
   doc, nodo, medida, personas, puede, critica,
@@ -120,7 +121,7 @@ export function Inspector({
                 <select value={n.responsable ?? ''} disabled={!puede}
                   onChange={e => onCambiar(n.id, { responsable: e.target.value || null })}>
                   <option value="">{n.puesto ? `Se asigna al liberar (${n.puesto})` : 'Sin responsable'}</option>
-                  {personas.map(p => <option key={p.id} value={p.id}>{p.nombre}{p.rol ? ` · ${p.rol}` : ''}</option>)}
+                  {personas.map(p => <option key={p.id} value={p.id}>{p.nombre}{p.rol ? ` · ${nombreDeRol(p.rol)}` : ''}</option>)}
                 </select>
               </div>
             </label>

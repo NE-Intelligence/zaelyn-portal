@@ -14,7 +14,7 @@ export function Barra({
   ejemplo?: boolean
   sesion?: boolean
   /** El editor de proyectos (#174) sí escribe: borradores, no el plan vivo. */
-  modo?: 'lectura' | 'editor'
+  modo?: 'lectura' | 'editor' | 'cuenta'
 }) {
   return (
     <>
@@ -58,7 +58,7 @@ export function Barra({
                 <path d="M12 2.6l2.1 5.9 5.9 2.1-5.9 2.1-2.1 5.9-2.1-5.9L4 10.6l5.9-2.1z" />
               </svg>
             </span>
-            {modo === 'editor' ? 'Editor · borrador' : 'Solo lectura'}
+            {modo === 'editor' ? 'Editor · borrador' : modo === 'cuenta' ? 'Tu cuenta' : 'Solo lectura'}
           </span>
           {/* Un FORMULARIO y no un enlace: ver `app/salir/route.ts`. */}
           {sesion && (
@@ -72,14 +72,16 @@ export function Barra({
   )
 }
 
-export function Pie({ modo = 'lectura' }: { modo?: 'lectura' | 'editor' } = {}) {
+export function Pie({ modo = 'lectura' }: { modo?: 'lectura' | 'editor' | 'cuenta' } = {}) {
   return (
     <footer className="pt-pie">
       <span>Zaelyn es un producto de NE Intelligence</span>
       <span className="der">
         {modo === 'editor'
           ? 'Lo que armas aquí es un borrador: Zaelyn lo sigue cuando lo liberas.'
-          : 'Se cambia hablando, no aquí: el portal solo muestra.'}
+          : modo === 'cuenta'
+            ? 'El pago lo procesa Stripe: Zaelyn nunca ve tu tarjeta.'
+            : 'Se cambia hablando, no aquí: el portal solo muestra.'}
       </span>
     </footer>
   )

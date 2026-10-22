@@ -135,6 +135,7 @@ export type Propuesta = {
   doc: Doc
   descartados: number
   costoUsd: number
+  creditos?: number
 }
 
 export type Diferencia = {
@@ -153,6 +154,7 @@ export type Reorganizacion = {
   dif: Diferencia
   descartados: number
   costoUsd: number
+  creditos?: number
 }
 
 export type Reapertura = { ok: true; id: string; nuevo: boolean; actualizados: number; agregados: number; quitados: number }
@@ -228,10 +230,11 @@ export type VistaLiberar = {
   fechas: { inicia: string | null; termina: string | null }
 }
 
-export const ROLES_DE_PROYECTO = ['integrante', 'lider', 'administrador', 'observador'] as const
+export const ROLES_DE_PROYECTO = ['integrante', 'lider', 'administrador', 'stakeholder', 'observador'] as const
 export const ROL_DICE: Record<string, string> = {
   integrante: 'Ejecuta lo suyo y reporta avance',
-  lider: 'Asigna, prioriza y pide avance',
-  administrador: 'Todo, más invitar y cambiar roles',
-  observador: 'Solo consulta; no interrumpe a nadie',
+  lider: 'Asigna, prioriza, mueve fechas y aprueba',
+  administrador: 'Todo, más invitar, roles y la cuenta',
+  stakeholder: 'Directivo: pregunta, recibe el resumen ejecutivo y manda comunicados',
+  observador: 'Da seguimiento; solo consulta y no interrumpe',
 }

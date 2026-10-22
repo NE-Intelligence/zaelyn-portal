@@ -257,21 +257,21 @@ export default function Portada() {
             <p>{t('pz.sub')}</p>
           </div>
           <div className="st-planes">
-            <article className="st-plan">
-              <h3>{t('z1.t')}</h3>
-              <div className="st-precio">{t('z1.precio')}</div>
-              <p>{t('z1.p')}</p>
-            </article>
-            <article className="st-plan">
-              <h3>{t('z2.t')}</h3>
-              <div className="st-precio st-cuando">{t('pz.cuando')}</div>
-              <p>{t('z2.p')}</p>
-            </article>
-            <article className="st-plan">
-              <h3>{t('z3.t')}</h3>
-              <div className="st-precio st-cuando">{t('pz.cuando')}</div>
-              <p>{t('z3.p')}</p>
-            </article>
+            {(['z1', 'z2', 'z3', 'z4'] as const).map(z => (
+              <article className={`st-plan${z === 'z4' ? ' st-plan-pmo' : ''}`} key={z}>
+                <h3>{t(`${z}.t`)}</h3>
+                <div className="st-precio">
+                  {t(`${z}.precio`)}{z !== 'z1' && <small> {t('pz.mes')}</small>}
+                </div>
+                <p>{t(`${z}.p`)}</p>
+              </article>
+            ))}
+          </div>
+          <div className="st-complementos">
+            <h3>{t('pz.comp.t')}</h3>
+            <ul>
+              {(['pz.comp.1', 'pz.comp.2', 'pz.comp.3', 'pz.comp.4', 'pz.comp.5', 'pz.comp.6'] as const).map(k => <li key={k}>{t(k)}</li>)}
+            </ul>
           </div>
           <p className="st-nota">{t('pz.nota')}</p>
         </div>

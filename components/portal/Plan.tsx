@@ -10,6 +10,7 @@ import { Salud, fecha, plural } from './atomos'
 import { Avance } from './atomos'
 import { Bitacora, Equipo, Gantt, Resumen, Ruta, Tablero } from './vistas'
 import { ROL_PUEDE, VISTA_NOMBRE, type VistaDePlan, type Vista } from '@/lib/plan'
+import { nombreDeRol } from '@/lib/plan-uso/tipos'
 
 export const VISTAS = Object.keys(VISTA_NOMBRE) as Vista[]
 
@@ -54,7 +55,7 @@ export function Lienzo({
                 {' · '}{plural(e.personas.length, 'persona')}
               </span>
               <span>Leído {frescura(leido)}</span>
-              {v.rol && <span title={ROL_PUEDE[v.rol] ?? undefined}>Tu rol aquí: {v.rol}</span>}
+              {v.rol && <span title={ROL_PUEDE[v.rol] ?? undefined}>Tu rol aquí: {nombreDeRol(v.rol)}</span>}
             </div>
           </div>
           <div style={{ display: 'grid', gap: 10, minWidth: 220, flex: '0 1 280px' }}>

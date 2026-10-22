@@ -10,6 +10,7 @@ import type { Mesa as MesaT, Tarjeta } from '@/lib/editor/tipos'
 import { METODOLOGIA_CORTA } from '@/lib/editor/tipos'
 import { hoyISO } from '@/lib/editor/programar'
 import { Chispa, corta, decirError, escribir } from './comun'
+import { nombreDeRol } from '@/lib/plan-uso/tipos'
 
 const hace = (iso: string) => {
   const min = Math.round((Date.now() - Date.parse(iso)) / 60_000)
@@ -50,7 +51,7 @@ export function Mesa({ mesa }: { mesa: MesaT }) {
             <h1>{mesa.grupo.nombre}</h1>
             <div className="meta">
               <span>Arma el plan aquí; Zaelyn lo sigue cuando lo liberas.</span>
-              {mesa.rol && <span>Tu rol: {mesa.rol}</span>}
+              {mesa.rol && <span>Tu rol: {nombreDeRol(mesa.rol)}</span>}
             </div>
           </div>
           <Link className="ed-btn suave" href={`/app/g/${g}`}>Ver los planes que Zaelyn sigue</Link>

@@ -166,7 +166,7 @@ export function Asistente({
                 </>
               )}
               {reorg.descartados > 0 && <p className="alt">Mencionó {reorg.descartados} persona{reorg.descartados === 1 ? '' : 's'} que no están en el grupo; no las asigné.</p>}
-              <small className="mono">costo de IA US$ {reorg.costoUsd.toFixed(3)}</small>
+              <small className="mono">{reorg.creditos ?? 1} crédito{(reorg.creditos ?? 1) === 1 ? '' : 's'} de IA</small>
               <div className="ed-reorg-acciones">
                 {(reorg.dif.agregados.length + reorg.dif.modificados.length + reorg.dif.quitados.length) > 0 && (
                   <button className="ed-btn zaelyn" onClick={() => { onReorganizar(reorg); setReorg(null); setPide('') }}>
@@ -224,6 +224,7 @@ export function Asistente({
               placeholder="Equipo disponible, temporadas de cierre, dependencias externas, presupuesto…" />
           </label>
           {doc.nodos.length > 0 && <small className="ed-nota">La propuesta reemplaza lo que hay en el lienzo. Se puede deshacer.</small>}
+          <small className="ed-nota">Gasta créditos de IA de tu PMO: compacto 1, normal 2, detallado 3.</small>
           {estado === 'error' && <div className="ed-error">{error}</div>}
           <button type="submit" className="ed-btn zaelyn" disabled={!ia || !puede || b.objetivo.trim().length < 10}>
             <Chispa />{ultima ? 'Armar otra propuesta' : 'Armar el plan'}
@@ -244,7 +245,7 @@ export function Asistente({
             </>
           )}
           {ultima.descartados > 0 && <p className="alt">Propuso {ultima.descartados} responsable{ultima.descartados === 1 ? '' : 's'} que no están en el grupo; los dejé sin asignar.</p>}
-          <small className="mono">{ultima.doc.nodos.length} objetos · costo de IA US$ {ultima.costoUsd.toFixed(3)}</small>
+          <small className="mono">{ultima.doc.nodos.length} objetos · {ultima.creditos ?? 1} crédito{(ultima.creditos ?? 1) === 1 ? '' : 's'} de IA</small>
         </div>
       )}
 

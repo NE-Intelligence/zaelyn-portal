@@ -164,12 +164,13 @@ export const docDelEditor = (id: string) =>
 export type AccionEditor =
   | 'guardar' | 'baja' | 'proponer' | 'mios'
   | 'liberar-vista' | 'liberar' | 'grupo-crear' | 'persona' | 'invitar'
-  | 'reabrir' | 'reorganizar'
+  | 'reabrir' | 'reorganizar' | 'plan-comprar'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
 function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
   const g = typeof cuerpo['groupId'] === 'string' ? encodeURIComponent(cuerpo['groupId']) : ''
   switch (accion) {
+    case 'plan-comprar': return { metodo: 'POST', ruta: '/portal/plan/comprar' }
     case 'guardar': case 'baja': case 'proponer': case 'reabrir': case 'reorganizar':
       return { metodo: 'POST', ruta: `/portal/editor/${accion}` }
     case 'mios': return { metodo: 'GET', ruta: '/portal/editor/mios' }
@@ -214,3 +215,4 @@ export async function escribirEditor(
 }
 
 export const misProyectos = () => leer<MisProyectos>('/portal/editor/mios')
+export const planYUso = () => leer<import('@/lib/plan-uso/tipos').VistaPlan>('/portal/plan')
