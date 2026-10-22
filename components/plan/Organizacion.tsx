@@ -10,6 +10,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { VistaOrganizacion, VistaPlan } from '@/lib/plan-uso/tipos'
 import { decirError, escribir } from '@/components/editor/comun'
+import { Facturacion } from '@/components/plan/Facturacion'
 
 const usd = (n: number) => `${n.toFixed(2)} USD`
 
@@ -39,14 +40,14 @@ function Medidor({ titulo, usados, tope }: { titulo: string; usados: number; top
   )
 }
 
-function csvDe(o: VistaOrganizacion): string {
+function csvDe(o: VistaOrganizacion, precioPmo: number): string {
   const fila = (xs: Array<string | number | null>) => xs.map(x => {
     const s = x === null ? '' : String(x)
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }).join(',')
-  const cab = ['Sponsor', 'Centro de costos', 'Desde', 'PMO USD/mes', 'Grupos', 'Proyectos activos', 'Ejecutores', 'Líderes', 'Stakeholders', 'Monitores', 'Créditos IA del mes', 'Avisos del mes']
+  const cab = ['Sponsor', 'Centro de costos', 'Desde', 'PMO USD/mes (IVA incluido)', 'Grupos', 'Proyectos activos', 'Ejecutores', 'Líderes', 'Stakeholders', 'Monitores', 'Créditos IA del mes', 'Avisos del mes']
   const filas = o.cuentas.map((c, i) => fila([
-    c.etiqueta ?? `Sponsor ${i + 1}`, c.centroCostos, c.desde.slice(0, 10), 24.99,
+    c.etiqueta ?? `Sponsor ${i + 1}`, c.centroCostos, c.desde.slice(0, 10), precioPmo,
     c.uso.grupos, c.uso.proyectosActivos, c.uso.ejecutores, c.uso.lideres, c.uso.stakeholders, c.uso.monitores, c.uso.creditos, c.uso.avisos,
   ]))
   return [fila(cab), ...filas].join('\n')
@@ -103,7 +104,7 @@ export function Organizacion({ o, cobro, plan, pagado, codigo }: {
             <Medidor titulo="Ejecutores" usados={o.uso.ejecutores} tope={o.topes.ejecutores} />
             <Medidor titulo="Líderes" usados={o.uso.lideres} tope={o.topes.lideres} />
             <Medidor titulo="Monitores incluidos" usados={Math.min(o.uso.monitores, o.topes.monitoresIncluidos)} tope={o.topes.monitoresIncluidos} />
-            {o.informados && <Medidor titulo="Lugares de 1.99" usados={o.informados.usados} tope={o.informados.tope} />}
+            {o.informados && <Medidor titulo="Lugares de Stakeholder o Monitor extra" usados={o.informados.usados} tope={o.informados.tope} />}
             <Medidor titulo="Créditos IA este mes" usados={o.uso.creditos} tope={o.topes.creditos} />
             <Medidor titulo="Avisos de WhatsApp este mes" usados={o.uso.avisos} tope={o.topes.avisos} />
           </div>
@@ -111,9 +112,13 @@ export function Organizacion({ o, cobro, plan, pagado, codigo }: {
       )}
       {!o.topes && <section className="pu-seccion"><p className="pu-nota">La bolsa se activa cuando la organización contrata: hasta entonces, cada cuenta conserva su plan.</p></section>}
 
-      <Sponsors o={o} hacer={hacer} ocupado={ocupado} setAviso={setAviso} />
+      <Sponsors o={o} hacer={hacer} ocupado={ocupado} setAviso={setAviso} precioPmo={plan.planes.find(p => p.clave === 'pro')?.precioUsd ?? 0} />
       {o.esAdmin && <Contratar o={o} cobro={cobro} plan={plan} hacer={hacer} ocupado={ocupado} />}
-      {o.esAdmin && <Facturacion o={o} hacer={hacer} ocupado={ocupado} />}
+      {o.esAdmin && <DatosCobro o={o} hacer={hacer} ocupado={ocupado} />}
+      {o.esAdmin && o.fiscal && (
+        <Facturacion titulo="Facturación de la organización" orgId={o.id} datos={o.fiscal.datos} cobros={o.fiscal.cobros}
+          regimenes={plan.fiscal.regimenes} usos={plan.fiscal.usos} />
+      )}
     </div>
   )
 }
@@ -161,14 +166,14 @@ function SinOrganizacion({ codigo, hacer, ocupado, error }: { codigo: string; ha
   )
 }
 
-function Sponsors({ o, hacer, ocupado, setAviso }: { o: VistaOrganizacion; hacer: Hacer; ocupado: boolean; setAviso: (s: string) => void }) {
+function Sponsors({ o, hacer, ocupado, setAviso, precioPmo }: { o: VistaOrganizacion; hacer: Hacer; ocupado: boolean; setAviso: (s: string) => void; precioPmo: number }) {
   const [etiqueta, setEtiqueta] = useState('')
   const [centro, setCentro] = useState('')
   const [editando, setEditando] = useState<string | null>(null)
   const [ed, setEd] = useState({ etiqueta: '', centro: '' })
 
   function descargar() {
-    const b = new Blob([`﻿${csvDe(o)}`], { type: 'text/csv;charset=utf-8' })
+    const b = new Blob([`﻿${csvDe(o, precioPmo)}`], { type: 'text/csv;charset=utf-8' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(b)
     a.download = `${o.nombre.replace(/[^\p{L}\p{N}]+/gu, '-')}-detalle-por-sponsor.csv`
@@ -276,8 +281,8 @@ function Contratar({ o, cobro, plan, hacer, ocupado }: { o: VistaOrganizacion; c
   const tc = plan.cobro.tipoCambio['MXN']
   const enMoneda = (x: number) => (moneda === 'mxn' && tc ? `${(x * tc.valor).toFixed(2)} MXN` : usd(x))
   const total = useMemo(() => {
-    let t = n * pmo.precioUsd * (anual ? pmo.mesesAnual : 1)
-    for (const c of comps) t += (cant[c.clave] ?? 0) * c.precioUsd * (anual ? c.mesesAnual : 1)
+    let t = n * (anual ? pmo.precioAnualUsd : pmo.precioUsd)
+    for (const c of comps) t += (cant[c.clave] ?? 0) * (anual ? c.precioAnualUsd : c.precioUsd)
     return t
   }, [n, pmo, comps, cant, anual])
   const cambio = comps.some(c => (cant[c.clave] ?? 0) !== (o.complementos[c.clave] ?? 0))
@@ -292,7 +297,7 @@ function Contratar({ o, cobro, plan, hacer, ocupado }: { o: VistaOrganizacion; c
           return (
             <div className={`pu-comp${k ? ' on' : ''}`} key={c.clave}>
               <div><b>{c.nombre}</b><span>{c.dice}</span></div>
-              <span className="pu-precio mono">{enMoneda(c.precioUsd * (anual ? c.mesesAnual : 1))}<i>{anual ? '/año' : '/mes'}</i></span>
+              <span className="pu-precio mono">{enMoneda(anual ? c.precioAnualUsd : c.precioUsd)}<i>{anual ? '/año' : '/mes'}</i></span>
               <div className="pu-paso">
                 <button aria-label={`Quitar ${c.nombre}`} onClick={() => setCant(x => ({ ...x, [c.clave]: Math.max(0, k - 1) }))} disabled={!k}>−</button>
                 <span className="mono">{k}</span>
@@ -306,7 +311,7 @@ function Contratar({ o, cobro, plan, hacer, ocupado }: { o: VistaOrganizacion; c
         <div>
           <span>{anual ? 'Total al año' : 'Total al mes'}</span>
           <b className="mono">{enMoneda(total)}</b>
-          <small>{o.cobro === 'factura' ? 'Factura con transferencia a 30 días.' : 'Con tarjeta.'} Más impuestos aplicables.{anual ? ` PMO y lugares como ${pmo.mesesAnual} meses; créditos y avisos completos.` : ''}</small>
+          <small>{o.cobro === 'factura' ? 'Factura con transferencia a 30 días.' : 'Con tarjeta.'} IVA incluido.{anual ? ` PMO y lugares como ${pmo.mesesAnual} meses; créditos y avisos completos.` : ''}</small>
         </div>
         {!viva && (
           <div className="ed-segmentos chico">
@@ -332,13 +337,14 @@ function Contratar({ o, cobro, plan, hacer, ocupado }: { o: VistaOrganizacion; c
   )
 }
 
-function Facturacion({ o, hacer, ocupado }: { o: VistaOrganizacion; hacer: Hacer; ocupado: boolean }) {
+function DatosCobro({ o, hacer, ocupado }: { o: VistaOrganizacion; hacer: Hacer; ocupado: boolean }) {
   const [f, setF] = useState({
     nombre: o.nombre, razonSocial: o.razonSocial ?? '', rfc: o.rfc ?? '', emailFactura: o.emailFactura ?? '', cobro: o.cobro,
   })
   return (
     <section className="pu-seccion">
-      <h2>Datos de facturación</h2>
+      <h2>Datos del pago</h2>
+      <p className="pu-nota">A nombre de quién y a qué correo manda Stripe el recibo, y cómo se paga.</p>
       <div className="og-form">
         <label>Nombre<input value={f.nombre} onChange={e => setF({ ...f, nombre: e.target.value })} maxLength={80} /></label>
         <label>Razón social<input value={f.razonSocial} onChange={e => setF({ ...f, razonSocial: e.target.value })} maxLength={200} /></label>

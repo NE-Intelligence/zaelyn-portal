@@ -19,11 +19,14 @@ export type CuentaPmo = {
 
 export type VistaPlan = {
   plan: { clave: string; nombre: string; queEs: string; precioUsd: number }
+  /** Los precios ya traen el IVA (#181). */
+  tasaIva: number
   cuenta: CuentaPmo | null
-  planes: Array<{ clave: string; nombre: string; queEs: string; precioUsd: number; mesesAnual: number }>
-  complementos: Array<{ clave: string; nombre: string; precioUsd: number; da: number; dice: string; mesesAnual: number }>
+  planes: Array<{ clave: string; nombre: string; queEs: string; precioUsd: number; mesesAnual: number; precioAnualUsd: number }>
+  complementos: Array<{ clave: string; nombre: string; precioUsd: number; da: number; dice: string; mesesAnual: number; precioAnualUsd: number }>
   ajenas: Array<{ groupId: string; grupo: string; nombreRol: string; paga: Paga; ocupaLugar: boolean | null }>
   organizacion: { id: string; nombre: string; esAdmin: boolean } | null
+  fiscal: { datos: DatosFiscales | null; cobros: Cobro[]; regimenes: Record<string, string>; usos: Record<string, string> }
   cobro: { disponible: boolean; monedas: string[]; tipoCambio: Record<string, { valor: number; fecha: string; fuente: string }> }
   suscripcion: { estado: string; hasta: string | null; moneda: string | null; viva: boolean } | null
 }
@@ -85,7 +88,17 @@ export type VistaOrganizacion = {
   invitaciones: Array<{ codigo: string; etiqueta: string | null; centroCostos: string | null; expira: string }> | null
   suscripcion: { id: string | null; estado: string; hasta: string | null } | null
   total: { mes: number; anio: number }
+  fiscal: { datos: DatosFiscales | null; cobros: Cobro[] } | null
 }
 
 export const PAGA = (p: Paga): string =>
   p.quien === 'tu' ? 'Tu cuenta' : p.quien === 'organizacion' ? `Lo paga ${p.nombre ?? 'su organización'}` : `Lo paga ${p.nombre ?? 'el Sponsor'}`
+
+// ─────────────────────────────── facturación (#181)
+export type DatosFiscales = {
+  quiereFactura: boolean; rfc: string; razonSocial: string; regimen: string; cp: string; usoCfdi: string; email: string
+}
+export type Cobro = {
+  fecha: string; moneda: string; total: number; neto: number; iva: number
+  facturaSolicitada: boolean; facturado: boolean; folio: string | null
+}

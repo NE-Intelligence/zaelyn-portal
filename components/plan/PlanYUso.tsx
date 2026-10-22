@@ -11,6 +11,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { PAGA, type VistaPlan } from '@/lib/plan-uso/tipos'
 import { decirError, escribir } from '@/components/editor/comun'
+import { Facturacion } from '@/components/plan/Facturacion'
 
 const usd = (n: number) => `${n.toFixed(2)} USD`
 
@@ -42,8 +43,8 @@ export function PlanYUso({ v, pagado }: { v: VistaPlan; pagado: boolean }) {
 
   const anual = periodo === 'anio'
   const total = useMemo(() => {
-    let t = pmo.precioUsd * (anual ? pmo.mesesAnual : 1)
-    for (const c of v.complementos) t += (cant[c.clave] ?? 0) * c.precioUsd * (anual ? c.mesesAnual : 1)
+    let t = anual ? pmo.precioAnualUsd : pmo.precioUsd
+    for (const c of v.complementos) t += (cant[c.clave] ?? 0) * (anual ? c.precioAnualUsd : c.precioUsd)
     return t
   }, [cant, v.complementos, pmo, anual])
   // Tu cuenta la paga una organización (la administres o no): no se contrata por aquí.
@@ -75,7 +76,7 @@ export function PlanYUso({ v, pagado }: { v: VistaPlan; pagado: boolean }) {
         <div>
           <span className="pu-rotulo">Tu plan</span>
           <h1>{v.plan.nombre}</h1>
-          <p>{v.plan.queEs}{v.plan.precioUsd ? ` · ${usd(v.plan.precioUsd)} al mes` : ''}</p>
+          <p>{v.plan.queEs}{v.plan.precioUsd ? ` · ${usd(v.plan.precioUsd)} al mes, IVA incluido` : ''}</p>
         </div>
         {v.suscripcion && (
           <div className="pu-sub">
@@ -111,7 +112,7 @@ export function PlanYUso({ v, pagado }: { v: VistaPlan; pagado: boolean }) {
             <Medidor titulo="Ejecutores" usados={v.cuenta.ejecutores} tope={t.ejecutores} />
             <Medidor titulo="Líderes" usados={v.cuenta.lideres} tope={t.lideres} nota="Tú, como Sponsor, no cuentas." />
             <Medidor titulo="Monitores incluidos" usados={Math.min(v.cuenta.monitores, t.monitoresIncluidos)} tope={t.monitoresIncluidos} />
-            <Medidor titulo="Lugares de 1.99" usados={v.cuenta.informados.usados} tope={v.cuenta.informados.tope}
+            <Medidor titulo="Lugares de Stakeholder o Monitor extra" usados={v.cuenta.informados.usados} tope={v.cuenta.informados.tope}
               nota={`${v.cuenta.stakeholders} Stakeholder${v.cuenta.stakeholders === 1 ? '' : 's'} · ${Math.max(0, v.cuenta.monitores - t.monitoresIncluidos)} Monitor(es) extra`} />
             <Medidor titulo="Créditos IA este mes" usados={v.cuenta.creditos} tope={t.creditos} nota="Armar un plan gasta 1 a 3; reorganizar, 1 o más según el tamaño." />
             <Medidor titulo="Avisos de WhatsApp este mes" usados={v.cuenta.avisos} tope={t.avisos} nota="En Telegram los avisos no tienen tope." />
@@ -148,7 +149,7 @@ export function PlanYUso({ v, pagado }: { v: VistaPlan; pagado: boolean }) {
                   <b>{c.nombre}</b>
                   <span>{c.dice}</span>
                 </div>
-                <span className="pu-precio mono">{enMoneda(c.precioUsd * (anual ? c.mesesAnual : 1))}<i>{anual ? '/año' : '/mes'}</i></span>
+                <span className="pu-precio mono">{enMoneda(anual ? c.precioAnualUsd : c.precioUsd)}<i>{anual ? '/año' : '/mes'}</i></span>
                 <div className="pu-paso">
                   <button aria-label={`Quitar ${c.nombre}`} onClick={() => setCant(x => ({ ...x, [c.clave]: Math.max(0, n - 1) }))} disabled={!n}>−</button>
                   <span className="mono">{n}</span>
@@ -164,7 +165,7 @@ export function PlanYUso({ v, pagado }: { v: VistaPlan; pagado: boolean }) {
             <span>{anual ? 'Total al año' : 'Total al mes'}</span>
             <b className="mono">{enMoneda(total)}</b>
             {moneda === 'mxn' && tc && <small>{usd(total)} al tipo de cambio FIX de Banxico del {tc.fecha} ({tc.valor.toFixed(4)}). Se recalcula antes de cada renovación.</small>}
-            {moneda === 'usd' && <small>Más impuestos aplicables.</small>}
+            <small>IVA incluido.</small>
             {anual && <small>Al año: PMO y lugares se cobran como {pmo.mesesAnual} meses; los paquetes de créditos y avisos, completos. Créditos y avisos se renuevan cada mes.</small>}
           </div>
           {!viva && (
@@ -195,14 +196,16 @@ export function PlanYUso({ v, pagado }: { v: VistaPlan; pagado: boolean }) {
             <div className={`pu-plan${p.clave === v.plan.clave ? ' actual' : ''}`} key={p.clave}>
               <b>{p.nombre}</b>
               <span className="pu-precio mono">{p.precioUsd ? usd(p.precioUsd) : 'Gratis'}{p.precioUsd ? <i>/mes</i> : null}</span>
-              {p.clave === 'pro' && <small className="pu-anual">o {usd(p.precioUsd * p.mesesAnual)} al año</small>}
+              {p.clave === 'pro' && <small className="pu-anual">o {usd(p.precioAnualUsd)} al año</small>}
               <p>{p.queEs}</p>
               {p.clave === v.plan.clave && <small>Tu plan</small>}
             </div>
           ))}
         </div>
-        <p className="pu-nota">Paga quien decide: el Sponsor y sus Líderes. Quien ejecuta entra en bloques; quien solo da seguimiento, gratis hasta dos.</p>
+        <p className="pu-nota">Paga quien decide: el Sponsor y sus Líderes. Quien ejecuta entra en bloques; quien solo da seguimiento, gratis hasta dos. Precios con IVA incluido.</p>
       </section>
+
+      {!pagaOrg && <Facturacion datos={v.fiscal.datos} cobros={v.fiscal.cobros} regimenes={v.fiscal.regimenes} usos={v.fiscal.usos} />}
     </div>
   )
 }

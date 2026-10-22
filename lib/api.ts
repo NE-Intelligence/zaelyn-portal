@@ -166,12 +166,14 @@ export type AccionEditor =
   | 'liberar-vista' | 'liberar' | 'grupo-crear' | 'persona' | 'invitar'
   | 'reabrir' | 'reorganizar' | 'plan-comprar'
   | 'org-crear' | 'org-invitar' | 'org-unirse' | 'org-quitar' | 'org-editar' | 'org-etiquetar' | 'org-comprar'
+  | 'fiscal'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
 function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
   const g = typeof cuerpo['groupId'] === 'string' ? encodeURIComponent(cuerpo['groupId']) : ''
   switch (accion) {
     case 'plan-comprar': return { metodo: 'POST', ruta: '/portal/plan/comprar' }
+    case 'fiscal': return { metodo: 'POST', ruta: '/portal/fiscal' }
     case 'org-crear': case 'org-invitar': case 'org-unirse': case 'org-quitar':
     case 'org-editar': case 'org-etiquetar': case 'org-comprar':
       return { metodo: 'POST', ruta: `/portal/organizacion/${accion.slice(4)}` }
