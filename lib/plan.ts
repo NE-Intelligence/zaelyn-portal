@@ -262,6 +262,8 @@ export type Suceso = {
   evento: string
   texto: string | null
   avance: number | null
+  /** La fecha de una prórroga (#174). Nulo en los demás eventos. */
+  hasta: string | null
   en: string
   quien: string | null
 }

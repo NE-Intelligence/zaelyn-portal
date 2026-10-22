@@ -738,6 +738,11 @@ const EVENTO: Record<string, string> = {
   importado: 'importó',
   avance: 'declaró el avance de',
   iniciado: 'arrancó',
+  // Las prórrogas (#174). «aprobada» reemplaza al «movido» de ese mismo acto:
+  // es la misma fecha movida, contada con el motivo.
+  prorroga_pedida: 'pidió una prórroga para',
+  prorroga_aprobada: 'aprobó la prórroga de',
+  prorroga_negada: 'negó la prórroga de',
 }
 
 export function Bitacora({ v }: { v: VistaDePlan }) {
@@ -763,6 +768,7 @@ export function Bitacora({ v }: { v: VistaDePlan }) {
               <b style={{ fontWeight: 600 }}>{b.quien ?? 'Alguien'}</b>{' '}
               {EVENTO[b.evento] ?? b.evento} «{b.pendiente}»
               {b.avance !== null && ` al ${b.avance}%`}
+              {b.hasta && ` al ${fecha(b.hasta)}`}
               {b.texto && <span style={{ color: 'var(--ink-2)' }}>: {b.texto}</span>}
             </div>
           </div>

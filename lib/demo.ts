@@ -297,13 +297,15 @@ function narrativa(): Narrativa {
 }
 
 const BITACORA: Suceso[] = [
-  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'avance', texto: null, avance: 25, en: `${mas(HOY, -1)}T18:12:00.000Z`, quien: 'Termika' },
-  { pendienteId: ID.get('B-01')!, pendiente: 'Ingeniería de detalle del tablero', clave: 'B-01', evento: 'comentado', texto: 'el cliente pidió cambiar el interruptor principal, ya está en el plano', avance: null, en: `${mas(HOY, -2)}T22:40:00.000Z`, quien: '@efrain' },
-  { pendienteId: ID.get('B-03')!, pendiente: 'Tramitar el permiso municipal', clave: 'B-03', evento: 'hecho', texto: null, avance: null, en: `${mas(HOY, -12)}T17:05:00.000Z`, quien: '@lupita' },
-  { pendienteId: ID.get('B-01')!, pendiente: 'Ingeniería de detalle del tablero', clave: 'B-01', evento: 'avance', texto: null, avance: 70, en: `${mas(HOY, -9)}T16:20:00.000Z`, quien: '@efrain' },
-  { pendienteId: ID.get('C-03')!, pendiente: 'Montaje y conexionado', clave: 'C-03', evento: 'bloqueado', texto: null, avance: null, en: `${mas(HOY, -15)}T15:00:00.000Z`, quien: '@marcela' },
-  { pendienteId: ID.get('B-02')!, pendiente: 'Memoria de cálculo y planos', clave: 'B-02', evento: 'hecho', texto: null, avance: null, en: '2026-10-30T19:30:00.000Z', quien: '@lupita' },
-  { pendienteId: ID.get('A-03')!, pendiente: 'Aprobación del comité técnico', clave: 'A-03', evento: 'hecho', texto: null, avance: null, en: '2026-10-09T20:00:00.000Z', quien: '@marcela' },
+  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'prorroga_aprobada', texto: 'llovió tres días y no se pudo colar', avance: null, hasta: `${mas(HOY, 6)}`, en: `${mas(HOY, -1)}T19:02:00.000Z`, quien: '@marcela' },
+  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'prorroga_pedida', texto: 'llovió tres días y no se pudo colar', avance: null, hasta: `${mas(HOY, 6)}`, en: `${mas(HOY, -1)}T18:30:00.000Z`, quien: 'Termika' },
+  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'avance', texto: null, avance: 25, hasta: null, en: `${mas(HOY, -1)}T18:12:00.000Z`, quien: 'Termika' },
+  { pendienteId: ID.get('B-01')!, pendiente: 'Ingeniería de detalle del tablero', clave: 'B-01', evento: 'comentado', texto: 'el cliente pidió cambiar el interruptor principal, ya está en el plano', avance: null, hasta: null, en: `${mas(HOY, -2)}T22:40:00.000Z`, quien: '@efrain' },
+  { pendienteId: ID.get('B-03')!, pendiente: 'Tramitar el permiso municipal', clave: 'B-03', evento: 'hecho', texto: null, avance: null, hasta: null, en: `${mas(HOY, -12)}T17:05:00.000Z`, quien: '@lupita' },
+  { pendienteId: ID.get('B-01')!, pendiente: 'Ingeniería de detalle del tablero', clave: 'B-01', evento: 'avance', texto: null, avance: 70, hasta: null, en: `${mas(HOY, -9)}T16:20:00.000Z`, quien: '@efrain' },
+  { pendienteId: ID.get('C-03')!, pendiente: 'Montaje y conexionado', clave: 'C-03', evento: 'bloqueado', texto: null, avance: null, hasta: null, en: `${mas(HOY, -15)}T15:00:00.000Z`, quien: '@marcela' },
+  { pendienteId: ID.get('B-02')!, pendiente: 'Memoria de cálculo y planos', clave: 'B-02', evento: 'hecho', texto: null, avance: null, hasta: null, en: '2026-10-30T19:30:00.000Z', quien: '@lupita' },
+  { pendienteId: ID.get('A-03')!, pendiente: 'Aprobación del comité técnico', clave: 'A-03', evento: 'hecho', texto: null, avance: null, hasta: null, en: '2026-10-09T20:00:00.000Z', quien: '@marcela' },
 ]
 
 const ESTADO: EstadoDePlan = {
