@@ -15,7 +15,7 @@ export default async function OrganizacionPagina({
   if (!p.ok) return <SinSesion fallo={p.fallo} />
   return (
     <>
-      <Barra migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Plan y uso', href: '/app/plan' }, { texto: 'Organización' }]} sesion modo="cuenta" />
+      <Barra area="cuenta" migas={[{ texto: 'Plan y uso', href: '/app/plan' }, { texto: 'Organización' }]} sesion modo="cuenta" />
       <main className="pt-lienzo">
         <Organizacion o={r.dato.organizacion} cobro={r.dato.cobro} plan={p.dato}
           pagado={q['pagado'] === '1'} codigo={typeof q['codigo'] === 'string' ? q['codigo'] : ''} />

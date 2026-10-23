@@ -20,7 +20,7 @@ export default async function Familia({
   const e = r.dato
   return (
     <>
-      <Barra migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: e.grupo.nombre }]} sesion etq="Familia" />
+      <Barra area="familia" migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: e.grupo.nombre }]} sesion etq="Familia" />
       <main className="pt-lienzo">
         <LienzoFamilia e={e} vista={vista} base={`/app/f/${grupo}`} leido={new Date().toISOString()} />
       </main>

@@ -26,7 +26,7 @@ export default async function Plan({
   const dirige = !!r.dato.rol && !['observador', 'miembro', 'integrante', 'a_cargo'].includes(r.dato.rol)
   return (
     <>
-      <Barra
+      <Barra area="proyectos"
         migas={[
           { texto: 'Mis grupos', href: '/app' },
           { texto: e.grupo.nombre, href: `/app/g/${grupo}` },

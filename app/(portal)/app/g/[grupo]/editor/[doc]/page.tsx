@@ -58,7 +58,7 @@ export default async function PaginaEditor({
 
   return (
     <>
-      <Barra
+      <Barra area="proyectos"
         migas={[
           { texto: 'Mis grupos', href: '/app' },
           { texto: mesa.grupo.nombre, href: `/app/g/${grupo}` },

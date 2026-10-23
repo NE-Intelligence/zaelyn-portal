@@ -1,16 +1,19 @@
 import { Encabezado, PieSitio } from '@/components/sitio/Marco'
+import { idiomaActual, temaActual } from '@/lib/preferencias'
 import '../sitio.css'
 
 /**
- * El marco del sitio público. Oscuro siempre: el logotipo es luz sobre negro
- * y sobre blanco no sobrevive, así que la decisión de tema la toma la marca.
+ * El marco del sitio público. Día y noche (#186): los tokens de `.st`
+ * cambian con `data-tema` o con el sistema operativo, y el logotipo se
+ * compone en tipografía cuando el fondo es claro.
  */
-export default function SitioLayout({ children }: { children: React.ReactNode }) {
+export default async function SitioLayout({ children }: { children: React.ReactNode }) {
+  const [lang, tema] = await Promise.all([idiomaActual(), temaActual()])
   return (
     <div className="st" style={{ minHeight: '100dvh' }}>
-      <Encabezado lang="es" />
+      <Encabezado lang={lang} tema={tema} />
       {children}
-      <PieSitio lang="es" />
+      <PieSitio lang={lang} />
     </div>
   )
 }

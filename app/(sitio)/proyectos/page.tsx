@@ -1,21 +1,24 @@
 import Link from 'next/link'
 import Campo from '@/components/sitio/Campo'
 import { type Clave, textos } from '@/lib/copy'
+import { idiomaActual } from '@/lib/preferencias'
+import { Ficha } from '@/components/sitio/Ficha'
 
-const t = textos('es')
-
-export const metadata = {
-  title: t('pr.meta.titulo'),
-  description: t('pr.meta.desc'),
-  openGraph: {
-    type: 'website',
-    locale: 'es_MX',
-    siteName: 'Zaelyn',
+export async function generateMetadata() {
+  const t = textos(await idiomaActual())
+  return {
     title: t('pr.meta.titulo'),
     description: t('pr.meta.desc'),
-    url: '/proyectos',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'zælyn' }],
-  },
+    openGraph: {
+      type: 'website',
+      
+      siteName: 'Zaelyn',
+      title: t('pr.meta.titulo'),
+      description: t('pr.meta.desc'),
+      url: '/proyectos',
+      images: [{ url: '/og.png', width: 1200, height: 630, alt: 'zælyn' }],
+    },
+  }
 }
 
 const trazo = {
@@ -95,7 +98,8 @@ const VISTAS: { k: string; v: string; icono: React.ReactNode }[] = [
 
 const ROLES = ['r1', 'r2', 'r3', 'r4'] as const
 
-export default function Proyectos() {
+export default async function Proyectos() {
+  const t = textos(await idiomaActual())
   return (
     <main>
       <section className="st-banda st-hero">
@@ -127,6 +131,8 @@ export default function Proyectos() {
           </nav>
         </div>
       </section>
+
+      <Ficha espacio="proyectos" t={t} />
 
       <section className="st-banda st-seccion">
         <div className="st-caja">

@@ -21,7 +21,7 @@ export default async function DemoPersonal({
   const e = demoPersona()
   return (
     <>
-      <Barra
+      <Barra area="personal"
         migas={[{ texto: 'Ejemplo' }, { texto: 'Personal' }]}
         ejemplo
         etq="Personal"

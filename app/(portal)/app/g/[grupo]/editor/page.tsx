@@ -16,7 +16,7 @@ export default async function MesaDelEditor({ params }: { params: Promise<{ grup
   if (!r.ok) return <SinSesion fallo={r.fallo} />
   return (
     <>
-      <Barra
+      <Barra area="proyectos"
         migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: r.dato.grupo.nombre, href: `/app/g/${grupo}` }, { texto: 'Editor' }]}
         sesion modo="editor"
       />

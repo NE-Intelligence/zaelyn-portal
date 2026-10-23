@@ -1,21 +1,26 @@
 import Link from 'next/link'
 import Menu from './Menu'
-import { IDIOMAS, NOMBRE_IDIOMA, type Idioma, textos, traducidos } from '@/lib/copy'
+import { Logo } from '@/components/Logo'
+import { Preferencias } from '@/components/Preferencias'
+import { type Idioma, textos } from '@/lib/copy'
+import type { Tema } from '@/lib/preferencias'
 
-/** La cinta de pruebas, la barra y el pie. Compartidos por todas las páginas. */
-export function Encabezado({ lang }: { lang: Idioma }) {
+/**
+ * La cinta, la barra y el pie del sitio público (#186).
+ *
+ * El menú dice QUÉ ES Zaelyn en el orden en que se entiende: los tres
+ * espacios (Personal, Familia, Proyectos), cuánto cuesta y quién lo hace.
+ * Entrar y Empezar quedan fuera del menú, siempre visibles: son las dos
+ * intenciones de quien ya decidió.
+ */
+export function Encabezado({ lang, tema }: { lang: Idioma; tema: Tema }) {
   const t = textos(lang)
-  const listos = traducidos()
-  // Las tres áreas van en el menú. ENTRAR NO: ver qué es el producto y entrar
-  // a usarlo son dos intenciones distintas, y la segunda estaba escondida
-  // entre las otras tres como un enlace más — en un teléfono, detrás de una
-  // hamburguesa que además no abría.
   const enlaces = [
-    { href: '/#empieza', texto: t('nav.empieza') },
-    { href: '/proyectos', texto: t('nav.proyectos') },
-    { href: '/familia', texto: t('nav.familia') },
     { href: '/personal', texto: t('nav.personal') },
-    { href: '/demo', texto: t('nav.portal') },
+    { href: '/familia', texto: t('nav.familia') },
+    { href: '/proyectos', texto: t('nav.proyectos') },
+    { href: '/precios', texto: t('nav.precios') },
+    { href: '/nosotros', texto: t('nav.nosotros') },
   ]
 
   return (
@@ -30,30 +35,21 @@ export function Encabezado({ lang }: { lang: Idioma }) {
       <header className="st-banda st-barra">
         <div className="st-caja">
           <Link className="st-marca-nav" href="/" aria-label={t('nav.inicio')}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo/zaelyn-wordmark-320.png" alt="zælyn" width={320} height={110} />
+            <Logo ancho={118} />
           </Link>
           <Menu enlaces={enlaces} etiqueta={t('nav.menu')} />
-          <Link className="st-btn st-btn-1 st-entrar" href="/app" title={t('nav.entrar.ayuda')}>
+          <Preferencias
+            lang={lang}
+            tema={tema}
+            clase="st"
+            et={{ tema: t('nav.tema'), claro: t('nav.tema.claro'), oscuro: t('nav.tema.oscuro'), sistema: t('nav.tema.sistema'), idioma: t('nav.idioma') }}
+          />
+          <Link className="st-btn st-btn-2 st-entrar" href="/app" title={t('nav.entrar.ayuda')}>
             {t('nav.entrar')}
           </Link>
-          <div className="st-idiomas" role="group" aria-label={t('nav.idioma')}>
-            {IDIOMAS.map((l) =>
-              l === lang ? (
-                <span key={l} className="st-ahora" aria-current="true">
-                  {NOMBRE_IDIOMA[l]}
-                </span>
-              ) : listos.includes(l) ? (
-                <a key={l} href={`/${l}`}>
-                  {NOMBRE_IDIOMA[l]}
-                </a>
-              ) : (
-                <span key={l} className="st-pronto" title="Próximamente">
-                  {NOMBRE_IDIOMA[l]}
-                </span>
-              ),
-            )}
-          </div>
+          <Link className="st-btn st-btn-1 st-empezar" href="/#empieza">
+            {t('nav.empezar')}
+          </Link>
         </div>
       </header>
     </>
@@ -65,14 +61,39 @@ export function PieSitio({ lang }: { lang: Idioma }) {
   return (
     <footer className="st-banda st-piep">
       <div className="st-caja">
-        <span>{t('pie.ne')}</span>
-        <span className="st-der">
-          <Link href="/proyectos">{t('pie.proyectos')}</Link>
-          <Link href="/familia">{t('pie.familia')}</Link>
-          <Link href="/personal">{t('pie.personal')}</Link>
-          <Link href="/app">{t('pie.portal')}</Link>
-          <span>{t('pie.year')}</span>
-        </span>
+        <div className="st-pie-rejilla">
+          <div className="st-pie-marca">
+            <Logo ancho={112} />
+            <p className="st-pie-by">{t('pie.by')}</p>
+            <p>{t('pie.lema')}</p>
+          </div>
+          <nav aria-label={t('pie.col.producto')}>
+            <h2>{t('pie.col.producto')}</h2>
+            <Link href="/personal">{t('pie.personal')}</Link>
+            <Link href="/familia">{t('pie.familia')}</Link>
+            <Link href="/proyectos">{t('pie.proyectos')}</Link>
+            <Link href="/precios">{t('pie.precios')}</Link>
+            <Link href="/demo">{t('pie.demo')}</Link>
+            <Link href="/app">{t('pie.entrar')}</Link>
+          </nav>
+          <nav aria-label={t('pie.col.empresa')}>
+            <h2>{t('pie.col.empresa')}</h2>
+            <Link href="/nosotros">{t('pie.nosotros')}</Link>
+            <Link href="/nosotros#por-que">{t('pie.porque')}</Link>
+            <Link href="/nosotros#contacto">{t('pie.contacto')}</Link>
+          </nav>
+          <nav aria-label={t('pie.col.legal')}>
+            <h2>{t('pie.col.legal')}</h2>
+            <Link href="/legal/privacidad">{t('pie.privacidad')}</Link>
+            <Link href="/legal/datos">{t('pie.datos')}</Link>
+            <Link href="/legal/terminos">{t('pie.terminos')}</Link>
+            <Link href="/legal/deslinde">{t('pie.deslinde')}</Link>
+          </nav>
+        </div>
+        <div className="st-pie-legal">
+          <p>{t('pie.mx')} · {t('pie.us')}</p>
+          <p>{t('pie.copy')} {t('pie.marcas')}</p>
+        </div>
       </div>
     </footer>
   )

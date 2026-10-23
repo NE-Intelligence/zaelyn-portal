@@ -1,17 +1,20 @@
 import Link from 'next/link'
 import Campo from '@/components/sitio/Campo'
 import { type Clave, textos } from '@/lib/copy'
+import { idiomaActual } from '@/lib/preferencias'
+import { Ficha } from '@/components/sitio/Ficha'
 
-const t = textos('es')
-
-export const metadata = {
-  title: t('pe.meta.titulo'),
-  description: t('pe.meta.desc'),
-  openGraph: {
-    type: 'website', locale: 'es_MX', siteName: 'Zaelyn',
-    title: t('pe.meta.titulo'), description: t('pe.meta.desc'), url: '/personal',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'zælyn' }],
-  },
+export async function generateMetadata() {
+  const t = textos(await idiomaActual())
+  return {
+    title: t('pe.meta.titulo'),
+    description: t('pe.meta.desc'),
+    openGraph: {
+      type: 'website',  siteName: 'Zaelyn',
+      title: t('pe.meta.titulo'), description: t('pe.meta.desc'), url: '/personal',
+      images: [{ url: '/og.png', width: 1200, height: 630, alt: 'zælyn' }],
+    },
+  }
 }
 
 const Chispa = () => (
@@ -35,7 +38,8 @@ const VISTAS: { k: string; v: string; icono: React.ReactNode }[] = [
   { k: 'v4', v: '?v=habitos', icono: <svg {...trazo}><path d="M4 18V9M9 18V5M14 18v-6M19 18V8" /></svg> },
 ]
 
-export default function Personal() {
+export default async function Personal() {
+  const t = textos(await idiomaActual())
   return (
     <main>
       <section className="st-banda st-hero">
@@ -74,6 +78,8 @@ export default function Personal() {
           </div>
         </div>
       </section>
+
+      <Ficha espacio="personal" t={t} />
 
       <section className="st-banda st-leyes" id="pantalla">
         <div className="st-caja">

@@ -11,7 +11,7 @@ export default async function ParticipacionesPagina() {
   if (!r.ok) return <SinSesion fallo={r.fallo} />
   return (
     <>
-      <Barra migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Mis participaciones' }]} sesion modo="cuenta" />
+      <Barra area="cuenta" migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Mis participaciones' }]} sesion modo="cuenta" />
       <main className="pt-lienzo">
         <Participaciones v={r.dato} />
       </main>

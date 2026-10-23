@@ -12,6 +12,7 @@
  * bajo: el portal solo muestra, no hay un solo control que escriba.
  */
 import { cookies } from 'next/headers'
+import { cache } from 'react'
 import type { GrupoEnPortal, VistaDePlan } from './plan'
 import type { Abierto, Mesa, MisProyectos } from './editor/tipos'
 
@@ -262,4 +263,27 @@ export async function yoMismo(dias = 7): Promise<
   } catch {
     return { ok: false, fallo: 'CAIDO' }
   }
+}
+
+// ──────────────────────────────────────────── administración (#186)
+
+/**
+ * ¿Quien tiene la sesión es administrador de Zaelyn?
+ *
+ * Lo decide el motor (tabla `administradores`), no el portal: aquí no hay
+ * lista de correos ni de identificadores. Sin sesión ni se pregunta. Se
+ * memoriza por petición con `cache` porque la barra y la página lo piden.
+ */
+export const soyAdmin = cache(async (): Promise<boolean> => {
+  if (!(await cookies()).get(COOKIE)?.value) return false
+  const r = await leer<{ admin: boolean }>('/portal/admin/soy')
+  return r.ok && r.dato.admin === true
+})
+
+export const tableroAdmin = (desde?: string, hasta?: string) => {
+  const q = new URLSearchParams()
+  if (desde) q.set('desde', desde)
+  if (hasta) q.set('hasta', hasta)
+  const s = q.toString()
+  return leer<import('@/lib/admin/tipos').TableroAdmin>(`/portal/admin/tablero${s ? `?${s}` : ''}`)
 }

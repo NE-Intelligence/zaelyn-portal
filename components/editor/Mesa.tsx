@@ -194,7 +194,7 @@ export function MesaPersonal({ datos }: { datos: import('@/lib/editor/tipos').Mi
             <h1>Mis proyectos</h1>
             <div className="meta"><span>Arma el proyecto aquí; al liberarlo eliges el grupo —o creas uno— y Zaelyn lo empieza a seguir.</span></div>
           </div>
-          <Link className="ed-btn suave" href="/app">Mis grupos</Link>
+          <Link className="ed-btn suave" href="/app/proyectos">Proyectos</Link>
         </div>
       </div>
       {aviso && <div className="ed-error" style={{ marginBottom: 16 }}>{aviso}</div>}

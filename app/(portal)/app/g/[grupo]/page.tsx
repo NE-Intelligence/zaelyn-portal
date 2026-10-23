@@ -29,7 +29,7 @@ export default async function Grupo({ params, searchParams }: {
 
   return (
     <>
-      <Barra migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: e.grupo.nombre }]} sesion />
+      <Barra area="proyectos" migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: e.grupo.nombre }]} sesion />
       <main className="pt-lienzo">
         <div className="pt-cabeza">
           <div className="fila">

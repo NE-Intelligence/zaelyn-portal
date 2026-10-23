@@ -14,7 +14,7 @@ export default async function PlanPagina({
   if (!r.ok) return <SinSesion fallo={r.fallo} />
   return (
     <>
-      <Barra migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Plan y uso' }]} sesion modo="cuenta" />
+      <Barra area="cuenta" migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Plan y uso' }]} sesion modo="cuenta" />
       <main className="pt-lienzo">
         <PlanYUso v={r.dato} pagado={q['pagado'] === '1'} />
       </main>

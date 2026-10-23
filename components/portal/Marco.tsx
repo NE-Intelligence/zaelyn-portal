@@ -1,100 +1,130 @@
 import Link from 'next/link'
+import { Preferencias } from '@/components/Preferencias'
+import { soyAdmin } from '@/lib/api'
+import { textos, type Clave } from '@/lib/copy'
+import { idiomaActual, temaActual } from '@/lib/preferencias'
+
+export type Area = 'inicio' | 'personal' | 'familia' | 'proyectos' | 'cuenta' | 'admin'
+type Modo = 'lectura' | 'editor' | 'cuenta' | 'admin'
+
+/** La casa de cada área, con sesión y en el ejemplo. */
+const CASA: Record<Area, { app: string; demo: string | null; k: Clave }> = {
+  inicio: { app: '/app', demo: null, k: 'po.inicio' },
+  personal: { app: '/app/personal', demo: '/demo/personal', k: 'po.personal' },
+  familia: { app: '/app/familia', demo: '/demo/familia', k: 'po.familia' },
+  proyectos: { app: '/app/proyectos', demo: '/demo', k: 'po.proyectos' },
+  cuenta: { app: '/app/cuenta', demo: null, k: 'po.cuenta' },
+  admin: { app: '/admin', demo: null, k: 'po.admin' },
+}
 
 /**
- * La barra superior del portal y el pie. Sin un solo control que escriba.
+ * La barra del portal (#186): marca, preferencias y, debajo, las PESTAÑAS DE
+ * ÁREA — Inicio · Personal · Familia · Proyectos · Cuenta.
  *
- * El aviso de «datos de ejemplo» es una PROP y no algo que esté siempre
- * puesto: cuando la pantalla trae datos reales, decir que son inventados es
- * exactamente igual de dañino que lo contrario.
+ * Antes la barra solo decía «Mi día» y «Mis grupos», y familia y proyectos
+ * convivían en la misma lista. Ahora cada área tiene su casa y su color, y
+ * la pestaña activa dice siempre dónde estás. Las migas empiezan en el área:
+ * «Proyectos / GestionDM / Plan», ya no «Mis grupos / …».
+ *
+ * En el ejemplo las pestañas llevan a los tres ejemplos; con sesión, a las
+ * casas reales. «Administración» aparece solo si el motor dice que lo eres.
  */
-export function Barra({
-  migas, ejemplo = false, sesion = false, modo = 'lectura', etq = 'Proyectos', aviso,
+export async function Barra({
+  migas = [], ejemplo = false, sesion = false, modo = 'lectura', area, aviso,
 }: {
-  migas: { texto: string; href?: string }[]
+  migas?: { texto: string; href?: string }[]
   ejemplo?: boolean
   sesion?: boolean
-  /** El editor de proyectos (#174) sí escribe: borradores, no el plan vivo. */
-  modo?: 'lectura' | 'editor' | 'cuenta'
-  /** El área del producto junto al logotipo: «Proyectos», «Familia». */
+  modo?: Modo
+  area?: Area
+  /** El área antes de #186; se conserva para no tocar cada llamada. */
   etq?: string
-  /** El texto del aviso de datos de ejemplo, si el de proyectos no aplica. */
   aviso?: string
 }) {
+  const [lang, tema, admin] = await Promise.all([idiomaActual(), temaActual(), sesion ? soyAdmin() : Promise.resolve(false)])
+  const t = textos(lang)
+  const a: Area | undefined = area
+  const pestanas: Area[] = ejemplo ? ['personal', 'familia', 'proyectos'] : sesion ? ['inicio', 'personal', 'familia', 'proyectos', 'cuenta'] : []
+  if (admin) pestanas.push('admin')
+  const href = (x: Area) => (ejemplo ? CASA[x].demo ?? '/' : CASA[x].app)
+  // «Mis grupos» era la raíz de todo; ahora la raíz es el área.
+  const nombreArea = a ? [t(CASA[a].k), textos('es')(CASA[a].k)] : []
+  const resto = migas.filter((m) => m.texto !== 'Mis grupos' && m.texto !== 'Ejemplo' && !nombreArea.includes(m.texto))
+  const cadena = a && a !== 'inicio' ? [{ texto: t(CASA[a].k), href: resto.length ? href(a) : undefined }, ...resto] : resto
+  const modoTxt = modo === 'editor' ? t('po.modo.editor') : modo === 'cuenta' ? t('po.modo.cuenta') : modo === 'admin' ? t('po.modo.admin') : t('po.modo.lectura')
+
   return (
     <>
       {ejemplo && (
         <div className="pt-aviso">
-          <b>Datos de ejemplo</b>
-          <span>
-            {aviso ?? `El proyecto, las personas y las fechas de esta pantalla están inventados.
-            Con tus datos reales la pantalla es la misma: cambia de dónde salen los
-            números, no cómo se pintan.`}
-          </span>
+          <b>{t('po.ejemplo')}</b>
+          <span>{aviso ?? t('po.ejemplo.p')}</span>
         </div>
       )}
-      <header className="pt-barra">
-        <Link className="pt-marca" href="/">
+      <header className="pt-barra" data-area={a}>
+        <Link className="pt-marca" href={sesion ? '/app' : '/'}>
           <span className="campo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo/zaelyn-wordmark-320.png" alt="zælyn" width={320} height={110} />
           </span>
-          <span className="pt-etq">{etq}</span>
         </Link>
-        <nav className="pt-migas" aria-label="Dónde estoy">
-          {migas.map((m, i) => (
-            <span key={i} style={{ display: 'contents' }}>
-              {i > 0 && <span className="sep">/</span>}
-              {m.href
-                ? <Link href={m.href}>{m.texto}</Link>
-                : <span style={{ color: 'var(--ink)' }}>{m.texto}</span>}
-            </span>
-          ))}
-        </nav>
+        {cadena.length > 0 && (
+          <nav className="pt-migas" aria-label={t('po.donde')}>
+            {cadena.map((m, i) => (
+              <span key={i} style={{ display: 'contents' }}>
+                {i > 0 && <span className="sep">/</span>}
+                {m.href ? <Link href={m.href}>{m.texto}</Link> : <span style={{ color: 'var(--ink)' }}>{m.texto}</span>}
+              </span>
+            ))}
+          </nav>
+        )}
         <div className="pt-der">
-          <span className="pt-overline" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <span
-              style={{
-                width: 18, height: 18, borderRadius: '50%',
-                background: 'var(--zaelyn)', display: 'grid', placeItems: 'center',
-              }}
-            >
-              <svg viewBox="0 0 24 24" style={{ width: 10, height: 10, fill: 'var(--surface)' }} aria-hidden="true">
-                <path d="M12 2.6l2.1 5.9 5.9 2.1-5.9 2.1-2.1 5.9-2.1-5.9L4 10.6l5.9-2.1z" />
-              </svg>
+          <span className="pt-overline pt-modo">
+            <span className="pt-modo-punto" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 2.6l2.1 5.9 5.9 2.1-5.9 2.1-2.1 5.9-2.1-5.9L4 10.6l5.9-2.1z" /></svg>
             </span>
-            {modo === 'editor' ? 'Editor · borrador' : modo === 'cuenta' ? 'Tu cuenta' : 'Solo lectura'}
+            {modoTxt}
           </span>
-          {/* Las dos puertas de quien entra (#184): su día, cruzado con todos
-              sus grupos, y sus grupos uno por uno. Siempre a la vista: Personal
-              escondido en un botón de la portada nadie lo encontraba. */}
-          {sesion && (
-            <nav className="pt-areas" aria-label="Áreas del portal">
-              <Link href="/app/personal">Mi día</Link>
-              <Link href="/app">Mis grupos</Link>
-            </nav>
-          )}
+          <Preferencias
+            lang={lang}
+            tema={tema}
+            clase="pt"
+            et={{ tema: t('nav.tema'), claro: t('nav.tema.claro'), oscuro: t('nav.tema.oscuro'), sistema: t('nav.tema.sistema'), idioma: t('nav.idioma') }}
+          />
           {/* Un FORMULARIO y no un enlace: ver `app/salir/route.ts`. */}
           {sesion && (
             <form action="/salir" method="post" style={{ display: 'contents' }}>
-              <button type="submit" className="pt-salir pt-overline">Salir</button>
+              <button type="submit" className="pt-salir pt-overline">{t('po.salir')}</button>
             </form>
           )}
+          {ejemplo && <Link href="/app" className="pt-boton pt-boton-chico">{t('nav.entrar')}</Link>}
         </div>
       </header>
+      {pestanas.length > 0 && (
+        <nav className="pt-pestanas" aria-label={t('po.areas')}>
+          <div className="pt-pestanas-in">
+            {pestanas.map((x) => (
+              <Link key={x} href={href(x)} data-area={x} aria-current={x === a ? 'page' : undefined}>
+                <i aria-hidden="true" />
+                {t(CASA[x].k)}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      )}
     </>
   )
 }
 
-export function Pie({ modo = 'lectura' }: { modo?: 'lectura' | 'editor' | 'cuenta' } = {}) {
+export async function Pie({ modo = 'lectura' }: { modo?: Modo } = {}) {
+  const t = textos(await idiomaActual())
   return (
     <footer className="pt-pie">
-      <span>Zaelyn es un producto de NE Intelligence</span>
+      <span>{t('pie.by')}</span>
       <span className="der">
-        {modo === 'editor'
-          ? 'Lo que armas aquí es un borrador: Zaelyn lo sigue cuando lo liberas.'
-          : modo === 'cuenta'
-            ? 'El pago lo procesa Stripe: Zaelyn nunca ve tu tarjeta.'
-            : 'Se cambia hablando, no aquí: el portal solo muestra.'}
+        {modo === 'editor' ? t('po.pie.editor') : modo === 'cuenta' ? t('po.pie.cuenta') : modo === 'admin' ? t('po.pie.admin') : t('po.pie.lectura')}
+        {' · '}
+        <Link href="/legal">{t('po.pie.legal')}</Link>
       </span>
     </footer>
   )

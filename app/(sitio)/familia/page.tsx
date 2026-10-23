@@ -1,17 +1,20 @@
 import Link from 'next/link'
 import Campo from '@/components/sitio/Campo'
 import { type Clave, textos } from '@/lib/copy'
+import { idiomaActual } from '@/lib/preferencias'
+import { Ficha } from '@/components/sitio/Ficha'
 
-const t = textos('es')
-
-export const metadata = {
-  title: t('fa.meta.titulo'),
-  description: t('fa.meta.desc'),
-  openGraph: {
-    type: 'website', locale: 'es_MX', siteName: 'Zaelyn',
-    title: t('fa.meta.titulo'), description: t('fa.meta.desc'), url: '/familia',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'zælyn' }],
-  },
+export async function generateMetadata() {
+  const t = textos(await idiomaActual())
+  return {
+    title: t('fa.meta.titulo'),
+    description: t('fa.meta.desc'),
+    openGraph: {
+      type: 'website',  siteName: 'Zaelyn',
+      title: t('fa.meta.titulo'), description: t('fa.meta.desc'), url: '/familia',
+      images: [{ url: '/og.png', width: 1200, height: 630, alt: 'zælyn' }],
+    },
+  }
 }
 
 const Chispa = () => (
@@ -37,7 +40,8 @@ const VISTAS: { k: string; v: string; icono: React.ReactNode }[] = [
   { k: 'v6', v: '?v=fechas', icono: <svg {...trazo}><path d="M5 20h14M6 20v-7h12v7M9 13V9M12 13V8M15 13V9" /><path d="M9 6.5c0-1 1-1.5 0-2.5M12 5.5c0-1 1-1.5 0-2.5M15 6.5c0-1 1-1.5 0-2.5" /></svg> },
 ]
 
-export default function Familia() {
+export default async function Familia() {
+  const t = textos(await idiomaActual())
   return (
     <main>
       <section className="st-banda st-hero">
@@ -78,6 +82,8 @@ export default function Familia() {
           </div>
         </div>
       </section>
+
+      <Ficha espacio="familia" t={t} />
 
       <section className="st-banda st-leyes" id="pantalla">
         <div className="st-caja">

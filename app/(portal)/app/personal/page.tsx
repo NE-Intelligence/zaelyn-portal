@@ -25,7 +25,7 @@ export default async function Personal({
   if (!r.ok && r.fallo === 'SIN_PLAN') {
     return (
       <>
-        <Barra migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Personal' }]} sesion etq="Personal" />
+        <Barra area="personal" migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Personal' }]} sesion etq="Personal" />
         <main className="pt-lienzo">
           <section className="pt-tarjeta" style={{ maxWidth: 640 }}>
             <header><h2>Tu portal Personal es de Sprint en adelante</h2></header>
@@ -46,7 +46,7 @@ export default async function Personal({
   if (!r.ok) return <SinSesion fallo={r.fallo} />
   return (
     <>
-      <Barra migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Personal' }]} sesion etq="Personal" />
+      <Barra area="personal" migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Personal' }]} sesion etq="Personal" />
       <main className="pt-lienzo">
         <LienzoPersona e={r.dato} vista={vista} base="/app/personal" leido={new Date().toISOString()} />
       </main>

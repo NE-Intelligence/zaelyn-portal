@@ -11,8 +11,21 @@ body {
   margin: 0;
   padding: 0;
 }
+/* El fondo del cuerpo sigue al tema para que el rebote del scroll no
+   enseñe un color ajeno (#186). Cada registro pinta el suyo encima. */
+:root {
+  --fondo-cuerpo: #f6f6fa;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='claro']) {
+    --fondo-cuerpo: #07070c;
+  }
+}
+:root[data-tema='oscuro'] {
+  --fondo-cuerpo: #07070c;
+}
 body {
-  background: #07070c;
+  background: var(--fondo-cuerpo);
   font-family: var(--fuente-texto), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -36,5 +49,49 @@ a {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ── logotipo por tema (#186) ────────────────────────────────────────── */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  width: var(--logo-ancho);
+  max-width: 100%;
+}
+.logo .logo-noche {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.logo .logo-dia {
+  display: none;
+  font-family: var(--fuente-display), 'Trebuchet MS', sans-serif;
+  font-weight: 500;
+  font-size: calc(var(--logo-ancho) * 0.29);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: #14141c;
+  white-space: nowrap;
+}
+.logo .ae {
+  background: linear-gradient(100deg, #8a3fe0, #0e8fbf);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 600;
+}
+:root[data-tema='claro'] .logo .logo-noche {
+  display: none;
+}
+:root[data-tema='claro'] .logo .logo-dia {
+  display: inline-block;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-tema='oscuro']) .logo .logo-noche {
+    display: none;
+  }
+  :root:not([data-tema='oscuro']) .logo .logo-dia {
+    display: inline-block;
   }
 }

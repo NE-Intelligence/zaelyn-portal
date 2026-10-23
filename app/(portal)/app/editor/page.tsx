@@ -14,7 +14,7 @@ export default async function MisProyectosPagina() {
   if (!r.ok) return <SinSesion fallo={r.fallo} />
   return (
     <>
-      <Barra migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Mis proyectos' }]} sesion modo="editor" />
+      <Barra area="proyectos" migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Mis proyectos' }]} sesion modo="editor" />
       <main className="pt-lienzo">
         <MesaPersonal datos={r.dato} />
       </main>

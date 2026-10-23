@@ -58,7 +58,7 @@ export default async function PaginaProyecto({
 
   return (
     <>
-      <Barra
+      <Barra area="proyectos"
         migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Mis proyectos', href: '/app/editor' }, { texto: inicial.nombre || 'Proyecto nuevo' }]}
         sesion modo="editor"
       />

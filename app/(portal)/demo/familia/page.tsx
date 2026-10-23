@@ -21,7 +21,7 @@ export default async function DemoFamilia({
   const e = demoFamilia()
   return (
     <>
-      <Barra
+      <Barra area="familia"
         migas={[{ texto: 'Ejemplo' }, { texto: e.grupo.nombre }]}
         ejemplo
         etq="Familia"

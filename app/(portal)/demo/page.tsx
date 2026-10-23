@@ -17,7 +17,7 @@ export default async function Demo({
   const vista = esVista((await searchParams).v)
   return (
     <>
-      <Barra
+      <Barra area="proyectos"
         migas={[{ texto: 'Ejemplo' }, { texto: DEMO.estado.plan!.nombre }]}
         ejemplo
       />
