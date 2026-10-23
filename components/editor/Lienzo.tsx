@@ -11,6 +11,7 @@
  *    recorren solos.
  *  · La paleta suelta objetos nuevos en cualquier fila o en el espacio libre.
  */
+import { esfuerzoTexto } from '@/lib/editor/unidades'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Doc, Nodo, PersonaDelEditor, TipoNodo } from '@/lib/editor/tipos'
 import { CONTENEDORES, PROGRAMABLES, TIPO_NOMBRE } from '@/lib/editor/tipos'
@@ -392,7 +393,7 @@ export function Lienzo({
                   <div className="ed-pista" style={{ width: ancho }}>
                     {m?.inicio && m.fin && n.tipo !== 'subtarea' && (
                       <Barra
-                        n={n} m={m} x={x} px={px} color={colorDe(n)} sel={sel}
+                        n={n} m={m} x={x} px={px} color={colorDe(n)} sel={sel} doc={doc}
                         critica={critica.has(n.id)} recien={recien.has(n.id)}
                         arrastrando={gesto?.id === n.id} puede={puede}
                         onBajar={bajar}
@@ -432,7 +433,8 @@ export function Lienzo({
 }
 
 
-function Barra({ n, m, x, px, color, sel, critica, recien, arrastrando, puede, onBajar }: {
+function Barra({ n, m, x, px, color, sel, critica, recien, arrastrando, puede, onBajar, doc }: {
+  doc: Doc
   n: Nodo; m: Medida; x: (f: string) => number; px: number; color: string; sel: boolean
   critica: boolean; recien: boolean; arrastrando: boolean; puede: boolean
   onBajar: (e: React.PointerEvent, n: Nodo, modo: 'mover' | 'estirar' | 'enlazar') => void
@@ -466,7 +468,7 @@ function Barra({ n, m, x, px, color, sel, critica, recien, arrastrando, puede, o
       style={{ ...estilo, left: ini, width: w }}
       data-barra={programable ? n.id : undefined}
       onPointerDown={e => onBajar(e, n, 'mover')}
-      title={`${n.titulo} · ${corta(m.inicio)} – ${corta(m.fin)} · ${m.dias} d${m.horas ? ` · ${m.horas} h` : ''}`}
+      title={`${n.titulo} · ${corta(m.inicio)} – ${corta(m.fin)} · ${m.dias} d${m.horas ? ` · ${esfuerzoTexto(m.horas, doc)}` : ''}`}
     >
       <span className="ed-etq">{w > 70 ? n.titulo : ''}</span>
       {w <= 70 && <span className="ed-etq-fuera">{n.titulo}</span>}

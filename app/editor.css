@@ -664,3 +664,13 @@
 .pt .ed-rev-nodo b { font-size: 13px; color: var(--ink); overflow-wrap: anywhere; }
 .pt .ed-rev-nodo:hover:not(:disabled) b { color: var(--brand); text-decoration: underline; }
 .pt .ed-antes-lista { margin: 4px 0 4px 18px; font-size: 13px; color: var(--ink-2); display: flex; flex-direction: column; gap: 4px; }
+.pt .ed-pr-datos .ed-jornada input { width: 72px; height: 30px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink); font: inherit; font-size: 13px; padding: 0 8px; }
+.pt .ed-unidades { max-width: 620px; }
+.pt .ed-unidad-col { border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.pt .ed-unidad-col .fila { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; }
+.pt .ed-unidad-col .mono { font-size: 12px; color: var(--ink-3); }
+.pt .ed-unidad-opciones { display: flex; gap: 10px; flex-wrap: wrap; }
+.pt .ed-unidad-opciones label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--ink-2); flex: 1 1 200px; min-width: 0; }
+.pt .ed-unidad-jornada { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.pt .ed-unidad-jornada input { width: 72px; }
+.pt .ed-unidades .gris { color: var(--ink-3); font-size: 12.5px; }

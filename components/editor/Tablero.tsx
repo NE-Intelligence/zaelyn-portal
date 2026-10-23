@@ -4,6 +4,7 @@
  * las actividades e hitos que contiene. Arrastrar una tarjeta a otra columna
  * la cambia de fase; soltarla sobre otra tarjeta la acomoda junto a ella.
  */
+import { esfuerzoTexto } from '@/lib/editor/unidades'
 import { useMemo, useState } from 'react'
 import type { Doc, Nodo, PersonaDelEditor } from '@/lib/editor/tipos'
 import { CONTENEDORES, PROGRAMABLES } from '@/lib/editor/tipos'
@@ -111,7 +112,7 @@ export function Tablero({ doc, medidas, personas, seleccion, onSeleccion, critic
               <b>{c.titulo}</b>
               <span className="mono">{tarjetas.length}</span>
             </header>
-            <div className="rango mono">{corta(m?.inicio)} – {corta(m?.fin)} · {m?.horas ? `${Math.round(m.horas)} h` : 'sin horas'}</div>
+            <div className="rango mono">{corta(m?.inicio)} – {corta(m?.fin)} · {m?.horas ? esfuerzoTexto(m.horas, doc, true) : 'sin esfuerzo'}</div>
             {c.objetivo && <p className="obj">{c.objetivo}</p>}
             <div className="lista">
               {tarjetas.map(t => <Tarjeta key={t.n.id} {...t} />)}

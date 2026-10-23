@@ -63,6 +63,8 @@ export type Origen = {
   avance?: number | null
   estatus?: EstatusSeguimiento
   persona?: string
+  /** La duración que decía el archivo, en días del calendario (#189). */
+  dias?: number | null
 }
 
 /** La revisión antes de liberar (#188). La calcula el motor. */
@@ -94,7 +96,12 @@ export type LecturaExcel = {
   calendario: 'habiles' | 'naturales'
   estructura: 'esquema' | 'fase' | 'plana'
   dependenciasPerdidas: number
+  tiempo: Array<{ titulo: string; tipo: 'duracion' | 'esfuerzo'; unidad: string }>
+  jornada: number
 }
+
+/** Una columna de tiempo cuyos números no dicen en qué están (#189). */
+export type PreguntaUnidad = { col: number; titulo: string; tipo: 'duracion' | 'esfuerzo'; ejemplos: string[] }
 
 export type EstatusSeguimiento = 'abierto' | 'en_curso' | 'bloqueado' | 'hecho' | 'cancelado'
 
@@ -115,6 +122,10 @@ export type Doc = {
   habiles: boolean
   /** Qué fecha manda: el arranque o el go-live. */
   fijar?: 'inicio' | 'golive'
+  /** Cómo se enseña el esfuerzo (#189). Se guarda siempre en horas. */
+  unidad?: 'horas' | 'dias'
+  /** Horas de una jornada; 8 si no se dice. */
+  jornada?: number
   nodos: Nodo[]
 }
 

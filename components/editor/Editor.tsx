@@ -21,6 +21,7 @@ import {
   inicioProyecto, insertar, medir, nuevoId, programar, quitar, recolocar, rutaCritica, terminarEn, type Destino,
 } from '@/lib/editor/programar'
 import { empezar, terminar } from '@/lib/editor/arrastre'
+import { esfuerzoTexto, jornadaDe } from '@/lib/editor/unidades'
 import { Lienzo } from './Lienzo'
 import { Tablero } from './Tablero'
 import { Inspector } from './Inspector'
@@ -388,6 +389,21 @@ export function Editor({
               <input type="checkbox" checked={doc.habiles} disabled={!puede} onChange={e => cambiarDoc({ habiles: e.target.checked })} />
               <span>Solo días hábiles</span>
             </label>
+            {/* Cómo se enseña el esfuerzo (#189): se guarda en horas, se ve como prefieras. */}
+            <div className="ed-fijar" role="group" aria-label="Esfuerzo en">
+              <span>Esfuerzo en</span>
+              <div className="ed-segmentos chico">
+                <button className={doc.unidad === 'dias' ? '' : 'on'} disabled={!puede}
+                  onClick={() => doc.unidad === 'dias' && comprometer({ ...h.presente, unidad: undefined })}>Horas</button>
+                <button className={doc.unidad === 'dias' ? 'on' : ''} disabled={!puede}
+                  onClick={() => doc.unidad !== 'dias' && comprometer({ ...h.presente, unidad: 'dias' })}>Días</button>
+              </div>
+            </div>
+            <label className="ed-jornada" title="Horas de una jornada: con esto se convierten días de trabajo en horas">
+              <span>Jornada (h)</span>
+              <input type="number" min={1} max={24} step={0.5} value={jornadaDe(doc)} disabled={!puede}
+                onChange={e => { const v = Number(e.target.value); if (v >= 1 && v <= 24) comprometer({ ...h.presente, jornada: v === 8 ? undefined : v }, { clave: 'doc:jornada' }) }} />
+            </label>
           </div>
         </div>
         <div className="ed-pr-acciones">
@@ -528,7 +544,7 @@ export function Editor({
           <div className="ed-pie-estado">
             <span><b className="mono">{totales.piezas}</b> actividades e hitos</span>
             <span className={totales.sinDueno ? 'aviso' : ''}><b className="mono">{totales.sinDueno}</b> sin responsable ni puesto</span>
-            <span><b className="mono">{Math.round(totales.horas)}</b> h estimadas</span>
+            <span><b className="mono">{esfuerzoTexto(totales.horas, doc, true)}</b> de esfuerzo estimado</span>
             <span><b className="mono">{critica.size}</b> en ruta crítica</span>
             <span>Termina <b className="mono">{corta(finProyecto)}</b></span>
             {doc.golive && <span className={tarde ? 'tarde' : 'bien'}>

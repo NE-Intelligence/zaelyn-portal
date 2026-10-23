@@ -5,6 +5,7 @@
  * se lee, no un campo escondido al final: es lo que alguien nuevo en el
  * proyecto necesita para entender por qué esa actividad está ahí.
  */
+import { NOMBRE_ESFUERZO, aVista, deVista, esfuerzoTexto } from '@/lib/editor/unidades'
 import { useMemo, useState } from 'react'
 import type { Doc, Nodo, PersonaDelEditor, TipoNodo } from '@/lib/editor/tipos'
 import { PROGRAMABLES, SEGUIMIENTO_DICE, TIPOS_NODO, TIPO_DICE, TIPO_NOMBRE, avanzo, puedeVivir } from '@/lib/editor/tipos'
@@ -143,9 +144,9 @@ export function Inspector({
           )}
           {n.tipo === 'actividad' && (
             <label>
-              <span>Esfuerzo (horas)</span>
-              <input type="number" min={0} step={0.5} value={n.horas ?? ''} disabled={!puede} placeholder="—"
-                onChange={e => onCambiar(n.id, { horas: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) })} />
+              <span>Esfuerzo ({NOMBRE_ESFUERZO(doc)})</span>
+              <input type="number" min={0} step={doc.unidad === 'dias' ? 0.25 : 0.5} value={n.horas != null ? aVista(n.horas, doc) : ''} disabled={!puede} placeholder="—"
+                onChange={e => onCambiar(n.id, { horas: e.target.value === '' ? null : deVista(Math.max(0, Number(e.target.value)), doc) })} />
             </label>
           )}
           <div className="ed-fin">
@@ -160,7 +161,7 @@ export function Inspector({
           <div><b className="mono">{corta(medida.inicio)} – {corta(medida.fin)}</b><span>abarca</span></div>
           <div><b className="mono">{medida.dias}</b><span>días</span></div>
           <div><b className="mono">{medida.piezas}</b><span>actividades e hitos</span></div>
-          <div><b className="mono">{Math.round(medida.horas)}</b><span>horas estimadas</span></div>
+          <div><b className="mono">{esfuerzoTexto(medida.horas, doc, true)}</b><span>esfuerzo estimado</span></div>
           {medida.sinDueno > 0 && <div className="aviso"><b className="mono">{medida.sinDueno}</b><span>sin responsable</span></div>}
         </div>
       )}

@@ -12,6 +12,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Doc, Hallazgo, LecturaExcel, NivelHallazgo, Revision as RevisionT } from '@/lib/editor/tipos'
 import { decirError, escribir } from './comun'
 
+const UNIDAD: Record<string, string> = { horas: 'horas', dias: 'días', semanas: 'semanas', meses: 'meses', minutos: 'minutos' }
 const NIVEL: Record<NivelHallazgo, string> = { error: 'Errores', aviso: 'Avisos', info: 'Para que lo sepas' }
 
 export function Revision({
@@ -92,6 +93,12 @@ export function Revision({
           <p className="ed-rev-chips">
             {lectura.columnas.map(c => <span key={c.campo} className="ed-chip" title={`Columna «${c.titulo}»`}>{c.campo}: {c.titulo}</span>)}
           </p>
+          {(lectura.tiempo?.length ?? 0) > 0 && (
+            <p>
+              Tiempos: {lectura.tiempo.map(t => `«${t.titulo}» como ${t.tipo === 'duracion' ? 'duración' : 'esfuerzo'} en ${UNIDAD[t.unidad] ?? t.unidad}`).join('; ')}
+              {` · jornada de ${lectura.jornada} h`}.
+            </p>
+          )}
           {lectura.estructura === 'esquema' && <p>Las claves eran un esquema (1, 1.1, 1.1.2): los renglones con hijos quedaron como fases y grupos.</p>}
           {lectura.estructura === 'fase' && <p>La columna de fase agrupó las actividades.</p>}
           {lectura.calendario === 'naturales' && <p>Muchas fechas caen en fin de semana: dejé el calendario en días naturales. Si tu proyecto es de lunes a viernes, activa «Solo días hábiles».</p>}
