@@ -27,6 +27,8 @@ export type VistaPlan = {
   ajenas: Array<{ groupId: string; grupo: string; nombreRol: string; paga: Paga; ocupaLugar: boolean | null }>
   organizacion: { id: string; nombre: string; esAdmin: boolean } | null
   fiscal: { datos: DatosFiscales | null; cobros: Cobro[]; regimenes: Record<string, string>; usos: Record<string, string> }
+  prueba: { expira: string; tipo: string } | null
+  invitaciones: Array<{ codigo: string; nota: string | null; usado: boolean; vence: string | null; creado: string }> | null
   cobro: { disponible: boolean; monedas: string[]; tipoCambio: Record<string, { valor: number; fecha: string; fuente: string }> }
   suscripcion: { estado: string; hasta: string | null; moneda: string | null; viva: boolean } | null
 }

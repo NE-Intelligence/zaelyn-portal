@@ -19,7 +19,7 @@ const ACCIONES = new Set<string>([
   'guardar', 'baja', 'proponer', 'mios', 'liberar-vista', 'liberar', 'grupo-crear', 'persona', 'invitar',
   'reabrir', 'reorganizar', 'plan-comprar',
   'org-crear', 'org-invitar', 'org-unirse', 'org-quitar', 'org-editar', 'org-etiquetar', 'org-comprar',
-  'fiscal',
+  'fiscal', 'codigo', 'invitaciones',
 ])
 type Accion = AccionEditor
 

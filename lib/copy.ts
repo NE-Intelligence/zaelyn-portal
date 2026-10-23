@@ -37,6 +37,30 @@ const es = {
   'pie.personal': 'Zaelyn Personal',
   'pie.portal': 'Portal de proyectos',
 
+  // ── empieza (#182) ───────────────────────────────────────────────────
+  'nav.empieza': 'Empieza',
+  'hero.cta0': 'Empieza gratis',
+  'em.rotulo': 'Empieza en 3 minutos',
+  'em.h2': 'Abre Telegram, escanea y escríbele.',
+  'em.sub': 'Zaelyn vive en Telegram: no hay app nueva que instalar ni cuenta que crear. El código de la guía te da 3 días de Zaelyn completa —Personal, Familia y Proyectos— sin tarjeta.',
+  'em.1t': 'Ten Telegram',
+  'em.1p': 'Si no lo tienes, descárgalo gratis en tu teléfono desde App Store o Google Play.',
+  'em.2t': 'Escanea el código',
+  'em.2p': 'Con la cámara del teléfono. Se abre el chat con @ZaelynBot y tu prueba se activa sola.',
+  'em.3t': 'Salúdalo',
+  'em.3p': 'Te pregunta tu ciudad para avisarte a tu hora. Después escríbele como a una persona.',
+  'em.abrir': 'Abrir Zaelyn en Telegram',
+  'em.qr': 'Código QR que abre Zaelyn en Telegram con la prueba de 3 días',
+  'em.codigo': 'Código de prueba',
+  'em.codigo.p': '3 días de Zaelyn completa. Si ya tienes el chat abierto, escribe «/codigo ZAELYN3».',
+  'em.inv': '¿Te invitó alguien del equipo de Zaelyn? Tu invitación completa el mes gratis: escribe «/codigo» y el código que te dieron.',
+  'em.guias': 'Guías para descargar',
+  'em.g1t': 'Guía rápida de inicio',
+  'em.g1p': 'De cero a tu primer recordatorio, en 4 páginas.',
+  'em.g2t': 'Guía completa de capacidades',
+  'em.g2p': 'Todo lo que puedes hacer en Telegram y en el portal, con ejemplos y pantallas.',
+  'em.pdf': 'Descargar PDF',
+
   // ── portada ──────────────────────────────────────────────────────────
   'meta.titulo': 'Zaelyn — Tu PMO de bolsillo',
   'meta.desc':

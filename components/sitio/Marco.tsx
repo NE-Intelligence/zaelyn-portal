@@ -11,6 +11,7 @@ export function Encabezado({ lang }: { lang: Idioma }) {
   // entre las otras tres como un enlace más — en un teléfono, detrás de una
   // hamburguesa que además no abría.
   const enlaces = [
+    { href: '/#empieza', texto: t('nav.empieza') },
     { href: '/proyectos', texto: t('nav.proyectos') },
     { href: '/familia', texto: t('nav.familia') },
     { href: '/personal', texto: t('nav.personal') },

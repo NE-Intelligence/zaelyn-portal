@@ -27,6 +27,13 @@ const Chispa = () => (
   </span>
 )
 
+/** La liga del QR: abre el bot y canjea la prueba de 3 días en el mismo toque (#182). */
+const LIGA_PRUEBA = 'https://t.me/ZaelynBot?start=ZAELYN3'
+const GUIAS = [
+  { k: 'g1', href: '/guias/zaelyn-guia-rapida.pdf' },
+  { k: 'g2', href: '/guias/zaelyn-guia-completa.pdf' },
+] as const
+
 const trazo = {
   width: 26,
   height: 26,
@@ -53,12 +60,12 @@ export default function Portada() {
           <p className="st-bajada">{t('hero.sub')}</p>
 
           <div className="st-acciones">
-            <Link className="st-btn st-btn-1" href="/proyectos">
+            <a className="st-btn st-btn-1" href="#empieza">
+              {t('hero.cta0')}
+            </a>
+            <Link className="st-btn st-btn-2" href="/proyectos">
               {t('hero.cta1')}
             </Link>
-            <a className="st-btn st-btn-2" href="#como">
-              {t('hero.cta2')}
-            </a>
             <Link className="st-btn st-btn-2" href="/demo">
               {t('nav.portal')}
             </Link>
@@ -98,6 +105,64 @@ export default function Portada() {
               <div className="st-burbuja">
                 {t('chat.4a')} <b>{t('chat.4b')}</b> {t('chat.4c')}
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="st-banda st-seccion st-empieza" id="empieza">
+        <div className="st-caja">
+          <div className="st-em-rejilla">
+            <div>
+              <p className="st-rotulo">{t('em.rotulo')}</p>
+              <h2>{t('em.h2')}</h2>
+              <p className="st-em-sub">{t('em.sub')}</p>
+              <ol className="st-em-pasos">
+                {(['1', '2', '3'] as const).map(n => (
+                  <li key={n}>
+                    <span className="st-em-n">{n}</span>
+                    <div>
+                      <h3>{t(`em.${n}t`)}</h3>
+                      <p>{t(`em.${n}p`)}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <div className="st-acciones st-em-acciones">
+                <a className="st-btn st-btn-1" href={LIGA_PRUEBA} target="_blank" rel="noopener noreferrer">
+                  {t('em.abrir')}
+                </a>
+              </div>
+            </div>
+
+            <div className="st-em-tarjeta">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="st-em-qr" src="/guias/zaelyn-qr.svg" alt={t('em.qr')} width={240} height={240} />
+              <p className="st-rotulo">{t('em.codigo')}</p>
+              <p className="st-em-codigo">ZAELYN3</p>
+              <p className="st-em-nota">{t('em.codigo.p')}</p>
+              <p className="st-em-nota st-em-inv">{t('em.inv')}</p>
+            </div>
+          </div>
+
+          <div className="st-em-guias">
+            <p className="st-rotulo">{t('em.guias')}</p>
+            <div className="st-em-lista">
+              {GUIAS.map(g => (
+                <a className="st-em-guia" key={g.k} href={g.href} download>
+                  <span className="st-em-ico" aria-hidden="true">
+                    <svg {...trazo}>
+                      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                      <path d="M14 3v5h5M12 11v6M9 14l3 3 3-3" />
+                    </svg>
+                  </span>
+                  <span className="st-em-txt">
+                    <b>{t(`em.${g.k}t`)}</b>
+                    <span>{t(`em.${g.k}p`)}</span>
+                  </span>
+                  <span className="st-em-bajar">{t('em.pdf')}</span>
+                </a>
+              ))}
             </div>
           </div>
         </div>

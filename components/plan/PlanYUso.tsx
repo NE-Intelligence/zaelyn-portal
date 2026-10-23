@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { PAGA, type VistaPlan } from '@/lib/plan-uso/tipos'
 import { decirError, escribir } from '@/components/editor/comun'
 import { Facturacion } from '@/components/plan/Facturacion'
+import { CanjearCodigo, Invitaciones } from '@/components/plan/Codigos'
 
 const usd = (n: number) => `${n.toFixed(2)} USD`
 
@@ -204,6 +205,9 @@ export function PlanYUso({ v, pagado }: { v: VistaPlan; pagado: boolean }) {
         </div>
         <p className="pu-nota">Paga quien decide: el Sponsor y sus Líderes. Quien ejecuta entra en bloques; quien solo da seguimiento, gratis hasta dos. Precios con IVA incluido.</p>
       </section>
+
+      {!pagaOrg && !v.suscripcion?.viva && <CanjearCodigo prueba={v.prueba} />}
+      {v.invitaciones && <Invitaciones lista={v.invitaciones} />}
 
       {!pagaOrg && <Facturacion datos={v.fiscal.datos} cobros={v.fiscal.cobros} regimenes={v.fiscal.regimenes} usos={v.fiscal.usos} />}
     </div>
