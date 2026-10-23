@@ -163,6 +163,31 @@ export default async function Grupos() {
           </section>
         )}
 
+        {/* SIN GRUPO DE FAMILIA, LA FAMILIA NO DESAPARECE (#183). Antes esta
+            pantalla simplemente no la mencionaba, y quien no tenía grupo de
+            familia no tenía cómo saber que existe ni cómo empezarla. */}
+        {!grupos.some(g => g.clase === 'family') && (
+          <section style={{ display: 'grid', gap: 16 }}>
+            <h2 className="pt-overline">Familia</h2>
+            <article className="pt-grupo" style={{ maxWidth: 560 }}>
+              <header><h2>Todavía no tienes un grupo de familia</h2></header>
+              <div className="pt-vacio">
+                <b>Se crea hablando, en Telegram</b>
+                <span>
+                  Dile a Zaelyn «crea el grupo Familia» y después «agrega a Leo a Familia a cargo mío».
+                  En cuanto exista, aquí aparece la semana de tu casa: quién lleva y quién recoge,
+                  quehaceres con puntos, el medallero y los cumpleaños. El grupo de familia viene con
+                  el módulo Tribu.
+                </span>
+              </div>
+              <Link href="/demo/familia" className="ed-entrada">
+                <span>Ver una familia de ejemplo</span>
+                <small>Las seis vistas, con una familia inventada</small>
+              </Link>
+            </article>
+          </section>
+        )}
+
         {otros.length > 0 && (
           <section style={{ display: 'grid', gap: 16 }}>
             <h2 className="pt-overline">Lo demás que Zaelyn te lleva</h2>
