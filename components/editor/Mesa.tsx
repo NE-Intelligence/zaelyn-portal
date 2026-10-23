@@ -10,6 +10,7 @@ import type { Mesa as MesaT, Tarjeta } from '@/lib/editor/tipos'
 import { METODOLOGIA_CORTA } from '@/lib/editor/tipos'
 import { hoyISO } from '@/lib/editor/programar'
 import { Chispa, corta, decirError, escribir } from './comun'
+import { DesdeExcel } from './DesdeExcel'
 import { nombreDeRol } from '@/lib/plan-uso/tipos'
 
 const hace = (iso: string) => {
@@ -105,6 +106,7 @@ export function Mesa({ mesa }: { mesa: MesaT }) {
               <b>En blanco</b>
               <span>Arma objeto por objeto: arrastra fases, sprints, grupos, actividades e hitos desde la paleta.</span>
             </button>
+            <DesdeExcel groupId={g} nombre={nombre} />
           </div>
         </section>
       )}
@@ -235,6 +237,7 @@ export function MesaPersonal({ datos }: { datos: import('@/lib/editor/tipos').Mi
             <b>En blanco</b>
             <span>Arma objeto por objeto: fases, sprints, grupos, actividades, subtareas e hitos.</span>
           </button>
+          <DesdeExcel groupId={null} nombre={nombre} />
         </div>
       </section>
 

@@ -51,6 +51,49 @@ export type Nodo = {
   hecho?: boolean
   /** Cómo va en el seguimiento, si el plan se reabrió (#178). Solo se lee. */
   seguimiento?: { estatus: EstatusSeguimiento; avance: number }
+  /** Lo que decía el archivo del que salió (#188). Lo lee la revisión; el editor no lo cambia. */
+  origen?: Origen
+}
+
+export type Origen = {
+  fila: number
+  inicio?: string | null
+  fin?: string | null
+  horas?: number | null
+  avance?: number | null
+  estatus?: EstatusSeguimiento
+  persona?: string
+}
+
+/** La revisión antes de liberar (#188). La calcula el motor. */
+export type NivelHallazgo = 'error' | 'aviso' | 'info'
+export type Hallazgo = {
+  codigo: string
+  nivel: NivelHallazgo
+  nodo: string | null
+  titulo: string | null
+  fila: number | null
+  dice: string
+  arreglo?: { etiqueta: string; cambios: { inicio?: string; dias?: number } }
+}
+export type Revision = { hallazgos: Hallazgo[]; errores: number; avisos: number; info: number }
+
+/** Lo que se entendió de un Excel al convertirlo en borrador (#188). */
+export type LecturaExcel = {
+  hoja: string
+  filaEncabezado: number
+  renglones: number
+  fases: number
+  actividades: number
+  hitos: number
+  columnas: Array<{ campo: string; titulo: string }>
+  ajenas: string[]
+  problemas: string[]
+  fechasSeguras: boolean
+  diaPrimero: boolean
+  calendario: 'habiles' | 'naturales'
+  estructura: 'esquema' | 'fase' | 'plana'
+  dependenciasPerdidas: number
 }
 
 export type EstatusSeguimiento = 'abierto' | 'en_curso' | 'bloqueado' | 'hecho' | 'cancelado'

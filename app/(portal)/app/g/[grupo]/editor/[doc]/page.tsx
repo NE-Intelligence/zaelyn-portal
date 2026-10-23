@@ -77,6 +77,7 @@ export default async function PaginaEditor({
         ia={mesa.ia}
         inicial={inicial}
         abrirZaelyn={s('ia') === '1'}
+        abrirRevision={s('revisar') === '1'}
         reabierto={s('reabierto') === '1'
           ? { actualizados: Number(s('a')) || 0, agregados: Number(s('n')) || 0, quitados: Number(s('q')) || 0 }
           : null}

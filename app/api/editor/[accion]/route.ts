@@ -20,6 +20,7 @@ const ACCIONES = new Set<string>([
   'reabrir', 'reorganizar', 'plan-comprar',
   'org-crear', 'org-invitar', 'org-unirse', 'org-quitar', 'org-editar', 'org-etiquetar', 'org-comprar',
   'fiscal', 'codigo', 'invitaciones',
+  'excel', 'revisar',
 ])
 type Accion = AccionEditor
 
@@ -33,7 +34,9 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ accion: st
     return NextResponse.json({ error: 'ORIGEN' }, { status: 403 })
   }
   const cuerpo = await req.text()
-  if (cuerpo.length > 2_000_000) return NextResponse.json({ error: 'DEMASIADO_GRANDE' }, { status: 413 })
+  // Un Excel viaja en base64 (#188): hasta 3 MB de archivo, ~4 MB aquí. Vercel
+  // corta en 4.5 MB, así que el tope de verdad lo pone la página.
+  if (cuerpo.length > (accion === 'excel' ? 4_400_000 : 2_000_000)) return NextResponse.json({ error: 'DEMASIADO_GRANDE' }, { status: 413 })
   const r = await escribirEditor(accion as Accion, cuerpo)
   if (r.status === 204) return new NextResponse(null, { status: 204 })
   return new NextResponse(r.cuerpo, { status: r.status, headers: { 'content-type': 'application/json' } })

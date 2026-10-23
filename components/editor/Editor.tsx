@@ -14,7 +14,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Doc, Ficha, Liberado, Metodologia, Nodo, PersonaDelEditor, PlantillaBase, Propuesta, Reorganizacion, Tarjeta, TipoNodo } from '@/lib/editor/tipos'
+import type { Doc, Ficha, LecturaExcel, Liberado, Metodologia, Nodo, PersonaDelEditor, PlantillaBase, Propuesta, Reorganizacion, Revision as RevisionT, Tarjeta, TipoNodo } from '@/lib/editor/tipos'
 import { METODOLOGIA_CORTA, TIPOS_NODO, TIPO_DICE, TIPO_NOMBRE } from '@/lib/editor/tipos'
 import {
   arbol, arrancarEn, cabe, compactar, cambiar, comoPlantilla, correrA, desenlazar, enlazar, entre, finProyecto as finDelProyecto, hoyISO,
@@ -26,6 +26,8 @@ import { Tablero } from './Tablero'
 import { Inspector } from './Inspector'
 import { Asistente } from './Asistente'
 import { Liberar } from './Liberar'
+import { Revision } from './Revision'
+import { claveLectura } from './DesdeExcel'
 import { Chispa, IconoTipo, corta, decirError, escribir } from './comun'
 
 type Historia = { pasado: Doc[]; presente: Doc; futuro: Doc[]; clave: string | null; t: number }
@@ -39,7 +41,7 @@ const TITULO_NUEVO: Record<TipoNodo, string> = {
 }
 
 export function Editor({
-  grupo, personas, fichas, base, puede, ia, inicial, abrirZaelyn = false, reabierto = null,
+  grupo, personas, fichas, base, puede, ia, inicial, abrirZaelyn = false, reabierto = null, abrirRevision = false,
 }: {
   /** El grupo del borrador, o null si es de la persona y el grupo se elige al liberar. */
   grupo: { id: string; nombre: string } | null
@@ -52,6 +54,8 @@ export function Editor({
   /** Recién traído del seguimiento (#178): qué cambió desde el borrador de la vez pasada. */
   reabierto?: { actualizados: number; agregados: number; quitados: number } | null
   abrirZaelyn?: boolean
+  /** Recién salido de un Excel (#188): abre con la revisión a la vista. */
+  abrirRevision?: boolean
 }) {
   const router = useRouter()
   const [h, setH] = useState<Historia>(() => ({ pasado: [], presente: programar(inicial.doc), futuro: [], clave: null, t: 0 }))
@@ -68,12 +72,23 @@ export function Editor({
   const [colapsados, setColapsados] = useState<Set<string>>(new Set())
   const [modo, setModo] = useState<'gantt' | 'tablero'>('gantt')
   const [zoom, setZoom] = useState<keyof typeof ZOOM>('semana')
-  const [panel, setPanel] = useState<'detalle' | 'zaelyn'>(abrirZaelyn ? 'zaelyn' : 'detalle')
+  const [panel, setPanel] = useState<'detalle' | 'zaelyn' | 'revision'>(abrirRevision ? 'revision' : abrirZaelyn ? 'zaelyn' : 'detalle')
+  const [lectura, setLectura] = useState<LecturaExcel | null>(null)
+  const [revisado, setRevisado] = useState<RevisionT | null>(null)
+  const [antes, setAntes] = useState<RevisionT | null>(null)
   const [recien, setRecien] = useState<Set<string>>(new Set())
   const [ultima, setUltima] = useState<Propuesta | null>(null)
   const [traido, setTraido] = useState(reabierto)
   const [reorgAplicada, setReorgAplicada] = useState<{ cambios: number; antes: string | null; despues: string | null } | null>(null)
   const [dialogo, setDialogo] = useState<'plantilla' | 'fabrica' | null>(null)
+  // Lo que se leyó del Excel, si este borrador acaba de salir de uno.
+  useEffect(() => {
+    if (!inicial.id) return
+    try {
+      const x = sessionStorage.getItem(claveLectura(inicial.id))
+      if (x) setLectura(JSON.parse(x) as LecturaExcel)
+    } catch { /* sin almacenamiento: no se enseña la lectura */ }
+  }, [inicial.id])
   const [aviso, setAviso] = useState('')
   const [liberado, setLiberado] = useState<Liberado | null>(inicial.liberado ?? null)
   const [liberando, setLiberando] = useState(false)
@@ -317,7 +332,19 @@ export function Editor({
       const r = await guardar()
       if (!r) return
     }
+    // La revisión va antes (#188): si hay algo que corregir, se dice aquí y
+    // la persona decide si lo ve o libera así.
+    const r = await escribir<RevisionT>('revisar', { doc: h.presente, groupId: grupo?.id ?? null })
+    if (r.ok && r.dato.errores + r.dato.avisos > 0) { setAntes(r.dato); return }
     setLiberando(true)
+  }
+
+  const aplicarArreglos = (lista: Array<{ nodo: string; cambios: { inicio?: string; dias?: number } }>) => {
+    let d = h.presente
+    for (const a of lista) if (d.nodos.some(n => n.id === a.nodo)) d = cambiar(d, a.nodo, a.cambios)
+    comprometer(d)
+    setRecien(new Set(lista.map(a => a.nodo)))
+    setTimeout(() => setRecien(new Set()), 2600)
   }
 
   const cambiarDoc = (c: Partial<Doc>, clave?: string) => comprometer(programar({ ...h.presente, ...c }), clave ? { clave } : {})
@@ -515,8 +542,18 @@ export function Editor({
           <div className="ed-segmentos panel">
             <button className={panel === 'detalle' ? 'on' : ''} onClick={() => setPanel('detalle')}>Detalle</button>
             <button className={panel === 'zaelyn' ? 'on zaelyn' : 'zaelyn'} onClick={() => setPanel('zaelyn')}><Chispa className="ch" />Zaelyn</button>
+            <button className={panel === 'revision' ? 'on' : ''} onClick={() => setPanel('revision')}>
+              Revisión{revisado && revisado.errores + revisado.avisos > 0 && <span className={`ed-badge${revisado.errores ? ' error' : ''}`}>{revisado.errores + revisado.avisos}</span>}
+            </button>
           </div>
-          {panel === 'zaelyn' ? (
+          {/* Siempre montada: así la pestaña lleva la cuenta aunque no esté abierta. */}
+          <div hidden={panel !== 'revision'}>
+            <Revision
+              doc={h.presente} groupId={grupo?.id ?? null} lectura={lectura} puede={puede}
+              onAplicar={aplicarArreglos} onIr={setSeleccion} onRevisado={setRevisado}
+            />
+          </div>
+          {panel === 'revision' ? null : panel === 'zaelyn' ? (
             <Asistente
               groupId={grupo?.id ?? null} nombre={nombre} doc={h.presente} metodologia={metodologia}
               fichas={fichas} ia={ia} puede={puede} ultima={ultima} onPropuesta={recibirPropuesta}
@@ -570,6 +607,30 @@ export function Editor({
           onCerrar={() => setLiberando(false)}
           onLiberado={(l) => { setLiberado(l); setAviso('Listo: Zaelyn ya sigue el plan. Cada responsable recibirá sus actividades por el chat.') }}
         />
+      )}
+
+      {antes && (
+        <div className="ed-velo" onClick={() => setAntes(null)}>
+          <div className="ed-dialogo" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
+            <h3>Antes de liberar</h3>
+            <p>
+              La revisión encontró {antes.errores ? <b>{antes.errores} error{antes.errores === 1 ? '' : 'es'}</b> : null}
+              {antes.errores && antes.avisos ? ' y ' : ''}
+              {antes.avisos ? <b>{antes.avisos} aviso{antes.avisos === 1 ? '' : 's'}</b> : null}
+              {' '}en el plan: fechas en fin de semana o festivo, dependencias que no se respetan, totales que no cuadran.
+              Lo que se libera es lo que Zaelyn va a seguir y avisar.
+            </p>
+            <ul className="ed-antes-lista">
+              {antes.hallazgos.filter(x => x.nivel !== 'info').slice(0, 5).map((x, i) => (
+                <li key={i}><b>{x.titulo ?? 'Plan'}</b> — {x.dice}</li>
+              ))}
+            </ul>
+            <div className="ed-dlg-acciones">
+              <button className="ed-btn suave" onClick={() => { setAntes(null); setLiberando(true) }}>Liberar así</button>
+              <button className="ed-btn primario" onClick={() => { setAntes(null); setPanel('revision') }}>Ver la revisión</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {dialogo && (

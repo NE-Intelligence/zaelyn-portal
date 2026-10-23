@@ -168,6 +168,7 @@ export type AccionEditor =
   | 'reabrir' | 'reorganizar' | 'plan-comprar'
   | 'org-crear' | 'org-invitar' | 'org-unirse' | 'org-quitar' | 'org-editar' | 'org-etiquetar' | 'org-comprar'
   | 'fiscal' | 'codigo' | 'invitaciones'
+  | 'excel' | 'revisar'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
 function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
@@ -180,6 +181,7 @@ function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo
     case 'org-crear': case 'org-invitar': case 'org-unirse': case 'org-quitar':
     case 'org-editar': case 'org-etiquetar': case 'org-comprar':
       return { metodo: 'POST', ruta: `/portal/organizacion/${accion.slice(4)}` }
+    case 'excel': case 'revisar':
     case 'guardar': case 'baja': case 'proponer': case 'reabrir': case 'reorganizar':
       return { metodo: 'POST', ruta: `/portal/editor/${accion}` }
     case 'mios': return { metodo: 'GET', ruta: '/portal/editor/mios' }
@@ -215,7 +217,7 @@ export async function escribirEditor(
       ...(destino.metodo === 'POST' ? { body: cuerpo } : {}),
       cache: 'no-store',
       // La propuesta del modelo tarda; el resto contesta en segundos.
-      signal: AbortSignal.timeout(accion === 'proponer' ? 150_000 : 30_000),
+      signal: AbortSignal.timeout(accion === 'proponer' ? 150_000 : accion === 'excel' ? 60_000 : 30_000),
     })
     return { status: r.status, cuerpo: r.status === 204 ? '' : await r.text() }
   } catch {

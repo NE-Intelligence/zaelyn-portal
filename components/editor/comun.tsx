@@ -115,11 +115,14 @@ export function decirError(e: { status: number; error: string; cuerpo: Record<st
     case 'FALLO': return `Zaelyn no pudo armar la propuesta (${String(e.cuerpo['detalle'] ?? 'sin detalle')}). Vuelve a intentarlo.`
     case 'NO_LO_ENCUENTRO': return String(e.cuerpo['detalle'] ?? 'Eso ya no existe o no es de un grupo tuyo.')
     case 'PLAN_EXISTE': return `Ese grupo ya tiene un plan llamado «${String(e.cuerpo['detalle'] ?? '')}». Ponle otro nombre o actualiza ese plan.`
-    case 'VACIO': return 'El borrador no tiene actividades ni hitos que liberar.'
+    case 'VACIO': return e.status === 422 ? 'El archivo no trae renglones con actividad.' : 'El borrador no tiene actividades ni hitos que liberar.'
     case 'YA_EXISTE': return 'Ya tienes un grupo con ese nombre.'
     case 'DEMASIADOS': return 'Llegaste al máximo de grupos.'
     case 'LLENO': return `El grupo ya tiene el máximo de personas de tu plan (${String(e.cuerpo['max'] ?? '')}).`
     case 'YA_TIENE_CUENTA': return 'Esa persona ya entró con su cuenta: no necesita código.'
+    case 'SIN_TABLA': return 'No encontré una tabla de actividades en el archivo. La primera fila de la tabla debe tener los títulos de columna (por ejemplo «Actividad», «Inicio», «Fin», «Responsable»).'
+    case 'ILEGIBLE': return 'No pude abrir el archivo. Súbelo como .xlsx o .csv.'
+    case 'DEMASIADO_GRANDE': return 'El archivo es demasiado grande. El tope es de 3 MB.'
     case 'RED': case 'CAIDO': return 'No hay conexión con Zaelyn ahora mismo.'
     default: return `Algo falló (${e.error}).`
   }

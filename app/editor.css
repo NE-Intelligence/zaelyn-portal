@@ -625,3 +625,42 @@
   .pt .og-tabla td:last-child .ed-btn { margin: 2px 0; }
 }
 .pt .pu { min-width: 0; }
+
+/* ── #188 · desde Excel y la revisión antes de liberar ─────────────── */
+.pt .ed-camino.excel input[type=file] { display: none; }
+.pt .ed-camino-error { font-style: normal; font-size: 12.5px; color: var(--critica); }
+.pt .ed-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; border-radius: var(--r-pill); background: var(--st-curso-bg); color: var(--st-curso-ink); font-size: 11px; font-weight: 600; }
+.pt .ed-badge.error { background: var(--critica-soft); color: var(--critica); }
+.pt .ed-btn.chico { padding: 4px 10px; font-size: 12.5px; }
+.pt .ed-btn.ancho { width: 100%; justify-content: center; }
+.pt .ed-revision { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.pt .ed-rev-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.pt .ed-rev-cab b { font-size: 14px; color: var(--ink); }
+.pt .ed-rev-estado { font-size: 12px; color: var(--ink-3); }
+.pt .ed-rev-lectura { background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px 12px; font-size: 12.5px; color: var(--ink-2); display: flex; flex-direction: column; gap: 6px; }
+.pt .ed-rev-lectura .fila { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pt .ed-rev-lectura b { color: var(--ink); font-size: 13px; }
+.pt .ed-rev-lectura .aviso { color: var(--st-curso-ink); }
+.pt .ed-rev-lectura .gris { color: var(--ink-3); }
+.pt .ed-rev-lectura details summary { cursor: pointer; color: var(--ink-2); }
+.pt .ed-rev-lectura ul { margin: 6px 0 0 16px; display: flex; flex-direction: column; gap: 2px; }
+.pt .ed-rev-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.pt .ed-rev-chips .ed-chip { font-size: 11px; }
+.pt .ed-rev-cuenta { display: flex; gap: 6px; flex-wrap: wrap; }
+.pt .ed-rev-cuenta .n { padding: 4px 10px; border-radius: var(--r-pill); background: var(--surface-2); border: 1px solid var(--line); font-size: 12px; color: var(--ink-2); }
+.pt .ed-rev-cuenta .n.error { background: var(--critica-soft); border-color: transparent; color: var(--critica); }
+.pt .ed-rev-cuenta .n.aviso { background: var(--st-curso-bg); border-color: transparent; color: var(--st-curso-ink); }
+.pt .ed-rev-limpio { padding: 10px 12px; border-radius: var(--r-md); background: var(--st-hecha-bg); color: var(--st-hecha-ink); font-size: 13px; }
+.pt .ed-rev-grupo h4 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin: 4px 0 6px; display: flex; gap: 6px; }
+.pt .ed-rev-grupo ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pt .ed-rev-grupo li { border: 1px solid var(--line); border-left-width: 3px; border-radius: var(--r-sm); padding: 8px 10px; background: var(--surface); display: flex; flex-direction: column; gap: 4px; align-items: flex-start; min-width: 0; }
+.pt .ed-rev-grupo.n-error li { border-left-color: var(--critica); }
+.pt .ed-rev-grupo.n-aviso li { border-left-color: var(--st-curso-ink); }
+.pt .ed-rev-grupo.n-info li { border-left-color: var(--line); }
+.pt .ed-rev-grupo li p { font-size: 12.5px; color: var(--ink-2); margin: 0; overflow-wrap: anywhere; }
+.pt .ed-rev-nodo { all: unset; cursor: pointer; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; min-width: 0; }
+.pt .ed-rev-nodo:disabled { cursor: default; }
+.pt .ed-rev-nodo .mono { font-size: 11px; color: var(--ink-3); }
+.pt .ed-rev-nodo b { font-size: 13px; color: var(--ink); overflow-wrap: anywhere; }
+.pt .ed-rev-nodo:hover:not(:disabled) b { color: var(--brand); text-decoration: underline; }
+.pt .ed-antes-lista { margin: 4px 0 4px 18px; font-size: 13px; color: var(--ink-2); display: flex; flex-direction: column; gap: 4px; }

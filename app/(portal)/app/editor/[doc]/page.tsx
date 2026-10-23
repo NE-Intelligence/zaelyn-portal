@@ -72,6 +72,7 @@ export default async function PaginaProyecto({
         ia={datos.ia}
         inicial={inicial}
         abrirZaelyn={s('ia') === '1'}
+        abrirRevision={s('revisar') === '1'}
       />
     </>
   )
