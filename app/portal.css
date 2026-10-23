@@ -1491,3 +1491,22 @@ a.pt-plan:hover {
 @media (max-width: 820px) { .pu-niveles { grid-template-columns: 1fr; } }
 .pt-pie { flex-wrap: wrap; }
 .pt-pie-sesion { flex-basis: 100%; margin: 0 0 6px; font-size: 12px; color: var(--ink-3); }
+
+/* ═══ #192 · tu suscripción e historial ════════════════════════════════ */
+.pu-sus { display: grid; gap: 16px; padding: 20px; border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--sombra-1); border-top: 3px solid var(--brand); }
+.pu-sus-cab { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.pu-sus-cab h1 { margin: 4px 0 0; font-family: var(--fuente-display), sans-serif; font-size: 26px; font-weight: 600; }
+.pu-sus-sello { display: inline-block; margin-top: 8px; padding: 4px 12px; border-radius: var(--r-pill); font-size: 12.5px; font-weight: 600; color: #fff; background: linear-gradient(100deg, #8a3fe0, #0e8fbf); }
+.pu-sus-datos { margin: 0; display: grid; gap: 12px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pu-sus-datos > div { padding: 12px 14px; border-radius: var(--r-md); background: var(--surface-2); display: grid; gap: 3px; align-content: start; }
+.pu-sus-datos dt { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+.pu-sus-datos dd { margin: 0; font-size: 15px; color: var(--ink); }
+.pu-sus-datos dd b { font-variant-numeric: tabular-nums; }
+.pu-sus-datos small { font-size: 12px; color: var(--ink-3); }
+.pu-sus-acciones { display: grid; gap: 10px; justify-items: start; }
+.pu-sus-acciones p { margin: 0; font-size: 13.5px; color: var(--ink-2); max-width: 75ch; }
+.pu-sus-botones { display: flex; gap: 8px; flex-wrap: wrap; }
+.pu-estado.e-cancela { background: var(--st-curso-bg); color: var(--st-curso-ink); }
+.pu-historial td { vertical-align: middle; }
+.pu-historial a { color: var(--brand); font-weight: 600; }
+@media (max-width: 760px) { .pu-sus-datos { grid-template-columns: 1fr; } }

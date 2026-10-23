@@ -30,7 +30,19 @@ export type VistaPlan = {
   prueba: { expira: string; tipo: string } | null
   invitaciones: Array<{ codigo: string; nota: string | null; usado: boolean; vence: string | null; creado: string }> | null
   cobro: { disponible: boolean; monedas: string[]; tipoCambio: Record<string, { valor: number; fecha: string; fuente: string }> }
-  suscripcion: { estado: string; hasta: string | null; moneda: string | null; viva: boolean } | null
+  suscripcion: {
+    estado: string; hasta: string | null; moneda: string | null; viva: boolean
+    /** #192: el periodo, el próximo cargo y la cancelación programada. Opcionales mientras el motor no los mande. */
+    desde?: string | null
+    proximoCargo?: { fecha: string; totalCentavos: number; moneda: string } | null
+    importeCentavos?: number | null
+    cancelaAlFinal?: boolean
+    termina?: string | null
+    plan?: string
+    complementos?: Array<{ clave: string; nombre: string; cantidad: number }>
+  } | null
+  /** #192: cada cobro con su periodo, su IVA y el estado de su factura. */
+  historial?: Movimiento[]
   /** Beta 1 (#190): el tramo de fundador abierto, si lo hay. Opcional mientras el motor no lo mande. */
   fundador?: Fundadores
   /** El descuento que ya trae tu suscripción viva (fundador o promoción). */
@@ -39,6 +51,15 @@ export type VistaPlan = {
 
 /** `GET /portal/fundadores` (#190): tramos de 10 lugares al 75, 50 y 25%. */
 export type Fundadores = { abierto: boolean; tramo: 75 | 50 | 25 | null; quedan: number; ocupados?: number; total?: number }
+
+/** Un cobro en el historial (#192). Centavos de su moneda. */
+export type Movimiento = {
+  id: string; fecha: string; periodoDesde: string | null; periodoHasta: string | null; moneda: string
+  totalCentavos: number; netoCentavos: number; ivaCentavos: number; descuentoCentavos: number | null
+  urlStripe: string | null
+  factura: 'emitida' | 'solicitada' | 'disponible' | 'global'
+  folio: string | null
+}
 
 /** Los niveles que se pueden contratar por sí solos (#190). */
 export type NivelDePaga = 'base' | 'family' | 'pro'

@@ -165,7 +165,7 @@ export const docDelEditor = (id: string) =>
 export type AccionEditor =
   | 'guardar' | 'baja' | 'proponer' | 'mios'
   | 'liberar-vista' | 'liberar' | 'grupo-crear' | 'persona' | 'invitar'
-  | 'reabrir' | 'reorganizar' | 'plan-comprar'
+  | 'reabrir' | 'reorganizar' | 'plan-comprar' | 'plan-cancelar' | 'fiscal-solicitar'
   | 'org-crear' | 'org-invitar' | 'org-unirse' | 'org-quitar' | 'org-editar' | 'org-etiquetar' | 'org-comprar'
   | 'fiscal' | 'codigo' | 'invitaciones'
   | 'excel' | 'revisar'
@@ -176,6 +176,8 @@ function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo
   const g = typeof cuerpo['groupId'] === 'string' ? encodeURIComponent(cuerpo['groupId']) : ''
   switch (accion) {
     case 'plan-comprar': return { metodo: 'POST', ruta: '/portal/plan/comprar' }
+    case 'plan-cancelar': return { metodo: 'POST', ruta: '/portal/plan/cancelar' }
+    case 'fiscal-solicitar': return { metodo: 'POST', ruta: '/portal/fiscal/solicitar' }
     case 'fiscal': return { metodo: 'POST', ruta: '/portal/fiscal' }
     case 'codigo': return { metodo: 'POST', ruta: '/portal/codigo' }
     case 'invitaciones': return { metodo: 'POST', ruta: '/portal/invitaciones' }

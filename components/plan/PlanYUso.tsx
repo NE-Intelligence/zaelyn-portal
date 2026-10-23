@@ -13,6 +13,7 @@ import { PAGA, type NivelDePaga, type VistaPlan } from '@/lib/plan-uso/tipos'
 import { decirError, escribir } from '@/components/editor/comun'
 import { Facturacion } from '@/components/plan/Facturacion'
 import { CanjearCodigo, Invitaciones } from '@/components/plan/Codigos'
+import { Historial, Suscripcion } from '@/components/plan/Suscripcion'
 
 const usd = (n: number) => `${n.toFixed(2)} USD`
 
@@ -95,6 +96,7 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
   const t = v.cuenta?.topes
   return (
     <div className="pu">
+      {viva ? <Suscripcion v={v} /> : (
       <header className="pu-cab">
         <div>
           <span className="pu-rotulo">Tu plan</span>
@@ -108,6 +110,7 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
           </div>
         )}
       </header>
+      )}
 
       <nav className="pu-atajos">
         <Link href="/app/participaciones" className="ed-btn suave">Mis participaciones</Link>
@@ -183,9 +186,14 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
             const p = v.planes.find(x => x.clave === n.clave)
             if (!p) return null
             const actual = pagado_ === n.clave
+            // Lo que ya viene dentro de lo que pagas no se vende otra vez (#192).
+            const conTribu = (actuales['tribu'] ?? 0) > 0
+            const incluido = viva && !actual && (
+              (n.clave === 'base' && (pagado_ === 'family' || pagado_ === 'pro'))
+              || (n.clave === 'family' && pagado_ === 'pro' && conTribu))
             const final = conDescuento(p.precioUsd)
             return (
-              <article className={`pu-nivel${actual ? ' actual' : ''}${elegido === n.clave ? ' elegido' : ''}`} key={n.clave} data-nivel={n.clave}>
+              <article className={`pu-nivel${actual || incluido ? ' actual' : ''}${elegido === n.clave ? ' elegido' : ''}`} key={n.clave} data-nivel={n.clave}>
                 <span className="pu-rotulo">{n.para}</span>
                 <h3>{p.nombre}</h3>
                 <div className="pu-nivel-precio">
@@ -195,6 +203,8 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
                 <ul>{n.rasgos.map(r => <li key={r}>{r}</li>)}</ul>
                 {actual ? (
                   <span className="pu-nivel-tuyo">Tu plan</span>
+                ) : incluido ? (
+                  <span className="pu-nivel-tuyo">{n.clave === 'family' ? 'Activo: paquete con PMO' : 'Incluido en tu plan'}</span>
                 ) : (
                   <button
                     className={`ed-btn ${n.clave === 'pro' ? 'primario' : 'suave'}`}
@@ -271,7 +281,8 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
       {!pagaOrg && !v.suscripcion?.viva && <CanjearCodigo prueba={v.prueba} />}
       {v.invitaciones && <Invitaciones lista={v.invitaciones} />}
 
-      {!pagaOrg && <Facturacion datos={v.fiscal.datos} cobros={v.fiscal.cobros} regimenes={v.fiscal.regimenes} usos={v.fiscal.usos} />}
+      {!pagaOrg && v.historial && <Historial lista={v.historial} hayDatos={!!v.fiscal.datos} />}
+      {!pagaOrg && <Facturacion datos={v.fiscal.datos} cobros={v.historial ? [] : v.fiscal.cobros} regimenes={v.fiscal.regimenes} usos={v.fiscal.usos} />}
     </div>
   )
 }

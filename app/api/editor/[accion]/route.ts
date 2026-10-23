@@ -17,7 +17,7 @@ export const maxDuration = 160
 
 const ACCIONES = new Set<string>([
   'guardar', 'baja', 'proponer', 'mios', 'liberar-vista', 'liberar', 'grupo-crear', 'persona', 'invitar',
-  'reabrir', 'reorganizar', 'plan-comprar',
+  'reabrir', 'reorganizar', 'plan-comprar', 'plan-cancelar', 'fiscal-solicitar',
   'org-crear', 'org-invitar', 'org-unirse', 'org-quitar', 'org-editar', 'org-etiquetar', 'org-comprar',
   'fiscal', 'codigo', 'invitaciones',
   'excel', 'revisar',
