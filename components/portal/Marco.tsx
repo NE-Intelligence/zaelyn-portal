@@ -64,6 +64,15 @@ export function Barra({
             </span>
             {modo === 'editor' ? 'Editor · borrador' : modo === 'cuenta' ? 'Tu cuenta' : 'Solo lectura'}
           </span>
+          {/* Las dos puertas de quien entra (#184): su día, cruzado con todos
+              sus grupos, y sus grupos uno por uno. Siempre a la vista: Personal
+              escondido en un botón de la portada nadie lo encontraba. */}
+          {sesion && (
+            <nav className="pt-areas" aria-label="Áreas del portal">
+              <Link href="/app/personal">Mi día</Link>
+              <Link href="/app">Mis grupos</Link>
+            </nav>
+          )}
           {/* Un FORMULARIO y no un enlace: ver `app/salir/route.ts`. */}
           {sesion && (
             <form action="/salir" method="post" style={{ display: 'contents' }}>

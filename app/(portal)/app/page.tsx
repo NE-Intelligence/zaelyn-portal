@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Barra, Pie } from '@/components/portal/Marco'
 import { SinSesion } from '@/components/portal/SinSesion'
-import { misGrupos } from '@/lib/api'
+import { misGrupos, yoMismo } from '@/lib/api'
 import { ROL_PUEDE, VISTA_NOMBRE } from '@/lib/plan'
 import { nombreDeRol } from '@/lib/plan-uso/tipos'
 import { fecha } from '@/components/portal/atomos'
@@ -24,7 +24,7 @@ export const dynamic = 'force-dynamic'
  * hechos contables, y el porcentaje aparece al abrir el plan, medido una vez.
  */
 export default async function Grupos() {
-  const r = await misGrupos()
+  const [r, yo] = await Promise.all([misGrupos(), yoMismo(7)])
   if (!r.ok) return <SinSesion fallo={r.fallo} />
 
   const grupos = r.dato.grupos
@@ -54,6 +54,48 @@ export default async function Grupos() {
             </div>
           </div>
         </div>
+
+        {/* PERSONAL VA PRIMERO (#184): es lo que cruza todo lo de abajo. */}
+        <section className="pt-tarjeta pe-portada">
+          <div className="fila">
+            <h2>Mi día</h2>
+            <span className="pt-overline">Tú, a través de todos tus grupos</span>
+          </div>
+          {yo.ok ? (
+            <>
+              <div className="cifras">
+                <span>{yo.dato.dias[0]?.entradas.length ?? 0} cosas hoy</span>
+                {yo.dato.alertas.filter(a => a.tipo === 'choque').length > 0 && (
+                  <span className="mal">{yo.dato.alertas.filter(a => a.tipo === 'choque').length} choque(s)</span>
+                )}
+                {yo.dato.compromisos.pendientes.some(p => p.vencida) && (
+                  <span className="mal">{yo.dato.compromisos.pendientes.filter(p => p.vencida).length} vencida(s)</span>
+                )}
+                {yo.dato.proximo && <span>Lo que sigue: {yo.dato.proximo.texto}</span>}
+              </div>
+              {yo.dato.foco.length > 0 && (
+                <ol className="pe-foco-lista">
+                  {yo.dato.foco.map((f, i) => (
+                    <li key={i}><span className="n">{i + 1}</span><div><b>{f.texto}</b><span>{f.grupo ?? 'Tuyo'}</span></div></li>
+                  ))}
+                </ol>
+              )}
+              <div className="pt-atajos">
+                <Link href="/app/personal">Dónde estoy parado</Link>
+                <Link href="/app/personal?v=compromisos">Mis compromisos</Link>
+                <Link href="/app/personal?v=calendario">Calendario</Link>
+                <Link href="/app/personal?v=habitos">Hábitos</Link>
+              </div>
+            </>
+          ) : yo.fallo === 'SIN_PLAN' ? (
+            <div className="pt-vacio">
+              <b>Tu portal Personal es de Sprint en adelante</b>
+              <span>Con {'plan' in yo ? yo.plan.nombre : 'Kickoff'} todo lo tuyo funciona en el chat. <Link href="/app/personal" style={{ color: 'var(--brand)' }}>Ver qué ganas con Sprint</Link>.</span>
+            </div>
+          ) : (
+            <div className="pt-vacio"><b>Tu día no cargó</b><span>Zaelyn no contestó a tiempo. Vuelve a intentarlo en un momento.</span></div>
+          )}
+        </section>
 
         {grupos.length === 0 && (
           <div className="pt-vacio" style={{ maxWidth: 560 }}>
@@ -145,10 +187,10 @@ export default async function Grupos() {
                       </div>
                     </>
                   ) : (
-                    <div className="pt-vacio">
-                      <b>Personal: todavía sin pantalla</b>
-                      <span>Tus recordatorios, notas y hábitos ya funcionan en el chat. Aquí van a vivir tu día y tu semana.</span>
-                    </div>
+                    <Link href="/app/personal" className="ed-entrada">
+                      <span>Lo de este grupo, en tu día</span>
+                      <small>Sus recordatorios y encargos aparecen en «Mi día», junto con todo lo demás</small>
+                    </Link>
                   )}
                   {g.planes.length > 0 && (
                     <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>
