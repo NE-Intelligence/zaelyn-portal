@@ -42,7 +42,7 @@ const NIVELES: { clave: NivelDePaga; para: string; rasgos: string[] }[] = [
 export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean; inicial?: NivelDePaga | null }) {
   const actuales = v.cuenta?.complementos ?? {}
   const [cant, setCant] = useState<Record<string, number>>(() => ({ ...actuales }))
-  const [moneda, setMoneda] = useState<'usd' | 'mxn'>(v.suscripcion?.moneda === 'mxn' ? 'mxn' : 'usd')
+  const [moneda, setMoneda] = useState<'usd' | 'mxn'>(v.suscripcion?.moneda?.toLowerCase() === 'mxn' ? 'mxn' : 'usd')
   const [periodo, setPeriodo] = useState<'mes' | 'anio'>('mes')
   const [estado, setEstado] = useState<'listo' | 'enviando' | 'hecho'>('listo')
   const [error, setError] = useState('')
@@ -169,12 +169,6 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
         <div className="pu-fundador">
           <b>Beta 1 · Precio de fundador: {fundador.tramo}% menos, para siempre</b>
           <span>Quedan {fundador.quedan} {fundador.quedan === 1 ? 'lugar' : 'lugares'} en este tramo. El descuento se aplica al plan mientras mantengas tu suscripción; si la cancelas, se pierde.</span>
-        </div>
-      )}
-      {viva && (v.miDescuento?.porcentaje ?? 0) > 0 && (
-        <div className="pu-fundador">
-          <b>Tienes {v.miDescuento!.porcentaje}% de descuento en tu plan</b>
-          <span>Se conserva mientras tu suscripción siga viva, también si cambias de nivel.</span>
         </div>
       )}
 
