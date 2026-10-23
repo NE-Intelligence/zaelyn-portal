@@ -222,6 +222,10 @@ export async function escribirEditor(
   }
 }
 
+/** La semana de una familia, ya medida por Zaelyn (#183). */
+export const laFamilia = (groupId: string) =>
+  leer<import('@/lib/familia').EstadoDeFamilia>(`/portal/familia/${encodeURIComponent(groupId)}?dias=14`)
+
 export const misProyectos = () => leer<MisProyectos>('/portal/editor/mios')
 export const planYUso = () => leer<import('@/lib/plan-uso/tipos').VistaPlan>('/portal/plan')
 export const participaciones = () => leer<import('@/lib/plan-uso/tipos').VistaParticipaciones>('/portal/participaciones')

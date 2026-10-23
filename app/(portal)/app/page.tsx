@@ -128,16 +128,27 @@ export default async function Grupos() {
                 <article className="pt-grupo" key={g.id}>
                   <header>
                     <h2>{g.nombre}</h2>
-                    {g.rol && <span style={{ marginLeft: 'auto' }} className="pt-rol">{g.rol}</span>}
+                    {g.rol && <span style={{ marginLeft: 'auto' }} className="pt-rol">{nombreDeRol(g.rol)}</span>}
                   </header>
-                  <div className="pt-vacio">
-                    <b>{g.clase === 'family' ? 'Familia' : 'Personal'}: todavía sin pantalla</b>
-                    <span>
-                      {g.clase === 'family'
-                        ? 'Quién lleva, quién recoge y las actividades de los hijos ya funcionan en el chat. La vista de este grupo se diseña después del portal de proyectos.'
-                        : 'Tus recordatorios, notas y hábitos ya funcionan en el chat. Aquí van a vivir tu día y tu semana.'}
-                    </span>
-                  </div>
+                  {g.clase === 'family' ? (
+                    <>
+                      <Link href={`/app/f/${g.id}`} className="ed-entrada">
+                        <span>Hoy en casa</span>
+                        <small>La semana, quién lleva y quién recoge, y lo que nadie ha cubierto</small>
+                      </Link>
+                      <div className="pt-atajos">
+                        {([['calendario', 'Calendario'], ['traslados', 'Traslados'], ['quehaceres', 'Quehaceres'],
+                          ['medallero', 'Medallero'], ['fechas', 'Fechas']] as const).map(([v, t]) => (
+                          <Link key={v} href={`/app/f/${g.id}?v=${v}`}>{t}</Link>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="pt-vacio">
+                      <b>Personal: todavía sin pantalla</b>
+                      <span>Tus recordatorios, notas y hábitos ya funcionan en el chat. Aquí van a vivir tu día y tu semana.</span>
+                    </div>
+                  )}
                   {g.planes.length > 0 && (
                     <div style={{ fontSize: 12, color: 'var(--ink-3)' }}>
                       Mientras tanto, sus {g.planes.length} plan(es) se ven con las mismas

@@ -8,13 +8,17 @@ import Link from 'next/link'
  * exactamente igual de dañino que lo contrario.
  */
 export function Barra({
-  migas, ejemplo = false, sesion = false, modo = 'lectura',
+  migas, ejemplo = false, sesion = false, modo = 'lectura', etq = 'Proyectos', aviso,
 }: {
   migas: { texto: string; href?: string }[]
   ejemplo?: boolean
   sesion?: boolean
   /** El editor de proyectos (#174) sí escribe: borradores, no el plan vivo. */
   modo?: 'lectura' | 'editor' | 'cuenta'
+  /** El área del producto junto al logotipo: «Proyectos», «Familia». */
+  etq?: string
+  /** El texto del aviso de datos de ejemplo, si el de proyectos no aplica. */
+  aviso?: string
 }) {
   return (
     <>
@@ -22,9 +26,9 @@ export function Barra({
         <div className="pt-aviso">
           <b>Datos de ejemplo</b>
           <span>
-            El proyecto, las personas y las fechas de esta pantalla están inventados.
+            {aviso ?? `El proyecto, las personas y las fechas de esta pantalla están inventados.
             Con tus datos reales la pantalla es la misma: cambia de dónde salen los
-            números, no cómo se pintan.
+            números, no cómo se pintan.`}
           </span>
         </div>
       )}
@@ -34,7 +38,7 @@ export function Barra({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo/zaelyn-wordmark-320.png" alt="zælyn" width={320} height={110} />
           </span>
-          <span className="pt-etq">Proyectos</span>
+          <span className="pt-etq">{etq}</span>
         </Link>
         <nav className="pt-migas" aria-label="Dónde estoy">
           {migas.map((m, i) => (

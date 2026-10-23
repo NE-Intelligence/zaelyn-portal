@@ -1,0 +1,152 @@
+/* Zaelyn Familia en el portal (#183). Cuelga de .pt y usa SOLO sus tokens:
+   ningún color literal, así el claro y el oscuro salen solos. El color de cada
+   persona es uno de los seis --grp-* del sistema, y nunca va solo: siempre
+   lleva el nombre al lado. */
+
+.fa-pila { display: grid; gap: 16px; }
+.fa-dos { display: grid; gap: 16px; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+@media (max-width: 900px) { .fa-dos { grid-template-columns: minmax(0, 1fr); } }
+
+.fa-quienes { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.fa-quien { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2);
+  background: var(--surface-2); border-radius: var(--r-pill); padding: 3px 10px 3px 3px; }
+.fa-quien i { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  color: var(--on-grp); font-style: normal; font-weight: 600; font-size: 11px; }
+
+.fa-festivo { font-size: 11px; font-weight: 600; color: var(--st-curso-ink); background: var(--st-curso-bg);
+  border-radius: var(--r-pill); padding: 2px 8px; }
+.pt-tarjeta > header .fa-festivo { margin-left: auto; }
+
+/* hoy en casa: una columna por persona */
+.fa-columnas { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.fa-columna { display: grid; gap: 8px; align-content: start; }
+.fa-col-cab { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; }
+.fa-col-cab i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.fa-bloque { border-left: 3px solid var(--c, var(--line-strong)); background: var(--surface-2);
+  border-radius: var(--r-sm); padding: 8px 10px; display: grid; gap: 3px; }
+.fa-bloque .h { font-family: var(--fuente-dato), monospace; font-size: 11px; color: var(--ink-3); }
+.fa-bloque .t { font-weight: 600; text-transform: capitalize; }
+.fa-bloque .m { font-size: 12px; color: var(--st-curso-ink); }
+.fa-bloque.no_hay { opacity: .6; }
+.fa-bloque.no_hay .m { color: var(--ink-3); }
+.fa-tras { display: flex; gap: 6px; font-size: 12px; color: var(--ink-2); align-items: baseline; }
+.fa-tras b { color: var(--ink); font-weight: 600; }
+.fa-tras.nadie b { color: var(--st-detenida-ink); }
+.fa-tras.hecho { color: var(--st-hecha-ink); }
+
+.fa-alertas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fa-alertas li::before { display: none; }
+.fa-alerta { border-radius: var(--r-sm); padding: 8px 10px; font-size: 13px; background: var(--surface); }
+.fa-alerta.mal { background: var(--st-detenida-bg); color: var(--st-detenida-ink); }
+.fa-alerta.aviso { background: var(--st-curso-bg); color: var(--st-curso-ink); }
+.fa-alerta.info { background: var(--brand-soft); color: var(--brand-ink); }
+
+/* listas con check */
+.fa-lista { list-style: none; margin: 0; padding: 0; display: grid; }
+.fa-lista li { display: flex; align-items: center; gap: 10px; padding: 8px 2px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.fa-lista li:last-child { border-bottom: 0; }
+.fa-lista .t { flex: 1 1 auto; min-width: 0; }
+.fa-lista li.hecho .t { color: var(--ink-3); text-decoration: line-through; }
+.fa-check { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--line-strong); display: grid;
+  place-items: center; font-size: 11px; flex: 0 0 auto; }
+.fa-lista li.hecho .fa-check { background: var(--st-hecha); border-color: var(--st-hecha); color: var(--surface); }
+.fa-check.espera { border-style: dashed; color: var(--st-curso-ink); }
+.fa-de { font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+.fa-pts { font-family: var(--fuente-dato), monospace; font-size: 12px; font-weight: 600; color: var(--zaelyn-ink);
+  background: var(--zaelyn-soft); border-radius: var(--r-pill); padding: 1px 8px; }
+
+/* la semana en mini */
+.fa-semana { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.fa-dia-mini { position: relative; background: var(--surface-2); border-radius: var(--r-md); padding: 8px 4px;
+  display: grid; justify-items: center; gap: 2px; font-size: 12px; }
+.fa-dia-mini b { font-size: 11px; color: var(--ink-3); font-weight: 600; text-transform: uppercase; }
+.fa-dia-mini span { font-family: var(--fuente-display), sans-serif; font-size: 18px; font-weight: 600; }
+.fa-dia-mini small { color: var(--ink-3); font-size: 10.5px; }
+.fa-dia-mini.hoy { background: var(--zaelyn-soft); }
+.fa-dia-mini.hoy span { color: var(--zaelyn-ink); }
+.fa-punto { position: absolute; top: 4px; right: 5px; font-style: normal; font-size: 11px; }
+.fa-punto.mal { color: var(--st-detenida-ink); font-weight: 700; }
+.fa-punto + .fa-punto { right: auto; left: 5px; }
+
+/* calendario */
+.fa-cal { display: grid; grid-template-columns: repeat(7, minmax(130px, 1fr)); gap: 8px; min-width: 920px; }
+.fa-cal-dia { background: var(--surface-2); border-radius: var(--r-md); padding: 8px; display: grid; gap: 6px;
+  align-content: start; min-height: 150px; }
+.fa-cal-dia .cab { font-size: 12px; color: var(--ink-2); }
+.fa-cal-dia .cab b { text-transform: uppercase; color: var(--ink-3); font-size: 11px; }
+.fa-cal-dia.hoy { outline: 2px solid var(--zaelyn); outline-offset: -2px; }
+.fa-ev { border-left: 3px solid var(--c); background: var(--surface); border-radius: var(--r-xs); padding: 4px 6px;
+  display: grid; gap: 1px; font-size: 12px; }
+.fa-ev .h { font-family: var(--fuente-dato), monospace; font-size: 10.5px; color: var(--ink-3); }
+.fa-ev .t { font-weight: 500; }
+.fa-ev.no_hay { opacity: .55; }
+.fa-ev.por_confirmar { border-left-style: dashed; }
+.fa-sin { font-size: 10.5px; font-weight: 600; color: var(--st-detenida-ink); }
+.fa-sin.suave { color: var(--ink-3); }
+.fa-cumple { font-size: 12px; font-weight: 600; color: var(--zaelyn-ink); }
+.fa-libre { font-size: 12px; color: var(--ink-3); }
+
+/* traslados */
+.fa-tabla th.hoy { color: var(--zaelyn-ink); }
+.fa-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex: 0 0 auto; }
+.fa-celda { font-size: 12.5px; white-space: nowrap; }
+.fa-celda.nadie { color: var(--st-detenida-ink); font-weight: 600; background: var(--st-detenida-bg); }
+.fa-celda.hecho { color: var(--st-hecha-ink); }
+.fa-celda.vacia, .fa-celda.suave { color: var(--ink-3); }
+.fa-barras, .fa-podio { display: grid; gap: 10px; }
+.fa-barra, .fa-puesto { display: grid; grid-template-columns: 110px minmax(0, 1fr) 44px; gap: 10px; align-items: center; font-size: 13px; }
+.fa-barra .pista, .fa-puesto .pista { height: 10px; background: var(--sunken); border-radius: var(--r-pill); overflow: hidden; }
+.fa-barra .pista span { display: block; height: 100%; background: var(--brand); border-radius: inherit; }
+.fa-barra b, .fa-puesto b { font-family: var(--fuente-dato), monospace; text-align: right; }
+
+/* tablero de puntos */
+.fa-puesto { grid-template-columns: 26px 90px minmax(0, 1fr) 48px; }
+.fa-puesto .lugar { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 700;
+  font-size: 12px; background: var(--c); color: var(--on-grp); }
+.fa-puesto .pista span { display: block; height: 100%; background: var(--c); border-radius: inherit; }
+.fa-puesto small { grid-column: 2 / -1; font-size: 11.5px; color: var(--ink-3); margin-top: -6px; }
+.fa-premios { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.fa-premios li { background: var(--surface-2); border-radius: var(--r-md); padding: 10px 12px; display: grid; gap: 6px; }
+.fa-premios .fila { display: flex; gap: 10px; align-items: baseline; }
+.fa-premios .t { flex: 1 1 auto; font-weight: 500; }
+.fa-premios b { font-family: var(--fuente-dato), monospace; font-size: 12.5px; color: var(--zaelyn-ink); }
+.fa-premios .quien { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11.5px; color: var(--ink-3); }
+.fa-premios .quien .ya { color: var(--st-hecha-ink); font-weight: 600; }
+.fa-por-persona { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.fa-grupo-q h3 { font-size: 13px; font-weight: 600; margin: 0 0 4px; }
+
+/* medallero */
+.fa-vitrina { border-top: 4px solid var(--c); }
+.fa-trofeos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.fa-trofeos div { background: var(--surface-2); border-radius: var(--r-md); padding: 10px 4px; display: grid;
+  justify-items: center; gap: 2px; }
+.fa-trofeos span { font-size: 20px; }
+.fa-trofeos b { font-family: var(--fuente-display), sans-serif; font-size: 22px; }
+.fa-trofeos small { font-size: 10.5px; color: var(--ink-3); }
+.fa-linea { list-style: none; margin: 0; padding: 0; display: grid; }
+.fa-linea li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 10px; align-items: baseline;
+  padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.fa-linea li:last-child { border-bottom: 0; }
+.fa-linea .ic { font-size: 16px; }
+.fa-linea time { font-size: 12px; color: var(--ink-3); }
+.fa-disc { margin-left: 8px; font-size: 11px; color: var(--brand-ink); background: var(--brand-soft);
+  border-radius: var(--r-pill); padding: 1px 7px; }
+.fa-nota { font-size: 12px; color: var(--ink-3); margin: 0; }
+
+/* fechas */
+.fa-fechas { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.fa-fechas li { display: flex; gap: 12px; align-items: center; }
+.fa-fechas .cuenta { width: 56px; height: 56px; border-radius: var(--r-md); background: var(--zaelyn-soft); color: var(--zaelyn-ink);
+  display: grid; place-items: center; align-content: center; flex: 0 0 auto; }
+.fa-fechas .cuenta b { font-family: var(--fuente-display), sans-serif; font-size: 20px; line-height: 1; }
+.fa-fechas .cuenta small { font-size: 10px; }
+.fa-fechas .t { display: block; font-weight: 600; }
+.fa-fechas .m { display: block; font-size: 12px; color: var(--ink-3); }
+
+@media (max-width: 560px) {
+  .fa-semana { gap: 3px; }
+  .fa-dia-mini span { font-size: 15px; }
+  .fa-dia-mini small { display: none; }
+  .fa-barra { grid-template-columns: 80px minmax(0, 1fr) 36px; }
+  .fa-puesto { grid-template-columns: 24px 70px minmax(0, 1fr) 40px; }
+}
