@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Barra, Pie } from '@/components/portal/Marco'
 import { Lienzo, esVista } from '@/components/portal/Plan'
 import { SinSesion } from '@/components/portal/SinSesion'
@@ -36,6 +37,11 @@ export default async function Plan({
       />
       <main className="pt-lienzo">
         {dirige && e.plan && <Reabrir grupo={grupo} plan={e.plan.id} />}
+        <div className="hr-enlace">
+          {dirige
+            ? <Link className="ed-btn suave chico" href={`/app/g/${grupo}/horas`}>Horas del proyecto</Link>
+            : <Link className="ed-btn suave chico" href="/app/horas">Registrar mis horas</Link>}
+        </div>
         <Lienzo v={r.dato} vista={vista} base={`/app/g/${grupo}/${plan}`} leido={leido} />
       </main>
       <Pie />

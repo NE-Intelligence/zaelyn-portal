@@ -1,13 +1,12 @@
 import Link from 'next/link'
 import { LogoBarra } from '@/components/Logo'
 import { Preferencias } from '@/components/Preferencias'
-import { cookies } from 'next/headers'
-import { COOKIE, soyAdmin } from '@/lib/api'
+import { soyAdmin } from '@/lib/api'
 import { textos, type Clave } from '@/lib/copy'
 import { idiomaActual, temaActual } from '@/lib/preferencias'
 
 export type Area = 'inicio' | 'personal' | 'familia' | 'proyectos' | 'cuenta' | 'admin'
-type Modo = 'lectura' | 'editor' | 'cuenta' | 'admin'
+type Modo = 'lectura' | 'editor' | 'cuenta' | 'admin' | 'horas'
 
 /** La casa de cada área, con sesión y en el ejemplo. */
 const CASA: Record<Area, { app: string; demo: string | null; k: Clave }> = {
@@ -53,7 +52,7 @@ export async function Barra({
   const nombreArea = a ? [t(CASA[a].k), textos('es')(CASA[a].k)] : []
   const resto = migas.filter((m) => m.texto !== 'Mis grupos' && m.texto !== 'Ejemplo' && !nombreArea.includes(m.texto))
   const cadena = a && a !== 'inicio' ? [{ texto: t(CASA[a].k), href: resto.length ? href(a) : undefined }, ...resto] : resto
-  const modoTxt = modo === 'editor' ? t('po.modo.editor') : modo === 'cuenta' ? t('po.modo.cuenta') : modo === 'admin' ? t('po.modo.admin') : t('po.modo.lectura')
+  const modoTxt = modo === 'editor' ? t('po.modo.editor') : modo === 'cuenta' ? t('po.modo.cuenta') : modo === 'admin' ? t('po.modo.admin') : modo === 'horas' ? t('po.modo.horas') : t('po.modo.lectura')
 
   return (
     <>
@@ -116,13 +115,9 @@ export async function Barra({
 }
 
 export async function Pie({ modo = 'lectura' }: { modo?: Modo } = {}) {
-  const [lang, conSesion] = await Promise.all([idiomaActual(), cookies().then((c) => !!c.get(COOKIE)?.value)])
-  const t = textos(lang)
+  const t = textos(await idiomaActual())
   return (
     <footer className="pt-pie">
-      {/* La nota de sesión única (#190): quien está adentro tiene que saber
-          que no hay contraseña y cómo se cierra en todos lados. */}
-      {conSesion && <p className="pt-pie-sesion">{t('po.pie.sesion')}</p>}
       <span>{t('pie.by')}</span>
       <span className="der">
         {modo === 'editor' ? t('po.pie.editor') : modo === 'cuenta' ? t('po.pie.cuenta') : modo === 'admin' ? t('po.pie.admin') : t('po.pie.lectura')}

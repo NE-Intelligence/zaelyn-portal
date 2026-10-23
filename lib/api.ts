@@ -169,6 +169,7 @@ export type AccionEditor =
   | 'org-crear' | 'org-invitar' | 'org-unirse' | 'org-quitar' | 'org-editar' | 'org-etiquetar' | 'org-comprar'
   | 'fiscal' | 'codigo' | 'invitaciones'
   | 'excel' | 'revisar'
+  | 'horas' | 'horas-borrar'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
 function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
@@ -185,6 +186,8 @@ function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo
     case 'guardar': case 'baja': case 'proponer': case 'reabrir': case 'reorganizar':
       return { metodo: 'POST', ruta: `/portal/editor/${accion}` }
     case 'mios': return { metodo: 'GET', ruta: '/portal/editor/mios' }
+    case 'horas': return { metodo: 'POST', ruta: '/portal/horas' }
+    case 'horas-borrar': return { metodo: 'POST', ruta: '/portal/horas/borrar' }
     case 'liberar-vista': return { metodo: 'POST', ruta: '/portal/editor/liberar/vista' }
     case 'liberar': return { metodo: 'POST', ruta: '/portal/editor/liberar' }
     case 'grupo-crear': return { metodo: 'POST', ruta: '/portal/grupos/crear' }
@@ -290,19 +293,63 @@ export const tableroAdmin = (desde?: string, hasta?: string) => {
   return leer<import('@/lib/admin/tipos').TableroAdmin>(`/portal/admin/tablero${s ? `?${s}` : ''}`)
 }
 
-/**
- * Los lugares de fundador (#190). PÚBLICO: la página de precios lo pregunta
- * sin sesión. Si el motor no contesta, se dice que no hay tramo abierto —
- * prometer un descuento que no se va a aplicar es peor que no anunciarlo.
- */
-export async function fundadores(): Promise<import('@/lib/plan-uso/tipos').Fundadores> {
-  const cerrado = { abierto: false, tramo: null, quedan: 0 } as const
-  if (!hayApi()) return cerrado
+// ──────────────────────────────────────────── registro de horas (#191)
+
+const consulta = (x: Record<string, string | undefined>) => {
+  const q = new URLSearchParams()
+  for (const [k, v] of Object.entries(x)) if (v) q.set(k, v)
+  return q.toString()
+}
+
+export const misHoras = (desde: string, hasta: string) =>
+  leer<import('@/lib/horas').VistaHoras>(`/portal/horas?${consulta({ desde, hasta })}`)
+
+/** El reporte de UN proyecto. 403 si no lo diriges: se distingue de «no existe». */
+export async function horasDelProyecto(groupId: string, desde: string, hasta: string): Promise<
+  | { ok: true; dato: import('@/lib/horas').ReporteProyecto }
+  | { ok: false; fallo: Fallo | 'SIN_PERMISO' }
+> {
+  if (!hayApi()) return { ok: false, fallo: 'SIN_API' }
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return { ok: false, fallo: 'SIN_SESION' }
   try {
-    const r = await fetch(`${base()}/portal/fundadores`, { cache: 'no-store' })
-    if (!r.ok) return cerrado
-    return (await r.json()) as import('@/lib/plan-uso/tipos').Fundadores
+    const r = await fetch(`${base()}/portal/horas/proyecto/${encodeURIComponent(groupId)}?${consulta({ desde, hasta })}`, {
+      headers: { authorization: `Bearer ${token}` }, cache: 'no-store',
+    })
+    if (r.status === 403) return { ok: false, fallo: 'SIN_PERMISO' }
+    if (r.status === 401) return { ok: false, fallo: 'SIN_SESION' }
+    if (r.status === 404) return { ok: false, fallo: 'NO_LO_ENCUENTRO' }
+    if (!r.ok) return { ok: false, fallo: 'CAIDO' }
+    return { ok: true, dato: (await r.json()) as import('@/lib/horas').ReporteProyecto }
   } catch {
-    return cerrado
+    return { ok: false, fallo: 'CAIDO' }
+  }
+}
+
+/**
+ * Un Excel del motor, pasado tal cual al navegador. Solo las dos rutas de
+ * horas: no es un proxy de descargas.
+ */
+export async function descargarHoras(
+  cual: { tipo: 'mias'; desde: string; hasta: string; groupId?: string } | { tipo: 'proyecto'; groupId: string; desde: string; hasta: string },
+): Promise<Response> {
+  if (!hayApi()) return new Response('No disponible', { status: 503 })
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return new Response('Sin sesión', { status: 401 })
+  const ruta = cual.tipo === 'mias'
+    ? `/portal/horas/excel?${consulta({ desde: cual.desde, hasta: cual.hasta, groupId: cual.groupId })}`
+    : `/portal/horas/proyecto/${encodeURIComponent(cual.groupId)}?${consulta({ desde: cual.desde, hasta: cual.hasta, formato: 'xlsx' })}`
+  try {
+    const r = await fetch(`${base()}${ruta}`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' })
+    if (!r.ok) return new Response(r.status === 403 ? 'Solo quien dirige el proyecto' : 'No disponible', { status: r.status })
+    return new Response(r.body, {
+      headers: {
+        'content-type': r.headers.get('content-type') ?? 'application/octet-stream',
+        'content-disposition': r.headers.get('content-disposition') ?? 'attachment; filename="horas.xlsx"',
+        'cache-control': 'no-store',
+      },
+    })
+  } catch {
+    return new Response('No disponible', { status: 502 })
   }
 }

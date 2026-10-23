@@ -1,0 +1,67 @@
+/* Registro de horas (Zaelyn #191). Todo cuelga de .pt y usa sus fichas. */
+.pt { --hr-t: var(--brand); --hr-d: #8b5cf6; }
+
+.pt .hr-nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pt .hr-seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+.pt .hr-seg a { padding: 6px 12px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+.pt .hr-seg a[aria-current='page'] { background: var(--brand-soft); color: var(--brand-ink); font-weight: 600; }
+.pt .hr-crono { color: var(--zaelyn-ink); font-weight: 600; }
+.pt .hr-enlace { display: flex; justify-content: flex-end; margin: 0 0 10px; }
+
+.pt .hr-carga { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 12px; margin: 0 0 16px;
+  background: var(--st-curso-bg); color: var(--st-curso-ink); border: 1px solid color-mix(in srgb, var(--st-curso) 40%, transparent); }
+.pt .hr-carga.n-alta, .pt .hr-carga.n-extrema { background: var(--critica-soft); color: var(--st-detenida-ink); border-color: color-mix(in srgb, var(--critica) 40%, transparent); }
+.pt .hr-carga span { font-size: 14px; }
+
+.pt .hr-rejilla { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; margin-bottom: 16px; align-items: start; }
+@media (max-width: 860px) { .pt .hr-rejilla { grid-template-columns: minmax(0, 1fr); } }
+
+.pt .hr-dias { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pt .hr-dias li { display: grid; grid-template-columns: 96px minmax(0, 1fr) 72px; gap: 10px; align-items: center; }
+.pt .hr-dias li.futuro { opacity: 0.45; }
+.pt .hr-dias li.hoy .hr-dia { font-weight: 700; color: var(--ink); }
+.pt .hr-dia { all: unset; cursor: pointer; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pt .hr-dia:disabled { cursor: default; }
+.pt .hr-dia:focus-visible { outline: 2px solid var(--focus); border-radius: 4px; }
+.pt .hr-barra { position: relative; height: 14px; background: var(--sunken); border-radius: 999px; overflow: hidden; display: flex; }
+.pt .hr-barra i { display: block; height: 100%; }
+.pt .hr-barra i.t, .pt .hr-ley i.t { background: var(--hr-t); }
+.pt .hr-barra i.d, .pt .hr-ley i.d { background: repeating-linear-gradient(45deg, var(--hr-d) 0 4px, color-mix(in srgb, var(--hr-d) 45%, transparent) 4px 8px); }
+.pt .hr-barra s { position: absolute; top: 0; bottom: 0; width: 1px; background: color-mix(in srgb, var(--ink) 25%, transparent); }
+.pt .hr-num { font-size: 13px; text-align: right; }
+.pt .hr-num em { font-style: normal; color: var(--hr-d); }
+.pt .hr-ley { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-3); margin: 12px 0 0; flex-wrap: wrap; }
+.pt .hr-ley i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-left: 8px; }
+
+.pt .hr-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; margin-bottom: 12px; }
+.pt .hr-campos .ancho { grid-column: 1 / -1; }
+.pt .hr-campos label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--ink-2); }
+.pt .hr-campos input:not([type='radio']), .pt .hr-campos select {
+  height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; min-width: 0; width: 100%; box-sizing: border-box; }
+.pt .hr-tipo { border: 0; padding: 0; margin: 0; display: flex; gap: 16px; flex-wrap: wrap; }
+.pt .hr-tipo label { flex-direction: row; align-items: center; gap: 6px; font-size: 14px; color: var(--ink); }
+.pt .hr-campos p { margin: 0; font-size: 12.5px; }
+.pt .hr-ok { padding: 10px 12px; border-radius: 8px; background: var(--st-hecha-bg); color: var(--st-hecha-ink); font-size: 13.5px; margin-bottom: 10px; }
+.pt .hr-alta .ed-btn.ancho { width: 100%; justify-content: center; }
+.pt .hr-chat { font-size: 12.5px; margin: 10px 0 0; }
+.pt .gris { color: var(--ink-3); }
+
+.pt .hr-lista > header { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+.pt .hr-excel { display: flex; gap: 8px; flex-wrap: wrap; }
+.pt .hr-grupo h3 { font-size: 13px; font-weight: 600; color: var(--ink-2); margin: 14px 0 6px; display: flex; justify-content: space-between; }
+.pt .hr-grupo ul { list-style: none; margin: 0; padding: 0; }
+.pt .hr-grupo li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.pt .hr-cant { width: 74px; flex: none; font-size: 13.5px; }
+.pt .hr-que { flex: 1 1 220px; min-width: 0; font-size: 14px; }
+.pt .hr-que small { display: block; color: var(--ink-3); font-size: 12.5px; }
+.pt .hr-origen { font-size: 12px; }
+.pt .hr-borrar { display: inline-flex; gap: 6px; }
+
+.pt .hr-tabla { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.pt .hr-tabla th { text-align: left; font-weight: 600; color: var(--ink-3); font-size: 12px; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.pt .hr-tabla td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.pt .hr-tabla td.mono, .pt .hr-tabla th:nth-child(n+2) { white-space: nowrap; }
+.pt .hr-pasado { color: var(--critica); font-weight: 600; }
+.pt .hr-lista { overflow-x: auto; }
+.pt .hr-campos label { min-width: 0; }
+@media (max-width: 480px) { .pt .hr-dias li { grid-template-columns: 82px minmax(0, 1fr) 56px; gap: 8px; } }

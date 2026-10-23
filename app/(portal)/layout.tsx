@@ -3,6 +3,7 @@ import '../portal.css'
 import '../editor.css'
 import '../familia.css'
 import '../persona.css'
+import '../horas.css'
 
 export const metadata: Metadata = { title: 'Proyectos' }
 

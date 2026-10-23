@@ -78,6 +78,7 @@ export function LienzoPersona({
           {(Object.keys(VISTAS_PERSONA) as VistaPersona[]).map(x => (
             <Link key={x} href={href(x)} aria-current={x === vista ? 'page' : undefined}>{VISTAS_PERSONA[x]}</Link>
           ))}
+          {base === '/app/personal' && <Link href="/app/horas">Horas</Link>}
         </nav>
       </div>
 
