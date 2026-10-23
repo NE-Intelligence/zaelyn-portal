@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { LogoBarra } from '@/components/Logo'
 import { Preferencias } from '@/components/Preferencias'
 import { soyAdmin } from '@/lib/api'
 import { textos, type Clave } from '@/lib/copy'
@@ -63,10 +64,7 @@ export async function Barra({
       )}
       <header className="pt-barra" data-area={a}>
         <Link className="pt-marca" href={sesion ? '/app' : '/'}>
-          <span className="campo">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo/zaelyn-wordmark-320.png" alt="zælyn" width={320} height={110} />
-          </span>
+          <LogoBarra ancho={104} />
         </Link>
         {cadena.length > 0 && (
           <nav className="pt-migas" aria-label={t('po.donde')}>

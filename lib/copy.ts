@@ -466,6 +466,7 @@ const es = {
   'pc.cta.s': 'Contratar Sprint',
   'pc.cta.t': 'Contratar Tribu',
   'pc.cta.p': 'Contratar PMO',
+  'pc.inc.k': 'Incluye:',
   'pc.inc.s': 'Todo Kickoff, más:',
   'pc.inc.tp': 'Incluye Sprint, más:',
   'pc.k.1': 'Todo desde Telegram',

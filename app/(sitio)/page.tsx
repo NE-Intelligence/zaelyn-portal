@@ -55,7 +55,7 @@ export default async function Portada() {
       <section className="st-banda st-hero">
         <Campo />
         <div className="st-caja">
-          <Logo ancho={560} src="/logo/zaelyn-wordmark-1200.png" clase="st-wordmark" />
+          <Logo ancho={560} clase="st-wordmark" />
           <p className="st-rotulo st-hero-etq">{t('hero.etq')}</p>
           <h1>
             <span>{t('hero.h1a')}</span> <em>{t('hero.h1b2')}</em>
@@ -102,7 +102,7 @@ export default async function Portada() {
             <p>{t('que.sub')}</p>
           </div>
 
-          <div className="st-rejilla-3">
+          <div className="st-rejilla-3 st-espacios">
             {ESPACIOS.map((e) => (
               <article className="st-producto st-espacio" data-espacio={e.id} key={e.id}>
                 <div className="st-espacio-cab">
@@ -230,7 +230,7 @@ export default async function Portada() {
             <h2>{t('pz.h2b')}</h2>
             <p>{t('pz.sub2')}</p>
           </div>
-          <div className="st-planes">
+          <div className="st-planes st-planes-4">
             {PLANES_PUBLICOS.map((p) => (
               <article className={`st-plan${p.destacado ? ' st-plan-pmo' : ''}`} key={p.id} data-espacio={p.espacio}>
                 <p className="st-para">{t(p.para)}</p>

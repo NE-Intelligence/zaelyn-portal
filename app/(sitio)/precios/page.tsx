@@ -51,18 +51,22 @@ export default async function Precios() {
             {PLANES_PUBLICOS.map((p) => (
               <article className={`st-plan${p.destacado ? ' st-plan-pmo' : ''}`} key={p.id} data-espacio={p.espacio}>
                 {p.destacado && <span className="st-sello">{t('pc.popular')}</span>}
-                <p className="st-para">{t(p.para)}</p>
-                <h2 className="st-plan-nombre">{p.nombre}</h2>
-                <div className="st-precio">
-                  {p.precio === null ? t('pc.gratis') : p.precio}
-                  {p.precio !== null && <small> {t('pc.mes')}</small>}
+                <div className="st-plan-cab">
+                  <p className="st-para">{t(p.para)}</p>
+                  <h2 className="st-plan-nombre">{p.nombre}</h2>
                 </div>
-                {p.id === 'pmo' && <p className="st-anual">{t('pc.anio')}</p>}
-                <p>{t(p.resumen)}</p>
+                <div className="st-plan-precio">
+                  <div className="st-precio">
+                    {p.precio === null ? t('pc.gratis') : p.precio}
+                    {p.precio !== null && <small> {t('pc.mes')}</small>}
+                  </div>
+                  <p className="st-anual">{p.id === 'pmo' ? t('pc.anio') : '\u00a0'}</p>
+                </div>
+                <p className="st-plan-resumen">{t(p.resumen)}</p>
                 <a className={`st-btn ${p.destacado ? 'st-btn-1' : 'st-btn-2'} st-plan-cta`} href={p.id === 'kickoff' ? '/#empieza' : '/app/plan'}>
                   {t(p.cta)}
                 </a>
-                {p.incluye && <p className="st-incluye">{t(p.incluye)}</p>}
+                <p className="st-incluye">{t(p.incluye ?? 'pc.inc.k')}</p>
                 <ul className="st-rasgos">
                   {p.rasgos.map((r) => <li key={r}>{t(r)}</li>)}
                 </ul>

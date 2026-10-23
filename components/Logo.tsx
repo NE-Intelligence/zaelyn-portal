@@ -1,19 +1,34 @@
 /**
- * El logotipo según el tema (#186).
+ * La marca (#187), en sus dos únicas formas permitidas:
  *
- * El wordmark raster es luz sobre negro y sobre blanco desaparece, así que en
- * modo día se compone en tipografía: «z æ lyn» en MuseoModerno con el ligado
- * æ en el degradado de marca. Los dos se pintan y el CSS decide cuál se ve,
- * para que no dependa de JavaScript ni destelle al cargar.
+ * - `LogoBarra`: el logotipo oficial —el wordmark con el ligado æ de
+ *   filamentos—, recortado sin fondo desde el arte original. Es luz sobre
+ *   negro y sobre blanco no sobrevive, así que SOLO vive en la barra
+ *   superior, que es negra siempre, en día y en noche.
+ * - `Logo`: en el resto del sitio el nombre se compone en tipografía,
+ *   «z æ lyn» en MuseoModerno con el ligado en el degradado de marca, y toma
+ *   el color de tinta del tema.
  *
- * Sigue faltando el vector del logotipo: cuando exista, este componente es
- * el único lugar que cambia.
+ * Nunca el raster dentro de un recuadro negro sobre una página clara.
  */
-export function Logo({ ancho, src = '/logo/zaelyn-wordmark-320.png', clase = '' }: { ancho: number; src?: string; clase?: string }) {
+export function LogoBarra({ ancho }: { ancho: number }) {
   return (
-    <span className={`logo ${clase}`} style={{ ['--logo-ancho' as string]: `${ancho}px` }}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="logo-noche" src={src} alt="zælyn" width={src.includes('1200') ? 1200 : 320} height={src.includes('1200') ? 413 : 110} />
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      className="logo-barra"
+      src="/logo/zaelyn-logo-640.png"
+      srcSet="/logo/zaelyn-logo-320.png 320w, /logo/zaelyn-logo-640.png 640w, /logo/zaelyn-logo-1200.png 1200w"
+      sizes={`${ancho}px`}
+      alt="zælyn"
+      width={ancho}
+      height={Math.round((ancho * 213) / 640)}
+    />
+  )
+}
+
+export function Logo({ ancho, clase = '' }: { ancho: number; clase?: string }) {
+  return (
+    <span className={`logo ${clase}`} style={{ ['--logo-ancho' as string]: `${ancho}px` }} role="img" aria-label="zælyn">
       <span className="logo-dia" aria-hidden="true">
         z<span className="ae">æ</span>lyn
       </span>

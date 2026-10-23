@@ -52,46 +52,33 @@ a {
   }
 }
 
-/* ── logotipo por tema (#186) ────────────────────────────────────────── */
+/* ── la marca (#187) ─────────────────────────────────────────────────
+   El nombre tipográfico va en todos lados menos en la barra superior, que
+   lleva el logotipo raster sobre negro (ver components/Logo.tsx). */
 .logo {
   display: inline-flex;
   align-items: center;
   width: var(--logo-ancho);
   max-width: 100%;
 }
-.logo .logo-noche {
-  width: 100%;
-  height: auto;
-  display: block;
-}
 .logo .logo-dia {
-  display: none;
+  display: inline-block;
   font-family: var(--fuente-display), 'Trebuchet MS', sans-serif;
   font-weight: 500;
   font-size: calc(var(--logo-ancho) * 0.29);
   line-height: 1;
   letter-spacing: -0.02em;
-  color: #14141c;
+  color: currentColor;
   white-space: nowrap;
 }
 .logo .ae {
-  background: linear-gradient(100deg, #8a3fe0, #0e8fbf);
+  background: linear-gradient(100deg, #9b5cf0, #2ea8d8);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   font-weight: 600;
 }
-:root[data-tema='claro'] .logo .logo-noche {
-  display: none;
-}
-:root[data-tema='claro'] .logo .logo-dia {
-  display: inline-block;
-}
-@media (prefers-color-scheme: light) {
-  :root:not([data-tema='oscuro']) .logo .logo-noche {
-    display: none;
-  }
-  :root:not([data-tema='oscuro']) .logo .logo-dia {
-    display: inline-block;
-  }
+.logo-barra {
+  display: block;
+  max-width: 100%;
 }

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Menu from './Menu'
-import { Logo } from '@/components/Logo'
+import { Logo, LogoBarra } from '@/components/Logo'
 import { Preferencias } from '@/components/Preferencias'
 import { type Idioma, textos } from '@/lib/copy'
 import type { Tema } from '@/lib/preferencias'
@@ -35,7 +35,7 @@ export function Encabezado({ lang, tema }: { lang: Idioma; tema: Tema }) {
       <header className="st-banda st-barra">
         <div className="st-caja">
           <Link className="st-marca-nav" href="/" aria-label={t('nav.inicio')}>
-            <Logo ancho={118} />
+            <LogoBarra ancho={128} />
           </Link>
           <Menu enlaces={enlaces} etiqueta={t('nav.menu')} />
           <Preferencias

@@ -456,6 +456,7 @@ export const pt: Partial<Record<Clave, string>> = {
   'pc.cta.s': 'Contratar Sprint',
   'pc.cta.t': 'Contratar Tribu',
   'pc.cta.p': 'Contratar PMO',
+  'pc.inc.k': 'Inclui:',
   'pc.inc.s': 'Tudo do Kickoff, mais:',
   'pc.inc.tp': 'Inclui o Sprint, mais:',
   'pc.k.1': 'Tudo pelo Telegram',
