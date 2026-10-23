@@ -46,6 +46,7 @@ export default async function Grupos() {
               </div>
             </div>
             <div className="ed-cab-acciones">
+              <Link href="/app/personal" className="ed-btn suave">Dónde estoy parado</Link>
               <Link href="/app/participaciones" className="ed-btn suave">Mis participaciones</Link>
               <Link href="/app/plan" className="ed-btn suave">Plan y uso</Link>
               <Link href="/app/editor" className="ed-btn suave">Mis proyectos</Link>

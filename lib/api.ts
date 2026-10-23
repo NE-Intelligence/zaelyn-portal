@@ -230,3 +230,36 @@ export const misProyectos = () => leer<MisProyectos>('/portal/editor/mios')
 export const planYUso = () => leer<import('@/lib/plan-uso/tipos').VistaPlan>('/portal/plan')
 export const participaciones = () => leer<import('@/lib/plan-uso/tipos').VistaParticipaciones>('/portal/participaciones')
 export const organizacion = () => leer<{ organizacion: import('@/lib/plan-uso/tipos').VistaOrganizacion | null; cobro: boolean }>('/portal/organizacion')
+
+/**
+ * Dónde estoy parado, en todos mis grupos (#184).
+ *
+ * Va aparte de `leer` por una sola respuesta: el 402. Kickoff tiene todo esto
+ * en el chat y el portal Personal es de Sprint en adelante, así que «no lo
+ * tienes en tu plan» es una respuesta normal —con su pantalla—, no un fallo.
+ */
+export async function yoMismo(dias = 7): Promise<
+  | { ok: true; dato: import('@/lib/persona').EstadoDePersona }
+  | { ok: false; fallo: Fallo }
+  | { ok: false; fallo: 'SIN_PLAN'; plan: { clave: string; nombre: string } }
+> {
+  if (!hayApi()) return { ok: false, fallo: 'SIN_API' }
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return { ok: false, fallo: 'SIN_SESION' }
+  try {
+    const r = await fetch(`${base()}/portal/persona?dias=${dias}`, {
+      headers: { authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    })
+    if (r.status === 402) {
+      const j = (await r.json().catch(() => ({}))) as { plan?: { clave: string; nombre: string } }
+      return { ok: false, fallo: 'SIN_PLAN', plan: j.plan ?? { clave: 'free', nombre: 'Zaelyn Kickoff' } }
+    }
+    if (r.status === 401 || r.status === 403) return { ok: false, fallo: 'SIN_SESION' }
+    if (r.status === 404) return { ok: false, fallo: 'NO_LO_ENCUENTRO' }
+    if (!r.ok) return { ok: false, fallo: 'CAIDO' }
+    return { ok: true, dato: (await r.json()) as import('@/lib/persona').EstadoDePersona }
+  } catch {
+    return { ok: false, fallo: 'CAIDO' }
+  }
+}

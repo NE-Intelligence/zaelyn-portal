@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import '../portal.css'
 import '../editor.css'
 import '../familia.css'
+import '../persona.css'
 
 export const metadata: Metadata = { title: 'Proyectos' }
 
