@@ -169,7 +169,7 @@ export type AccionEditor =
   | 'org-crear' | 'org-invitar' | 'org-unirse' | 'org-quitar' | 'org-editar' | 'org-etiquetar' | 'org-comprar'
   | 'fiscal' | 'codigo' | 'invitaciones'
   | 'excel' | 'revisar'
-  | 'horas' | 'horas-borrar'
+  | 'horas' | 'horas-borrar' | 'horas-enviar' | 'horas-resolver' | 'horas-retirar'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
 function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
@@ -188,6 +188,9 @@ function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo
     case 'mios': return { metodo: 'GET', ruta: '/portal/editor/mios' }
     case 'horas': return { metodo: 'POST', ruta: '/portal/horas' }
     case 'horas-borrar': return { metodo: 'POST', ruta: '/portal/horas/borrar' }
+    case 'horas-enviar': return { metodo: 'POST', ruta: '/portal/horas/enviar' }
+    case 'horas-resolver': return { metodo: 'POST', ruta: '/portal/horas/resolver' }
+    case 'horas-retirar': return { metodo: 'POST', ruta: '/portal/horas/retirar' }
     case 'liberar-vista': return { metodo: 'POST', ruta: '/portal/editor/liberar/vista' }
     case 'liberar': return { metodo: 'POST', ruta: '/portal/editor/liberar' }
     case 'grupo-crear': return { metodo: 'POST', ruta: '/portal/grupos/crear' }
@@ -348,14 +351,22 @@ export async function horasDelProyecto(groupId: string, desde: string, hasta: st
  * horas: no es un proxy de descargas.
  */
 export async function descargarHoras(
-  cual: { tipo: 'mias'; desde: string; hasta: string; groupId?: string } | { tipo: 'proyecto'; groupId: string; desde: string; hasta: string },
+  cual:
+    | { tipo: 'mias'; desde: string; hasta: string; groupId?: string }
+    | { tipo: 'proyecto'; groupId: string; desde: string; hasta: string }
+    | { tipo: 'envio'; id: string; formato: 'pdf' | 'xlsx' }
+    | { tipo: 'aprobadas'; groupId: string; desde: string; hasta: string; formato: 'pdf' | 'xlsx' },
 ): Promise<Response> {
   if (!hayApi()) return new Response('No disponible', { status: 503 })
   const token = (await cookies()).get(COOKIE)?.value
   if (!token) return new Response('Sin sesión', { status: 401 })
   const ruta = cual.tipo === 'mias'
     ? `/portal/horas/excel?${consulta({ desde: cual.desde, hasta: cual.hasta, groupId: cual.groupId })}`
-    : `/portal/horas/proyecto/${encodeURIComponent(cual.groupId)}?${consulta({ desde: cual.desde, hasta: cual.hasta, formato: 'xlsx' })}`
+    : cual.tipo === 'envio'
+      ? `/portal/horas/envio/${encodeURIComponent(cual.id)}?formato=${cual.formato}`
+      : cual.tipo === 'aprobadas'
+        ? `/portal/horas/proyecto/${encodeURIComponent(cual.groupId)}/aprobadas?${consulta({ desde: cual.desde, hasta: cual.hasta, formato: cual.formato })}`
+        : `/portal/horas/proyecto/${encodeURIComponent(cual.groupId)}?${consulta({ desde: cual.desde, hasta: cual.hasta, formato: 'xlsx' })}`
   try {
     const r = await fetch(`${base()}${ruta}`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' })
     if (!r.ok) return new Response(r.status === 403 ? 'Solo quien dirige el proyecto' : 'No disponible', { status: r.status })
@@ -368,5 +379,22 @@ export async function descargarHoras(
     })
   } catch {
     return new Response('No disponible', { status: 502 })
+  }
+}
+
+export type VerificacionHoras =
+  | { valido: false }
+  | { valido: true; folio: string; estado: string; desde: string; hasta: string; trabajoMin: number; disponibilidadMin: number; aprobadoEn: string }
+
+/** Verificar un documento de horas aprobado. Sin sesión: lo puede abrir quien recibió el PDF. */
+export async function verificarHoras(folio: string, huella: string): Promise<VerificacionHoras | null> {
+  if (!hayApi()) return null
+  try {
+    const r = await fetch(`${base()}/portal/horas/verificar?${consulta({ folio, huella })}`, { cache: 'no-store' })
+    if (r.status === 422) return { valido: false }
+    if (!r.ok) return null
+    return (await r.json()) as VerificacionHoras
+  } catch {
+    return null
   }
 }

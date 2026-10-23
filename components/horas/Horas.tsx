@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { escribir } from '@/components/editor/comun'
 import {
-  TIPO_DICE, diaCorto, enHoras, horasTexto, mesLargo, moverAncla,
+  ESTADO_ENVIO, TIPO_DICE, diaCorto, enHoras, horasTexto, mesLargo, moverAncla,
   type Periodo, type TipoHora, type VistaHoras,
 } from '@/lib/horas'
 
@@ -74,6 +74,7 @@ export function Horas({ v, periodo, ancla }: { v: VistaHoras; periodo: Periodo; 
       const llevas = Number(r.cuerpo['llevas'] ?? 0)
       setError(r.error === 'TOPE_DIA'
         ? `Ese día ya llevas ${horasTexto(llevas)} de trabajo; con esto pasarías de 24 h. Si fue tiempo localizable para otro proyecto, márcalo como disponibilidad o guardia.`
+        : r.error === 'PERIODO_CERRADO' ? `Ese día está en un envío a aprobación (${String(r.cuerpo['folio'] ?? '')}). Retíralo si necesitas corregir.`
         : r.error === 'FECHA' ? 'Las horas se registran de hoy hacia atrás.'
           : r.error === 'SIN_PLAN' ? 'Las horas personales son del plan con portal Personal. Las de tus proyectos sí puedes registrarlas.'
             : r.error === 'SIN_PERMISO' ? 'En ese proyecto tu rol no registra horas.'
@@ -88,7 +89,32 @@ export function Horas({ v, periodo, ancla }: { v: VistaHoras; periodo: Periodo; 
   async function borrar(id: string) {
     const r = await escribir('horas-borrar', { id })
     setPorBorrar(null)
-    if (!r.ok) { setError('No se pudo borrar.'); return }
+    if (!r.ok) { setError(r.error === 'PERIODO_CERRADO' ? `Ese registro está en un envío a aprobación (${String(r.cuerpo['folio'] ?? '')}): retíralo primero.` : 'No se pudo borrar.'); return }
+    router.refresh()
+  }
+
+  // ── aprobación (#192)
+  const [enviando, setEnviando] = useState<string | null>(null)
+  const [msgEnvio, setMsgEnvio] = useState('')
+  const hastaEnvio = v.hasta > v.hoy ? v.hoy : v.hasta
+  const porMandar = proyectosConHoras.filter(([id]) => v.registros.some(r => r.groupId === id && r.fecha <= hastaEnvio && !v.cerrados[r.id]))
+  async function mandar(groupId: string, nombre: string) {
+    setEnviando(groupId); setMsgEnvio('')
+    const r = await escribir<{ envio: { folio: string }; aprobadores: string[] }>('horas-enviar', { groupId, desde: v.desde, hasta: hastaEnvio })
+    setEnviando(null)
+    if (!r.ok) {
+      const e = r.cuerpo['error']
+      setMsgEnvio(e === 'ENCIMADO' ? `Parte de este periodo de ${nombre} ya está mandado${r.cuerpo['folio'] ? ` (${String(r.cuerpo['folio'])})` : ''}. Retíralo o elige otro periodo.`
+        : e === 'SIN_APROBADOR' ? `En ${nombre} no hay quién apruebe además de ti: hace falta alguien que dirija el proyecto o un Stakeholder.`
+          : e === 'VACIO' ? `No tienes horas de ${nombre} en este periodo.` : 'No se pudo mandar.')
+      return
+    }
+    setMsgEnvio(`Mandado: folio ${r.dato.envio.folio}. Le avisé a ${r.dato.aprobadores.join(', ')}. Mientras tanto esas horas quedan cerradas.`)
+    router.refresh()
+  }
+  async function retirarEnvio(id: string) {
+    const r = await escribir('horas-retirar', { id })
+    if (!r.ok) { setMsgEnvio('No se pudo retirar: quizá ya lo resolvieron.'); return }
     router.refresh()
   }
 
@@ -214,7 +240,9 @@ export function Horas({ v, periodo, ancla }: { v: VistaHoras; periodo: Periodo; 
                   </span>
                   {r.tipo === 'disponibilidad' && <span className="ed-chip">{TIPO_DICE.disponibilidad}</span>}
                   {r.origen !== 'portal' && <span className="gris hr-origen">{r.origen === 'chat' ? 'chat' : 'cronómetro'}</span>}
-                  {porBorrar === r.id ? (
+                  {v.cerrados[r.id] ? (
+                    <span className="gris hr-origen" title="Está en un envío a aprobación">🔒 {v.cerrados[r.id]}</span>
+                  ) : porBorrar === r.id ? (
                     <span className="hr-borrar">
                       <button className="ed-btn suave chico" onClick={() => setPorBorrar(null)}>No</button>
                       <button className="ed-btn peligro chico" onClick={() => borrar(r.id)}>Borrar</button>
@@ -227,6 +255,52 @@ export function Horas({ v, periodo, ancla }: { v: VistaHoras; periodo: Periodo; 
             </ul>
           </div>
         ))}
+      </section>
+
+      <section className="pt-tarjeta hr-lista">
+        <header><h2>Aprobación</h2><span className="pt-overline">un envío por proyecto · nunca se mezclan</span></header>
+        {porMandar.length > 0 && (
+          <div className="hr-mandar">
+            <p className="gris">Manda tus horas de {diaCorto(v.desde)} a {diaCorto(hastaEnvio)} a quien dirige el proyecto. Quedan cerradas hasta que las aprueben o las rechacen.</p>
+            <div className="hr-excel">
+              {porMandar.map(([id, nombre]) => (
+                <button key={id} className="ed-btn primario chico" disabled={enviando !== null} onClick={() => mandar(id, nombre)}>
+                  {enviando === id ? 'Mandando…' : `Mandar ${nombre} a aprobación`}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {msgEnvio && <div className="hr-ok">{msgEnvio}</div>}
+        {!v.envios.length ? (
+          <p className="gris">Sin envíos en este periodo. También desde el chat: «manda mis horas de esta semana a aprobación».</p>
+        ) : (
+          <table className="hr-tabla">
+            <thead><tr><th>Folio</th><th>Proyecto</th><th>Periodo</th><th>Horas</th><th>Estado</th><th /></tr></thead>
+            <tbody>
+              {v.envios.map(e => (
+                <tr key={e.id}>
+                  <td className="mono">{e.folio}</td>
+                  <td>{e.grupo}</td>
+                  <td>{diaCorto(e.desde)} – {diaCorto(e.hasta)}</td>
+                  <td className="mono">{enHoras(e.trabajo)}{e.disponibilidad ? <em className="hr-disp"> +{enHoras(e.disponibilidad)}</em> : null}</td>
+                  <td>
+                    <span className={`hr-estado e-${e.estado}`}>{ESTADO_ENVIO[e.estado]}</span>
+                    {e.resueltoPor && <small className="gris"> · {e.resueltoPor}</small>}
+                    {e.motivo && <small className="hr-motivo">«{e.motivo}»</small>}
+                  </td>
+                  <td className="hr-acciones">
+                    {e.estado === 'enviado' && <button className="ed-btn texto chico" onClick={() => retirarEnvio(e.id)}>Retirar</button>}
+                    {(e.estado === 'aprobado' || e.estado === 'enviado') && <>
+                      <a className="ed-btn suave chico" href={`/app/horas/envio/${e.id}?formato=pdf`}>PDF</a>
+                      <a className="ed-btn suave chico" href={`/app/horas/envio/${e.id}?formato=xlsx`}>Excel</a>
+                    </>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
     </>
   )

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Barra, Pie } from '@/components/portal/Marco'
 import { SinSesion } from '@/components/portal/SinSesion'
 import { horasDelProyecto } from '@/lib/api'
+import { AprobarHoras } from '@/components/horas/Aprobar'
 import { TIPO_DICE, diaCorto, enHoras, esFecha, horasTexto, mesLargo, moverAncla, rangoDe, type Periodo } from '@/lib/horas'
 
 export const dynamic = 'force-dynamic'
@@ -30,7 +31,7 @@ export default async function HorasDelProyecto({ params, searchParams }: {
         <Barra area="proyectos" migas={[{ texto: 'Proyecto', href: `/app/g/${grupo}?quedarme=1` }, { texto: 'Horas' }]} sesion />
         <main className="pt-lienzo">
           <div className="pt-vacio" style={{ maxWidth: 560 }}>
-            <b>El reporte de horas del proyecto es de quien lo dirige</b>
+            <b>El reporte de horas del proyecto es de quien lo dirige o de su Stakeholder</b>
             <span>Tus propias horas, incluidas las de este proyecto, están en <Link href="/app/horas">Mis horas</Link>.</span>
           </div>
         </main>
@@ -69,6 +70,8 @@ export default async function HorasDelProyecto({ params, searchParams }: {
             </div>
           </div>
         </div>
+
+        <AprobarHoras envios={x.envios} grupo={grupo} desde={x.desde} hasta={x.hasta} />
 
         {!x.registros.length ? (
           <div className="pt-vacio" style={{ maxWidth: 620 }}>

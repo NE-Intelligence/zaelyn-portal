@@ -34,11 +34,24 @@ export type VistaHoras = {
   opciones: OpcionesHoras
   personal: boolean
   umbrales: { leve: number; alta: number; extrema: number; dias: number }
+  envios: EnvioHoras[]
+  /** id de registro → folio del envío que lo tiene cerrado. */
+  cerrados: Record<string, string>
 }
+
+export type EstadoEnvio = 'enviado' | 'aprobado' | 'rechazado' | 'retirado'
+export type EnvioHoras = {
+  id: string; folio: string; groupId: string; grupo: string; desde: string; hasta: string
+  estado: EstadoEnvio; trabajo: number; disponibilidad: number; enviadoEn: string; resueltoEn: string | null
+  persona?: string; resueltoPor?: string | null; motivo?: string | null
+}
+export const ESTADO_ENVIO: Record<EstadoEnvio, string> = { enviado: 'Por aprobar', aprobado: 'Aprobado', rechazado: 'Rechazado', retirado: 'Retirado' }
 
 export type ReporteProyecto = {
   groupId: string; grupo: string; desde: string; hasta: string
   registros: Array<RegistroHora & { persona: string }>
+  envios: EnvioHoras[]
+  puedeAprobar: boolean
   porPersona: Array<{ persona: string; trabajo: number; disponibilidad: number }>
   porActividad: Array<{ pendienteId: string | null; actividad: string; estimado: number | null; real: number; disponibilidad: number }>
   totales: { trabajo: number; disponibilidad: number }

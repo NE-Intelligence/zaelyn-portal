@@ -65,3 +65,19 @@
 .pt .hr-lista { overflow-x: auto; }
 .pt .hr-campos label { min-width: 0; }
 @media (max-width: 480px) { .pt .hr-dias li { grid-template-columns: 82px minmax(0, 1fr) 56px; gap: 8px; } }
+/* aprobación (#192) */
+.pt .hr-sub { font-size: 13px; font-weight: 600; color: var(--ink-2); margin: 14px 0 6px; }
+.pt .hr-pendientes { list-style: none; margin: 0; padding: 0; }
+.pt .hr-pendientes li { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.pt .hr-pendientes .hr-que small { display: block; }
+.pt .hr-acciones { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.pt .hr-rechazo { flex-basis: 100%; display: flex; gap: 8px; }
+.pt .hr-rechazo input { flex: 1; min-width: 0; height: 32px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13.5px; }
+.pt .hr-estado { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--sunken); color: var(--ink-2); }
+.pt .hr-estado.e-enviado { background: var(--st-curso-bg); color: var(--st-curso-ink); }
+.pt .hr-estado.e-aprobado { background: var(--st-hecha-bg); color: var(--st-hecha-ink); }
+.pt .hr-estado.e-rechazado { background: var(--st-detenida-bg); color: var(--st-detenida-ink); }
+.pt .hr-motivo { display: block; color: var(--ink-2); font-size: 12.5px; }
+.pt .hr-disp { color: var(--hr-d); font-style: normal; }
+.pt .hr-mandar { margin-bottom: 12px; }
+.pt .hr-mandar p { margin: 0 0 8px; font-size: 13px; }
