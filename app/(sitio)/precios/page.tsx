@@ -3,6 +3,7 @@ import Campo from '@/components/sitio/Campo'
 import { textos, type Clave } from '@/lib/copy'
 import { idiomaActual } from '@/lib/preferencias'
 import { COMPARATIVA, COMPLEMENTOS_PMO, COMPLEMENTOS_TRIBU, PLANES_PUBLICOS } from '@/lib/precios'
+import { fundadores } from '@/lib/api'
 
 export async function generateMetadata() {
   const t = textos(await idiomaActual())
@@ -24,8 +25,12 @@ const Palomita = ({ si, et }: { si: boolean; et: string }) =>
  * final de la portada, mezclados con complementos sin decir de qué plan.
  */
 export default async function Precios() {
-  const lang = await idiomaActual()
+  const [lang, f] = await Promise.all([idiomaActual(), fundadores()])
   const t = textos(lang)
+  /** El tramo de fundador lo decide el motor en vivo; si no contesta, no se anuncia. */
+  const tramo = f.abierto && f.tramo ? f.tramo : null
+  const deFundador = (precio: string) => (Math.round(Number(precio) * (1 - (tramo ?? 0) / 100) * 100) / 100).toFixed(2)
+  const NIVEL: Record<string, string> = { sprint: 'base', tribu: 'family', pmo: 'pro' }
   const celda = (v: boolean | string, fila: Clave) => {
     if (typeof v === 'boolean') return <Palomita si={v} et={v ? '✓' : '—'} />
     const txt = v.startsWith('pc.') ? t(v as Clave) : v
@@ -47,6 +52,13 @@ export default async function Precios() {
 
       <section className="st-banda st-seccion st-seccion-pegada">
         <div className="st-caja">
+          <div className="st-fundador">
+            <div>
+              <p className="st-rotulo">{t('pc.fund.t')}</p>
+              <p>{t('pc.fund.p')}</p>
+            </div>
+            {tramo && <b>{t('pc.fund.abierto').replace('{t}', String(tramo)).replace('{q}', String(f.quedan))}</b>}
+          </div>
           <div className="st-planes st-planes-grandes">
             {PLANES_PUBLICOS.map((p) => (
               <article className={`st-plan${p.destacado ? ' st-plan-pmo' : ''}`} key={p.id} data-espacio={p.espacio}>
@@ -60,10 +72,11 @@ export default async function Precios() {
                     {p.precio === null ? t('pc.gratis') : p.precio}
                     {p.precio !== null && <small> {t('pc.mes')}</small>}
                   </div>
-                  <p className="st-anual">{p.id === 'pmo' ? t('pc.anio') : '\u00a0'}</p>
+                  {tramo && <p className="st-anual st-anual-fundador">{p.precio ? t('pc.fund.precio').replace('{p}', deFundador(p.precio)) : '\u00a0'}</p>}
+                  {p.id === 'pmo' && <p className="st-anual">{t('pc.anio')}</p>}
                 </div>
                 <p className="st-plan-resumen">{t(p.resumen)}</p>
-                <a className={`st-btn ${p.destacado ? 'st-btn-1' : 'st-btn-2'} st-plan-cta`} href={p.id === 'kickoff' ? '/#empieza' : '/app/plan'}>
+                <a className={`st-btn ${p.destacado ? 'st-btn-1' : 'st-btn-2'} st-plan-cta`} href={p.id === 'kickoff' ? '/#empieza' : `/app/plan?plan=${NIVEL[p.id]}`}>
                   {t(p.cta)}
                 </a>
                 <p className="st-incluye">{t(p.incluye ?? 'pc.inc.k')}</p>

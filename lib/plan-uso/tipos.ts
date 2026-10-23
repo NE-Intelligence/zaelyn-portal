@@ -31,7 +31,17 @@ export type VistaPlan = {
   invitaciones: Array<{ codigo: string; nota: string | null; usado: boolean; vence: string | null; creado: string }> | null
   cobro: { disponible: boolean; monedas: string[]; tipoCambio: Record<string, { valor: number; fecha: string; fuente: string }> }
   suscripcion: { estado: string; hasta: string | null; moneda: string | null; viva: boolean } | null
+  /** Beta 1 (#190): el tramo de fundador abierto, si lo hay. Opcional mientras el motor no lo mande. */
+  fundador?: Fundadores
+  /** El descuento que ya trae tu suscripción viva (fundador o promoción). */
+  miDescuento?: { porcentaje: number; cupon: string } | null
 }
+
+/** `GET /portal/fundadores` (#190): tramos de 10 lugares al 75, 50 y 25%. */
+export type Fundadores = { abierto: boolean; tramo: 75 | 50 | 25 | null; quedan: number; ocupados?: number; total?: number }
+
+/** Los niveles que se pueden contratar por sí solos (#190). */
+export type NivelDePaga = 'base' | 'family' | 'pro'
 
 /** Un tope que el motor dijo que se alcanzó (402 · LIMITE). */
 export type Limite = {

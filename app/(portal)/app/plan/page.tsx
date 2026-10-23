@@ -11,12 +11,12 @@ export default async function PlanPagina({
 }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const q = await searchParams
   const r = await planYUso()
-  if (!r.ok) return <SinSesion fallo={r.fallo} />
+  if (!r.ok) return <SinSesion fallo={r.fallo} inicio="planes" />
   return (
     <>
       <Barra area="cuenta" migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Plan y uso' }]} sesion modo="cuenta" />
       <main className="pt-lienzo">
-        <PlanYUso v={r.dato} pagado={q['pagado'] === '1'} />
+        <PlanYUso v={r.dato} pagado={q['pagado'] === '1'} inicial={q['plan'] === 'base' || q['plan'] === 'family' || q['plan'] === 'pro' ? q['plan'] : null} />
       </main>
       <Pie modo="cuenta" />
     </>

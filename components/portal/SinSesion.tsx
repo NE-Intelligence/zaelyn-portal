@@ -17,7 +17,7 @@ import type { Fallo } from '@/lib/api'
  * es deliberado del lado de Zaelyn (#167): a quien no puede ver un grupo no
  * se le confirma que exista.
  */
-export function SinSesion({ fallo }: { fallo: Fallo }) {
+export function SinSesion({ fallo, inicio = 'portal' }: { fallo: Fallo; inicio?: 'portal' | 'planes' }) {
   const texto: Record<Fallo, { titulo: string; cuerpo: React.ReactNode }> = {
     SIN_SESION: {
       titulo: 'Tu sesión no está abierta',
@@ -72,7 +72,7 @@ export function SinSesion({ fallo }: { fallo: Fallo }) {
           {/* EL BOTÓN SOLO DONDE SIRVE. En «no lo encuentro» ya hay sesión, y
               ofrecer entrar otra vez mandaría a alguien a resolver un problema
               que no tiene. */}
-          {fallo === 'SIN_SESION' && <Entrar />}
+          {fallo === 'SIN_SESION' && <Entrar inicio={inicio} />}
           <Link href="/proyectos" style={{ color: 'var(--brand)', marginTop: 6 }}>
             Cómo funciona Zaelyn para proyectos
           </Link>

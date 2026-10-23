@@ -289,3 +289,20 @@ export const tableroAdmin = (desde?: string, hasta?: string) => {
   const s = q.toString()
   return leer<import('@/lib/admin/tipos').TableroAdmin>(`/portal/admin/tablero${s ? `?${s}` : ''}`)
 }
+
+/**
+ * Los lugares de fundador (#190). PÚBLICO: la página de precios lo pregunta
+ * sin sesión. Si el motor no contesta, se dice que no hay tramo abierto —
+ * prometer un descuento que no se va a aplicar es peor que no anunciarlo.
+ */
+export async function fundadores(): Promise<import('@/lib/plan-uso/tipos').Fundadores> {
+  const cerrado = { abierto: false, tramo: null, quedan: 0 } as const
+  if (!hayApi()) return cerrado
+  try {
+    const r = await fetch(`${base()}/portal/fundadores`, { cache: 'no-store' })
+    if (!r.ok) return cerrado
+    return (await r.json()) as import('@/lib/plan-uso/tipos').Fundadores
+  } catch {
+    return cerrado
+  }
+}

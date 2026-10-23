@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { LogoBarra } from '@/components/Logo'
 import { Preferencias } from '@/components/Preferencias'
-import { soyAdmin } from '@/lib/api'
+import { cookies } from 'next/headers'
+import { COOKIE, soyAdmin } from '@/lib/api'
 import { textos, type Clave } from '@/lib/copy'
 import { idiomaActual, temaActual } from '@/lib/preferencias'
 
@@ -115,9 +116,13 @@ export async function Barra({
 }
 
 export async function Pie({ modo = 'lectura' }: { modo?: Modo } = {}) {
-  const t = textos(await idiomaActual())
+  const [lang, conSesion] = await Promise.all([idiomaActual(), cookies().then((c) => !!c.get(COOKIE)?.value)])
+  const t = textos(lang)
   return (
     <footer className="pt-pie">
+      {/* La nota de sesión única (#190): quien está adentro tiene que saber
+          que no hay contraseña y cómo se cierra en todos lados. */}
+      {conSesion && <p className="pt-pie-sesion">{t('po.pie.sesion')}</p>}
       <span>{t('pie.by')}</span>
       <span className="der">
         {modo === 'editor' ? t('po.pie.editor') : modo === 'cuenta' ? t('po.pie.cuenta') : modo === 'admin' ? t('po.pie.admin') : t('po.pie.lectura')}

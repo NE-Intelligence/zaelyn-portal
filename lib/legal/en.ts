@@ -249,6 +249,8 @@ export const legalEn: TextosLegales | null = {
               'Payments are processed by Stripe under its own terms.',
               'A price change is announced at least 30 days in advance and never affects a period already paid.',
               'If a charge can’t be made, the account may return to Kickoff until it’s settled.',
+              'Beta 1 · founders: the first 30 subscriptions get a permanent discount on the plan —75% for the first 10, 50% for the next 10 and 25% for the next 10, in order of purchase— as long as the subscription stays active. It does not apply to add-ons. If the subscription is canceled, the discount is not recovered.',
+              'Temporary promotions have their own validity, are shown at checkout and cannot be combined with the founder discount.',
             ],
           ],
         },

@@ -250,6 +250,8 @@ export const legalEs: TextosLegales = {
               'Los pagos los procesa Stripe conforme a sus propios términos.',
               'Un cambio de precio se avisa con al menos 30 días de anticipación y nunca afecta un periodo ya pagado.',
               'Si un cobro no se puede realizar, la cuenta puede volver a Kickoff hasta que se regularice.',
+              'Beta 1 · fundadores: las primeras 30 suscripciones reciben un descuento permanente sobre el plan —75% las primeras 10, 50% las siguientes 10 y 25% las siguientes 10, por orden de contratación— mientras la suscripción se mantenga activa. No aplica a complementos. Si la suscripción se cancela, el descuento no se recupera.',
+              'Las promociones temporales tienen su propia vigencia, se indican al contratar y no se acumulan con el descuento de fundador.',
             ],
           ],
         },

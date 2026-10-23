@@ -19,16 +19,19 @@ import { bienvenida } from '@/lib/api'
  * único que lo sabe. Si no contesta, quedan las instrucciones y ningún botón
  * roto.
  */
-export async function Entrar({ compacto = false }: { compacto?: boolean }) {
+export async function Entrar({ compacto = false, inicio = 'portal' }: { compacto?: boolean; inicio?: 'portal' | 'planes' }) {
   const b = await bienvenida()
+  // `?start=planes` (#190): Zaelyn manda el pase directo a Plan y uso, y si
+  // la persona es nueva, se lo manda al terminar el alta.
+  const enlace = b.telegram ? b.telegram.enlace.replace('start=portal', `start=${inicio}`) : ''
 
   return (
     <div className="pt-entrar">
       {b.telegram ? (
         <>
-          <a className="pt-boton" href={b.telegram.enlace} rel="noopener">
+          <a className="pt-boton" href={enlace} rel="noopener">
             <Telegrama />
-            Pedir mi enlace en Telegram
+            {inicio === 'planes' ? 'Contratar desde Telegram' : 'Pedir mi enlace en Telegram'}
           </a>
           {!compacto && (
             <p className="nota">
