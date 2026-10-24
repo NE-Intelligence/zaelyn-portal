@@ -57,7 +57,8 @@ export function Revision({
     for (const h of rev?.hallazgos ?? []) m[h.nivel].push(h)
     return m
   }, [rev])
-  const conArreglo = (rev?.hallazgos ?? []).filter(h => h.arreglo && h.nodo)
+  // Las notas (info) no entran en «Corregir todas»: son costumbres del archivo, no errores.
+  const conArreglo = (rev?.hallazgos ?? []).filter(h => h.arreglo && h.nodo && h.nivel !== 'info')
   // En bloque solo van las FECHAS (pasar al siguiente día hábil, respetar una
   // dependencia). Alargar una duración mueve todo lo que sigue y puede correr
   // el go-live semanas: eso se decide una por una.
@@ -101,6 +102,10 @@ export function Revision({
           )}
           {lectura.estructura === 'esquema' && <p>Las claves eran un esquema (1, 1.1, 1.1.2): los renglones con hijos quedaron como fases y grupos.</p>}
           {lectura.estructura === 'fase' && <p>La columna de fase agrupó las actividades.</p>}
+          {lectura.estructura === 'nivel' && <p>La columna de nivel armó las fases y los grupos.</p>}
+          {lectura.estructura === 'sangria' && <p>La sangría de los nombres armó las fases y los grupos.</p>}
+          {lectura.estructura === 'claves' && <p>Los IDs (F1 → F11 → F112) y la sangría armaron las fases y los grupos; cada renglón conserva su ID.</p>}
+          {lectura.proyecto && <p>El primer renglón, «{lectura.proyecto}», era el proyecto entero: lo usé como nombre y no como fase.</p>}
           {lectura.calendario === 'naturales' && <p>Muchas fechas caen en fin de semana: dejé el calendario en días naturales. Si tu proyecto es de lunes a viernes, activa «Solo días hábiles».</p>}
           {!lectura.fechasSeguras && <p className="aviso">Las fechas podían leerse como día/mes o mes/día; las leí como {lectura.diaPrimero ? 'día/mes' : 'mes/día'}. Revisa una para confirmar.</p>}
           {lectura.dependenciasPerdidas > 0 && <p className="aviso">{lectura.dependenciasPerdidas} dependencia{lectura.dependenciasPerdidas === 1 ? '' : 's'} no se pasaron: apuntaban a un renglón que no existe, a un renglón de resumen o cerraban un ciclo.</p>}

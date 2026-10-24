@@ -357,7 +357,7 @@ export function Lienzo({
                       tabIndex={tieneHijos ? 0 : -1}
                     >▾</button>
                     <span className={`ed-tipo t-${n.tipo}`} title={TIPO_NOMBRE[n.tipo]} style={{ color: colorDe(n) }}><IconoTipo tipo={n.tipo} /></span>
-                    <span className="ed-wbs mono">{wbs}</span>
+                    <span className="ed-wbs mono" title={n.clave ? `ID del archivo · posición ${wbs}` : undefined}>{n.clave ?? wbs}</span>
                     {editando === n.id ? (
                       <input
                         className="ed-titulo-input"

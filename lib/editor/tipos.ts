@@ -37,6 +37,8 @@ export type Nodo = {
   padre: string | null
   orden: number
   titulo: string
+  /** El ID que traía el archivo («F1121»), tal cual (#194). */
+  clave?: string
   objetivo?: string
   relevancia?: string
   terminado?: string
@@ -94,7 +96,8 @@ export type LecturaExcel = {
   fechasSeguras: boolean
   diaPrimero: boolean
   calendario: 'habiles' | 'naturales'
-  estructura: 'esquema' | 'fase' | 'plana'
+  estructura: 'esquema' | 'nivel' | 'sangria' | 'claves' | 'fase' | 'plana'
+  proyecto?: string
   dependenciasPerdidas: number
   tiempo: Array<{ titulo: string; tipo: 'duracion' | 'esfuerzo'; unidad: string }>
   jornada: number
