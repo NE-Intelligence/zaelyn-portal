@@ -674,3 +674,7 @@
 .pt .ed-unidad-jornada { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); }
 .pt .ed-unidad-jornada input { width: 72px; }
 .pt .ed-unidades .gris { color: var(--ink-3); font-size: 12.5px; }
+/* revisión: dejar así (#196) */
+.pt .ed-rev-acciones { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+.pt .ed-rev-vistos { font-size: 12.5px; color: var(--ink-3); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.pt .ed-btn.ancho { width: 100%; justify-content: center; margin-top: 8px; }

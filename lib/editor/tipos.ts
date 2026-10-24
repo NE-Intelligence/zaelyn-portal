@@ -79,8 +79,11 @@ export type Hallazgo = {
   fila: number | null
   dice: string
   arreglo?: { etiqueta: string; cambios: { inicio?: string; dias?: number } }
+  /** «codigo:nodo» para marcarlo como visto (#196). */
+  clave: string
+  descartable: boolean
 }
-export type Revision = { hallazgos: Hallazgo[]; errores: number; avisos: number; info: number }
+export type Revision = { hallazgos: Hallazgo[]; errores: number; avisos: number; info: number; revisados?: number }
 
 /** Lo que se entendió de un Excel al convertirlo en borrador (#188). */
 export type LecturaExcel = {
@@ -129,6 +132,8 @@ export type Doc = {
   unidad?: 'horas' | 'dias'
   /** Horas de una jornada; 8 si no se dice. */
   jornada?: number
+  /** Hallazgos de la revisión que se vieron y se dejaron así (#196). */
+  revisados?: string[]
   nodos: Nodo[]
 }
 

@@ -567,6 +567,7 @@ export function Editor({
             <Revision
               doc={h.presente} groupId={grupo?.id ?? null} lectura={lectura} puede={puede}
               onAplicar={aplicarArreglos} onIr={setSeleccion} onRevisado={setRevisado}
+              onVistos={c => comprometer({ ...h.presente, revisados: c === null ? undefined : [...new Set([...(h.presente.revisados ?? []), ...c])] })}
             />
           </div>
           {panel === 'revision' ? null : panel === 'zaelyn' ? (

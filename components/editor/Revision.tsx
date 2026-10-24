@@ -16,7 +16,7 @@ const UNIDAD: Record<string, string> = { horas: 'horas', dias: 'días', semanas:
 const NIVEL: Record<NivelHallazgo, string> = { error: 'Errores', aviso: 'Avisos', info: 'Para que lo sepas' }
 
 export function Revision({
-  doc, groupId, lectura, puede, onAplicar, onIr, onRevisado,
+  doc, groupId, lectura, puede, onAplicar, onIr, onRevisado, onVistos,
 }: {
   doc: Doc
   groupId: string | null
@@ -26,6 +26,8 @@ export function Revision({
   onAplicar: (arreglos: Array<{ nodo: string; cambios: { inicio?: string; dias?: number } }>) => void
   onIr: (nodo: string) => void
   onRevisado?: (r: RevisionT) => void
+  /** Marca hallazgos como vistos («dejar así»), o con null vuelve a mostrarlos todos (#196). */
+  onVistos?: (claves: string[] | null) => void
 }) {
   const [rev, setRev] = useState<RevisionT | null>(null)
   const [error, setError] = useState('')
@@ -64,6 +66,7 @@ export function Revision({
   // el go-live semanas: eso se decide una por una.
   const deFecha = conArreglo.filter(h => h.arreglo!.cambios.inicio && h.arreglo!.cambios.dias === undefined)
 
+  const descartables = (rev?.hallazgos ?? []).filter(h => h.descartable && h.nivel !== 'error')
   const todo = () => {
     // Un nodo, un arreglo: si trae dos (fin de semana y festivo, digamos),
     // gana el primero y la siguiente revisión dirá si queda algo.
@@ -130,6 +133,15 @@ export function Revision({
           {puede && deFecha.length > 1 && (
             <button className="ed-btn primario ancho" onClick={todo}>Corregir todas las fechas ({deFecha.length})</button>
           )}
+          {puede && onVistos && descartables.length > 1 && (
+            <button className="ed-btn suave ancho" onClick={() => onVistos(descartables.map(h => h.clave))}>
+              Ya los revisé: dejar así los {descartables.length} avisos y notas
+            </button>
+          )}
+          {(rev.revisados ?? 0) > 0 && (
+            <p className="ed-rev-vistos">{rev.revisados} ya revisado{rev.revisados === 1 ? '' : 's'} y dejado{rev.revisados === 1 ? '' : 's'} así.
+              {puede && onVistos && <button className="ed-btn texto chico" onClick={() => onVistos(null)}>Volver a mostrarlos</button>}</p>
+          )}
           {rev.errores + rev.avisos === 0 && (
             <div className="ed-rev-limpio">Nada que corregir. Las fechas caen en días hábiles, las dependencias se respetan y los totales cuadran.</div>
           )}
@@ -152,8 +164,15 @@ export function Revision({
                         </button>
                       )}
                       <p>{h.dice}</p>
-                      {h.arreglo && h.nodo && puede && (
-                        <button className="ed-btn suave chico" onClick={() => onAplicar([{ nodo: h.nodo!, cambios: h.arreglo!.cambios }])}>{h.arreglo.etiqueta}</button>
+                      {puede && (h.arreglo || (h.descartable && onVistos)) && (
+                        <div className="ed-rev-acciones">
+                          {h.arreglo && h.nodo && (
+                            <button className="ed-btn suave chico" onClick={() => onAplicar([{ nodo: h.nodo!, cambios: h.arreglo!.cambios }])}>{h.arreglo.etiqueta}</button>
+                          )}
+                          {h.descartable && onVistos && (
+                            <button className="ed-btn texto chico" onClick={() => onVistos([h.clave])} title="Ya lo vi; no lo vuelvas a contar">{h.arreglo ? 'Dejar así' : 'Entendido'}</button>
+                          )}
+                        </div>
                       )}
                     </li>
                   ))}
