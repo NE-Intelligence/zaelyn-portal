@@ -6,7 +6,7 @@
 .pt .hr-seg a { padding: 6px 12px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
 .pt .hr-seg a[aria-current='page'] { background: var(--brand-soft); color: var(--brand-ink); font-weight: 600; }
 .pt .hr-crono { color: var(--zaelyn-ink); font-weight: 600; }
-.pt .hr-enlace { display: flex; justify-content: flex-end; margin: 0 0 10px; }
+.pt .hr-enlace { display: flex; justify-content: flex-end; gap: 6px; margin: 0 0 10px; }
 
 .pt .hr-carga { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; border-radius: 12px; margin: 0 0 16px;
   background: var(--st-curso-bg); color: var(--st-curso-ink); border: 1px solid color-mix(in srgb, var(--st-curso) 40%, transparent); }
@@ -81,3 +81,17 @@
 .pt .hr-disp { color: var(--hr-d); font-style: normal; }
 .pt .hr-mandar { margin-bottom: 12px; }
 .pt .hr-mandar p { margin: 0 0 8px; font-size: 13px; }
+/* presupuesto (#195) */
+.pt .pr-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.pt .pr-tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.pt .pr-tile > span { font-size: 12px; color: var(--ink-3); }
+.pt .pr-tile b { font-size: 20px; font-weight: 700; color: var(--ink); }
+.pt .pr-tile b small { font-size: 12px; font-weight: 500; }
+.pt .pr-tile > small { font-size: 12px; color: var(--ink-3); }
+.pt .pr-monto { display: flex; gap: 6px; }
+.pt .pr-monto input, .pt .pr-input { min-width: 0; width: 100%; height: 32px; border: 1px solid var(--line); border-radius: 8px; padding: 0 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; box-sizing: border-box; }
+.pt .pr-input { max-width: 150px; }
+.pt .pr-bien { color: var(--st-hecha-ink); }
+.pt .pr-ojo { color: var(--st-curso-ink); }
+.pt .pr-mal { color: var(--critica); }
+.pt .pr-hist { display: inline-flex; align-items: center; gap: 2px; margin-right: 8px; font-size: 12.5px; color: var(--ink-2); }

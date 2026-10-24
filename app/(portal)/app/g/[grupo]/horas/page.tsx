@@ -66,6 +66,7 @@ export default async function HorasDelProyecto({ params, searchParams }: {
                 <Link href={q(ancla, 'semana')} aria-current={periodo === 'semana' ? 'page' : undefined}>Semana</Link>
                 <Link href={q(ancla, 'mes')} aria-current={periodo === 'mes' ? 'page' : undefined}>Mes</Link>
               </span>
+              <Link className="ed-btn suave" href={`/app/g/${grupo}/presupuesto`}>Presupuesto</Link>
               <a className="ed-btn primario" href={`/app/g/${grupo}/horas/excel?desde=${x.desde}&hasta=${x.hasta}`}>Excel del proyecto</a>
             </div>
           </div>

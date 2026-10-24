@@ -170,6 +170,7 @@ export type AccionEditor =
   | 'fiscal' | 'codigo' | 'invitaciones'
   | 'excel' | 'revisar'
   | 'horas' | 'horas-borrar' | 'horas-enviar' | 'horas-resolver' | 'horas-retirar'
+  | 'presupuesto-tarifa' | 'presupuesto-monto'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
 function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
@@ -193,6 +194,8 @@ function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo
     case 'horas-enviar': return { metodo: 'POST', ruta: '/portal/horas/enviar' }
     case 'horas-resolver': return { metodo: 'POST', ruta: '/portal/horas/resolver' }
     case 'horas-retirar': return { metodo: 'POST', ruta: '/portal/horas/retirar' }
+    case 'presupuesto-tarifa': return { metodo: 'POST', ruta: '/portal/presupuesto/tarifa' }
+    case 'presupuesto-monto': return { metodo: 'POST', ruta: '/portal/presupuesto/monto' }
     case 'liberar-vista': return { metodo: 'POST', ruta: '/portal/editor/liberar/vista' }
     case 'liberar': return { metodo: 'POST', ruta: '/portal/editor/liberar' }
     case 'grupo-crear': return { metodo: 'POST', ruta: '/portal/grupos/crear' }
@@ -357,13 +360,16 @@ export async function descargarHoras(
     | { tipo: 'mias'; desde: string; hasta: string; groupId?: string }
     | { tipo: 'proyecto'; groupId: string; desde: string; hasta: string }
     | { tipo: 'envio'; id: string; formato: 'pdf' | 'xlsx' }
-    | { tipo: 'aprobadas'; groupId: string; desde: string; hasta: string; formato: 'pdf' | 'xlsx' },
+    | { tipo: 'aprobadas'; groupId: string; desde: string; hasta: string; formato: 'pdf' | 'xlsx' }
+    | { tipo: 'presupuesto'; groupId: string },
 ): Promise<Response> {
   if (!hayApi()) return new Response('No disponible', { status: 503 })
   const token = (await cookies()).get(COOKIE)?.value
   if (!token) return new Response('Sin sesión', { status: 401 })
   const ruta = cual.tipo === 'mias'
     ? `/portal/horas/excel?${consulta({ desde: cual.desde, hasta: cual.hasta, groupId: cual.groupId })}`
+    : cual.tipo === 'presupuesto'
+      ? `/portal/presupuesto/${encodeURIComponent(cual.groupId)}?formato=xlsx`
     : cual.tipo === 'envio'
       ? `/portal/horas/envio/${encodeURIComponent(cual.id)}?formato=${cual.formato}`
       : cual.tipo === 'aprobadas'
@@ -398,5 +404,25 @@ export async function verificarHoras(folio: string, huella: string): Promise<Ver
     return (await r.json()) as VerificacionHoras
   } catch {
     return null
+  }
+}
+
+/** El presupuesto de UN proyecto (#195). Solo quien lo dirige; 403 se distingue de «no existe». */
+export async function elPresupuesto(groupId: string): Promise<
+  | { ok: true; dato: import('@/lib/presupuesto').EstadoPresupuesto }
+  | { ok: false; fallo: Fallo | 'SIN_PERMISO' }
+> {
+  if (!hayApi()) return { ok: false, fallo: 'SIN_API' }
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return { ok: false, fallo: 'SIN_SESION' }
+  try {
+    const r = await fetch(`${base()}/portal/presupuesto/${encodeURIComponent(groupId)}`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' })
+    if (r.status === 403) return { ok: false, fallo: 'SIN_PERMISO' }
+    if (r.status === 401) return { ok: false, fallo: 'SIN_SESION' }
+    if (r.status === 404) return { ok: false, fallo: 'NO_LO_ENCUENTRO' }
+    if (!r.ok) return { ok: false, fallo: 'CAIDO' }
+    return { ok: true, dato: (await r.json()) as import('@/lib/presupuesto').EstadoPresupuesto }
+  } catch {
+    return { ok: false, fallo: 'CAIDO' }
   }
 }
