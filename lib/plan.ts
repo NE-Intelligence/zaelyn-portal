@@ -157,6 +157,8 @@ export type Renglon = {
   dias?: number | null
   /** Quienes apoyan además del responsable (#197). */
   apoyos?: Array<{ id: string; nombre: string }>
+  /** Soporte posterior al go-live: pesa poco en el avance (#198). */
+  soporte?: boolean
   /** Días que puede recorrerse sin empujar nada. `null` = no se puede saber. */
   holgura: number | null
   /** Holgura cero: manda sobre la fecha final. */
@@ -191,6 +193,9 @@ export type Punto = {
   senales: Partial<Record<Senal, number>>
   dudosos: number
   dichoSinCerrar: number
+  /** Actividades de soporte post go-live, y cuánto pesaron en % (#198). */
+  soporte?: number
+  pesoSoporte?: number | null
 }
 
 export type PersonaEnPlan = {

@@ -127,7 +127,7 @@ export function Resumen({ v }: { v: VistaDePlan }) {
         </section>
       </div>
 
-      {!!v.grupos?.length && <Entregables grupos={v.grupos} hoy={e.hoy} base={e.punto.base} />}
+      {!!v.grupos?.length && <Entregables grupos={v.grupos} hoy={e.hoy} base={e.punto.base} pesoSoporte={e.punto.pesoSoporte} />}
 
       <section className="pt-tarjeta">
         <header>
@@ -185,13 +185,18 @@ export function Resumen({ v }: { v: VistaDePlan }) {
  * Los grupos del archivo, sangrados por nivel. El número lo agregó el
  * contrato con la misma ponderación que el plan; aquí solo se dibuja.
  */
-function Entregables({ grupos, hoy, base }: { grupos: GrupoDePlan[]; hoy: string; base: VistaDePlan['estado']['punto']['base'] }) {
+function Entregables({ grupos, hoy, base, pesoSoporte }: { grupos: GrupoDePlan[]; hoy: string; base: VistaDePlan['estado']['punto']['base']; pesoSoporte: number | null | undefined }) {
   return (
     <section className="pt-tarjeta">
       <header>
         <h2>Avance por entregable</h2>
         <span className="pt-overline">{comoSePesa(base)}</span>
       </header>
+      {pesoSoporte != null && (
+        <p style={{ fontSize: 12, color: 'var(--ink-3)', margin: '0 0 10px' }}>
+          El soporte posterior al go-live vale {pesoSoporte}% del avance: con todo lo demás entregado, el plan va al {100 - pesoSoporte}%.
+        </p>
+      )}
       <div style={{ display: 'grid', gap: 12 }}>
         {grupos.map(g => {
           return (
@@ -368,6 +373,7 @@ export function Tablero({ v }: { v: VistaDePlan }) {
                           <span className="txt">
                             {r.texto}
                             {r.hito && <span className="pt-bandera" style={{ marginLeft: 6 }}>Hito</span>}
+                            {r.soporte && <span className="pt-bandera" style={{ marginLeft: 6 }} title="Soporte post go-live: pesa poco en el avance">Soporte</span>}
                             {r.manda && <span className="pt-bandera" style={{ marginLeft: 6 }}>Sin margen</span>}
                           </span>
                         </div>

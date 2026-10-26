@@ -381,6 +381,7 @@ export function Lienzo({
                     )}
                     <span className="ed-meta">
                       <ChipSeguimiento n={n} />
+                      {n.soporte && <span className="ed-puesto" title="Soporte post go-live: pesa poco en el avance">Soporte</span>}
                       {!p && n.puesto && <span className="ed-puesto" title={`Puesto: ${n.puesto}`}>{n.puesto}</span>}
                       {n.tipo === 'actividad' && !n.responsable && !n.puesto && <span className="ed-falta" title="Sin responsable ni puesto">sin dueño</span>}
                       {p && <Avatar p={p} chico />}

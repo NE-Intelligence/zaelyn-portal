@@ -404,6 +404,13 @@ export function Editor({
               <input type="number" min={1} max={24} step={0.5} value={jornadaDe(doc)} disabled={!puede}
                 onChange={e => { const v = Number(e.target.value); if (v >= 1 && v <= 24) comprometer({ ...h.presente, jornada: v === 8 ? undefined : v }, { clave: 'doc:jornada' }) }} />
             </label>
+            {doc.nodos.some(n => n.soporte) && (
+              <label className="ed-jornada" title="Entre todas, las actividades de soporte post go-live valen este % del avance. Con 5, todo entregado y solo el soporte pendiente = 95%.">
+                <span>Peso del soporte (%)</span>
+                <input type="number" min={0} max={50} step={1} value={doc.pesoSoporte ?? 5} disabled={!puede}
+                  onChange={e => { const v = Math.round(Number(e.target.value)); if (v >= 0 && v <= 50) comprometer({ ...h.presente, pesoSoporte: v === 5 ? undefined : v }, { clave: 'doc:pesoSoporte' }) }} />
+              </label>
+            )}
           </div>
         </div>
         <div className="ed-pr-acciones">

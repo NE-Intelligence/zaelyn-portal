@@ -128,6 +128,13 @@ export function Inspector({
             </label>
           )}
           {n.tipo === 'actividad' && (
+            <label className="ancho ed-check" style={{ display: 'flex', alignItems: 'flex-start', gap: 8, flexDirection: 'row' }}>
+              <input type="checkbox" checked={!!n.soporte} disabled={!puede} style={{ marginTop: 3 }}
+                onChange={e => onCambiar(n.id, { soporte: e.target.checked || undefined })} />
+              <span>Soporte post go-live <em>se sigue y se avisa igual, pero entre todas valen {doc.pesoSoporte ?? 5}% del avance</em></span>
+            </label>
+          )}
+          {n.tipo === 'actividad' && (
             <label className="ancho">
               <span>Apoyo <em>quién más participa; le llegan los avisos de la fecha</em></span>
               <input key={`apoyo:${n.id}:${(n.apoyo ?? []).join('|')}`} list="ed-puestos" disabled={!puede}

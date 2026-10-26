@@ -49,6 +49,8 @@ export type Nodo = {
   apoyan?: string[]
   /** Quienes apoyan, por puesto: se asignan al liberar (#197). */
   apoyo?: string[]
+  /** Soporte posterior al go-live: pesa poco en el avance (#198). */
+  soporte?: boolean
   inicio?: string | null
   dias?: number | null
   horas?: number | null
@@ -136,6 +138,8 @@ export type Doc = {
   unidad?: 'horas' | 'dias'
   /** Horas de una jornada; 8 si no se dice. */
   jornada?: number
+  /** Cuánto vale, en %, el soporte post go-live en el avance; 5 si no se dice (#198). */
+  pesoSoporte?: number
   /** Hallazgos de la revisión que se vieron y se dejaron así (#196). */
   revisados?: string[]
   nodos: Nodo[]
