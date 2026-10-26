@@ -45,8 +45,8 @@ export default async function Plan({
         sesion
       />
       <main className="pt-lienzo">
-        {dirige && e.plan && <Reabrir grupo={grupo} plan={e.plan.id} />}
         <div className="hr-enlace">
+          {dirige && e.plan && <Reabrir grupo={grupo} plan={e.plan.id} />}
           {dirige
             ? <><Link className="ed-btn suave chico" href={`/app/g/${grupo}/horas`}>Horas del proyecto</Link>{r.dato.rol !== 'stakeholder' && <Link className="ed-btn suave chico" href={`/app/g/${grupo}/presupuesto`}>Presupuesto</Link>}</>
             : <Link className="ed-btn suave chico" href="/app/horas">Registrar mis horas</Link>}

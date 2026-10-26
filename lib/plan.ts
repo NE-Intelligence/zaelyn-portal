@@ -285,7 +285,12 @@ export type FaseDePlan = {
   hitos: number
 }
 
-export type Narrativa = { resumen: string; puntos: string[] }
+export type Narrativa = {
+  resumen: string
+  puntos: string[]
+  /** En bloques con tono (#201). Opcional: un motor viejo no los manda. */
+  bloques?: Array<{ tono: 'bien' | 'atencion' | 'falta'; titulo: string; texto: string }>
+}
 
 export type Suceso = {
   pendienteId: string

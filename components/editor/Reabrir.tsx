@@ -27,13 +27,16 @@ export function Reabrir({ grupo, plan }: { grupo: string; plan: string }) {
     router.push(`/app/g/${grupo}/editor/${r.dato.id}?${q.toString()}`)
   }
 
+  // Un botón más de la fila de acciones, no una franja (#201): el dueño del
+  // producto lo pidió así —«que se llame solamente Edición»—. Lo que hace lo
+  // dice el título al pasar el cursor.
   return (
-    <div className="ed-reabrir">
-      <button className="ed-btn zaelyn" onClick={abrir} disabled={estado === 'abriendo'}>
-        {estado === 'abriendo' ? 'Trayendo el plan…' : 'Edición mayor en el editor'}
+    <>
+      <button className="ed-btn suave chico" onClick={abrir} disabled={estado === 'abriendo'}
+        title="Abre el plan en el editor para reorganizar fases, fechas y dependencias. Nada cambia aquí hasta que liberes.">
+        {estado === 'abriendo' ? 'Abriendo…' : 'Edición'}
       </button>
-      <small>Reorganiza fases, fechas y dependencias con Zaelyn. Nada cambia aquí hasta que liberes.</small>
-      {error && <div className="ed-error">{error}</div>}
-    </div>
+      {error && <span className="ed-error" style={{ fontSize: 12 }}>{error}</span>}
+    </>
   )
 }

@@ -13,6 +13,8 @@
 import Link from 'next/link'
 import type { GrupoDePlan, PuntoDeCurva, Renglon, VistaDePlan } from '@/lib/plan'
 import { comoSePesa, deFase, enRiesgo, persona } from '@/lib/plan'
+import { RITMO_NOMBRE, filasDelArbol, ritmoDe } from '@/lib/arbol'
+import { ArbolDeAvance } from './Arbol'
 import {
   Avance, Avatar, Chispa, Crit, Distribucion, Franja, Kpi, Margen, Pill, Senales,
   cuando, dias, fecha, plural, tarde,
@@ -152,36 +154,11 @@ export function Resumen({ v, base }: { v: VistaDePlan; base: string }) {
  * grupos con `avanceDe`); aquí solo se dibuja el árbol.
  */
 function AvanceDelProyecto({ v, base }: { v: VistaDePlan; base: string }) {
-  const e = v.estado
-  const p = e.punto
-  const grupos = v.grupos ?? []
-  const fila = (o: {
-    k: string; nivel: number; nombre: string; real: number; esperado: number | null
-    total: number; abiertos?: number; hitos?: number; vence?: string | null; orden?: number | null; fase?: boolean
-    href?: string
-  }) => (
-    <div key={o.k} style={{ display: 'grid', gap: 5, paddingLeft: Math.max(0, o.nivel - 1) * 18 }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap',
-                    fontSize: o.nivel === 0 ? 14.5 : o.nivel === 1 ? 13.5 : 12.5 }}>
-        {o.fase && <Franja orden={o.orden ?? null} />}
-        {/* Cada nivel abre su detalle: el Tablero con solo lo de ese tramo (#200). */}
-        <Link href={o.href ?? `${base}?v=tablero`} title="Ver sus actividades"
-              style={{ fontWeight: o.nivel <= 1 ? 650 : 550, minWidth: 0, overflowWrap: 'anywhere', color: 'inherit' }}>
-          {o.nombre}
-        </Link>
-        {!!o.hitos && <span className="pt-bandera">{o.hitos} hito{o.hitos === 1 ? '' : 's'}</span>}
-        <span style={{ marginLeft: 'auto', color: 'var(--ink-3)', fontSize: 12, whiteSpace: 'nowrap' }}>
-          {o.abiertos !== undefined ? `${o.total - o.abiertos}/${o.total} cerradas` : `${o.total} actividades`}
-          {o.vence && ` · ${o.abiertos === 0 ? 'terminó' : 'termina'} ${fecha(o.vence)}`}
-        </span>
-      </div>
-      <Avance real={o.real} esperado={o.esperado} />
-    </div>
-  )
+  const p = v.estado.punto
   return (
     <section className="pt-tarjeta">
       <header>
-        <h2>Avance por fase y entregable</h2>
+        <h2>Avance del proyecto</h2>
         <span className="pt-overline">{comoSePesa(p.base)}</span>
       </header>
       {p.pesoSoporte != null && (
@@ -189,50 +166,29 @@ function AvanceDelProyecto({ v, base }: { v: VistaDePlan; base: string }) {
           El soporte posterior al go-live vale {p.pesoSoporte}% del avance: con todo lo demás entregado, el plan va al {100 - p.pesoSoporte}%.
         </p>
       )}
-      <div style={{ display: 'grid', gap: 12 }}>
-        {fila({ k: 'proyecto', nivel: 0, nombre: e.plan?.nombre ?? e.grupo.nombre, real: p.declarado, esperado: p.esperado,
-                total: p.total, abiertos: p.total - p.cerrados, vence: v.ruta.venceElPlan })}
-        {v.fases.map(f => {
-          const suyos = grupos.filter(g => (g.fase ?? null) === f.nombre)
-          // Un plan sin fases no repite la misma barra dos veces: los grupos
-          // cuelgan directo del proyecto.
-          const sinFases = v.fases.length === 1 && f.nombre === null
-          return (
-            <div key={f.nombre ?? 'sin'} style={{ display: 'grid', gap: 12, paddingLeft: 18 }}>
-              {!sinFases && fila({ k: `f:${f.nombre}`, nivel: 1, nombre: f.nombre ?? 'Fuera de fase', real: f.punto.declarado,
-                esperado: f.punto.esperado, total: f.total, abiertos: f.abiertos, hitos: f.hitos, orden: f.orden, fase: true,
-                href: enlaceDeTramo(base, [f.nombre]) })}
-              {suyos.map(g => fila({ k: JSON.stringify([g.fase, ...g.ruta]), nivel: g.nivel + (sinFases ? 0 : 1),
-                nombre: g.nombre, real: g.punto.declarado, esperado: g.punto.esperado, total: g.total,
-                abiertos: g.abiertos, hitos: g.hitos, vence: g.vence, href: enlaceDeTramo(base, [g.fase, ...g.ruta]) }))}
-            </div>
-          )
-        })}
-        {v.fases.length === 1 && v.fases[0]!.nombre === null && !grupos.length && (
-          <p style={{ fontSize: 12.5, color: 'var(--ink-3)', margin: 0 }}>
-            Ninguna actividad trae fase ni grupo. Si tu Excel tiene fases o entregables,
-            súbelo en el editor y se agrupan solas.
-          </p>
-        )}
-      </div>
+      <ArbolDeAvance filas={filasDelArbol(v)} hoy={v.estado.hoy} base={base} />
     </section>
   )
 }
 
+/**
+ * La lectura de hoy (#201): qué pasa y qué consecuencia tiene, bloque por
+ * bloque, sin franja de color de alarma. El texto lo redacta el motor.
+ */
 function ZaelynHoy({ v }: { v: VistaDePlan }) {
+  const n = v.narrativa
   return (
-    <section className="pt-zaelyn">
-      <header>
-        <span className="chispa"><Chispa /></span>
-        <h2>Lo que Zaelyn ve hoy</h2>
-      </header>
-      <p className="resumen">{v.narrativa.resumen}</p>
+    <section className="pt-lectura">
+      <h2>Lectura de hoy</h2>
+      <p className="resumen">{n.resumen}</p>
       <ul>
-        {v.narrativa.puntos.map(x => <li key={x}>{x}</li>)}
+        {(n.bloques ?? n.puntos.map(x => ({ tono: 'falta' as const, titulo: '', texto: x }))).map(b => (
+          <li key={b.titulo + b.texto} className={b.tono}>
+            <i />
+            <span>{b.titulo && <b>{b.titulo}. </b>}{b.texto}</span>
+          </li>
+        ))}
       </ul>
-      <p className="salida">
-        Para cambiar algo, díselo a Zaelyn por el chat. El portal solo muestra.
-      </p>
     </section>
   )
 }
@@ -448,24 +404,22 @@ export function Tablero({ v, en, base }: { v: VistaDePlan; en?: Tramo | null; ba
 export function Gantt({ v }: { v: VistaDePlan }) {
   const e = v.estado
   const conFecha = e.renglones.filter(r => r.inicia || r.vence)
-  const ini = conFecha.map(r => r.inicia ?? r.vence!).sort()[0] ?? e.hoy
-  const fin = conFecha.map(r => r.vence ?? r.inicia!).sort().at(-1) ?? e.hoy
-  const total = Math.max(dias(ini, fin) + 1, 1)
-  const PX = Math.min(Math.max(760 / total, 1.4), 14)
-  const ancho = total * PX
-
   if (!conFecha.length) {
     return (
       <div className="pt-vacio" style={{ maxWidth: 560 }}>
         <b>No hay nada que dibujar todavía</b>
         <span>
-          Ninguna actividad trae fechas. Un Gantt sin fechas no es un Gantt vacío:
-          es una pantalla que no puede decir nada. Dile a Zaelyn cuándo van las
-          cosas, o sube el Excel con las columnas «Inicio» y «Fecha compromiso».
+          Ninguna actividad trae fechas. Dile a Zaelyn cuándo van las cosas, o
+          sube el Excel con las columnas «Inicio» y «Fin».
         </span>
       </div>
     )
   }
+  const ini = conFecha.map(r => r.inicia ?? r.vence!).sort()[0] ?? e.hoy
+  const fin = conFecha.map(r => r.vence ?? r.inicia!).sort().at(-1) ?? e.hoy
+  const total = Math.max(dias(ini, fin) + 1, 1)
+  const PX = Math.min(Math.max(640 / total, 2), 16)
+  const ancho = total * PX + 60
 
   const meses: { etiqueta: string; d: number }[] = []
   let cursor = ini
@@ -477,69 +431,77 @@ export function Gantt({ v }: { v: VistaDePlan }) {
     cursor = new Date(Date.parse(`${hasta}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10)
   }
 
-  const filas = v.fases.flatMap(f => [
-    { fase: f, act: null as Renglon | null },
-    ...deFase(e, f.nombre).map(r => ({ fase: f, act: r })),
-  ])
+  // Las mismas filas que el árbol: fase → grupo → actividad, con su sangría.
+  const filas = filasDelArbol(v, false)
+  const x = (iso: string) => dias(ini, iso) * PX
 
   return (
-    <div className="pt-gantt">
-      <div className="lista">
-        <div className="enc">Actividad</div>
-        {filas.map((row, i) => row.act ? (
-          <div className="ren" key={row.act.id}>
-            {row.act.clave && <span className="pt-mono" style={{ color: 'var(--ink-3)' }}>{row.act.clave}</span>}
-            <span className="txt">{row.act.texto}</span>
-          </div>
-        ) : (
-          <div className="ren" key={`f${i}`} style={{ background: 'var(--surface-2)' }}>
-            <Franja orden={row.fase.orden} />
-            <b style={{ fontSize: 12.5, fontWeight: 600 }}>{row.fase.nombre ?? 'Sin fase'}</b>
-          </div>
+    <div className="pt-gantt2">
+      <div className="leyenda">
+        {(['hecho', 'bien', 'riesgo', 'atrasado', 'futuro'] as const).map(r => (
+          <span key={r} className={`rt-${r}`}><i />{RITMO_NOMBRE[r]}</span>
         ))}
+        <span><i className="esp" />Lo que tocaba hoy</span>
+        <span>La parte oscura de cada barra es el avance real</span>
       </div>
-
-      <div className="lienzo">
-        <div style={{ width: ancho, minWidth: '100%' }}>
-          <div className="meses">
-            {meses.map((m, i) => (
-              <div className="mes" key={i} style={{ width: m.d * PX }} title={m.etiqueta}>
-                {m.d * PX > 30 ? m.etiqueta : ''}
+      <div className="cuerpo">
+        <div className="izq">
+          <div className="fila enc"><span>Actividad</span><span>Responsable</span><span>Inicio</span><span>Fin</span><span style={{ textAlign: 'right' }}>%</span></div>
+          {filas.map(f => {
+            const ritmo = ritmoDe(f, e.hoy)
+            return (
+              <div key={f.k} className={`fila t-${f.tipo}`}>
+                <span className="nom" style={{ paddingLeft: f.nivel * 16 }} title={f.nombre}>
+                  {f.tipo === 'fase' && <Franja orden={f.orden} />}
+                  {f.clave && <span className="clave">{f.clave}</span>}
+                  <span className="t">{f.nombre}</span>
+                </span>
+                <span className="resp" title={f.apoyos.length ? `Apoyo: ${f.apoyos.join(', ')}` : undefined}>
+                  {f.tipo === 'actividad' || f.tipo === 'hito' ? (f.quien ?? '—') : `${f.cerradas}/${f.total}`}
+                </span>
+                <span className="f">{fecha(f.inicia)}</span>
+                <span className="f">{fecha(f.vence)}</span>
+                <span className={`p rt-${ritmo}`}>{f.real}%</span>
               </div>
-            ))}
-          </div>
-          <div className="pistas">
-            <div className="hoy" style={{ left: dias(ini, e.hoy) * PX }} />
-            {filas.map((row, i) => {
-              const a = row.act
-              if (!a) return <div className="pista" key={`f${i}`} style={{ background: 'var(--surface-2)' }} />
-              // Sin fechas no se pinta una barra inventada: se deja la pista
-              // vacía, que es exactamente lo que se sabe de esa actividad.
-              if (!a.inicia && !a.vence) return <div className="pista" key={a.id} />
-              const desde = a.inicia ?? a.vence!
-              const hasta = a.vence ?? a.inicia!
-              const x = dias(ini, desde) * PX
-              const w = Math.max((dias(desde, hasta) + 1) * PX, 6)
-              const color = `var(--grp-${row.fase.orden === null ? 6 : ((row.fase.orden - 1) % 5) + 1})`
-              return (
-                <div className="pista" key={a.id}>
-                  {a.hito ? (
-                    <div className="hito" style={{ left: x, background: color }}
-                         title={`${a.texto} · ${fecha(hasta)}`} />
-                  ) : (
-                    <div
-                      className={`barra${a.manda ? ' es-critica' : ''}`}
-                      style={{ left: x, width: w, background: color }}
-                      title={`${a.texto} · ${fecha(desde)} → ${fecha(hasta)} · ${a.avance}%`
-                        + (a.holgura === null ? ' · margen desconocido'
-                          : a.holgura === 0 ? ' · sin margen' : ` · ${a.holgura}d de margen`)}
-                    >
-                      <div className="relleno" style={{ width: `${a.avance}%` }} />
-                    </div>
-                  )}
-                </div>
-              )
-            })}
+            )
+          })}
+        </div>
+        <div className="der">
+          <div style={{ width: ancho, minWidth: '100%' }}>
+            <div className="meses">
+              {meses.map((m, i) => (
+                <div className="mes" key={i} style={{ width: m.d * PX }} title={m.etiqueta}>{m.d * PX > 30 ? m.etiqueta : ''}</div>
+              ))}
+            </div>
+            <div className="pistas">
+              {e.hoy >= ini && e.hoy <= fin && <div className="hoy" style={{ left: x(e.hoy) }} />}
+              {filas.map(f => {
+                const ritmo = ritmoDe(f, e.hoy)
+                if (!f.inicia && !f.vence) return <div key={f.k} className={`pista t-${f.tipo}`} />
+                const desde = f.inicia ?? f.vence!
+                const hasta = f.vence ?? f.inicia!
+                const izq = x(desde)
+                const w = Math.max((dias(desde, hasta) + 1) * PX, 6)
+                const titulo = `${f.nombre} · ${fecha(desde)} → ${fecha(hasta)} · ${f.real}%${f.esperado !== null ? ` (tocaba ${f.esperado}%)` : ''} · ${RITMO_NOMBRE[ritmo]}`
+                return (
+                  <div key={f.k} className={`pista t-${f.tipo}`}>
+                    {f.tipo === 'hito' ? (
+                      <div className={`hito rt-${ritmo}`} style={{ left: x(hasta) + PX / 2 }} title={titulo} />
+                    ) : f.tipo === 'actividad' ? (
+                      <div className={`barra rt-${ritmo}${f.manda ? ' critica' : ''}`} style={{ left: izq, width: w }} title={titulo}>
+                        <i style={{ width: `${Math.max(0, Math.min(100, f.real))}%` }} />
+                        {f.esperado !== null && f.esperado > 0 && f.esperado < 100 && <b style={{ left: `${f.esperado}%` }} />}
+                        <em>{f.real}%</em>
+                      </div>
+                    ) : (
+                      <div className={`resumen rt-${ritmo}`} style={{ left: izq, width: w }} title={titulo}>
+                        <i style={{ width: `${Math.max(0, Math.min(100, f.real))}%` }} />
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>
