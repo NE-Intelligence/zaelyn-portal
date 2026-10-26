@@ -29,7 +29,7 @@ function frescura(iso: string, ahora = Date.now()): string {
 }
 
 export function Lienzo({
-  v, vista, base, leido,
+  v, vista, base, leido, en,
 }: {
   v: VistaDePlan
   vista: Vista
@@ -37,6 +37,8 @@ export function Lienzo({
   base: string
   /** Cuándo se leyó el estado. */
   leido: string
+  /** El tramo que se está viendo en el Tablero: [fase, ...grupos] (#200). */
+  en?: Array<string | null> | null
 }) {
   const e = v.estado
   const nombre = e.plan?.nombre ?? e.grupo.nombre
@@ -77,8 +79,8 @@ export function Lienzo({
         </nav>
       </div>
 
-      {vista === 'resumen' && <Resumen v={v} />}
-      {vista === 'tablero' && <Tablero v={v} />}
+      {vista === 'resumen' && <Resumen v={v} base={base} />}
+      {vista === 'tablero' && <Tablero v={v} en={en ?? null} base={base} />}
       {vista === 'gantt' && <Gantt v={v} />}
       {vista === 'ruta' && <Ruta v={v} />}
       {vista === 'equipo' && <Equipo v={v} />}

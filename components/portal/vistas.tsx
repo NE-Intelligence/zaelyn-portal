@@ -10,6 +10,7 @@
  * un número que nadie puso: un hueco se llena, y un número inventado con cara
  * de cálculo se cree.
  */
+import Link from 'next/link'
 import type { GrupoDePlan, PuntoDeCurva, Renglon, VistaDePlan } from '@/lib/plan'
 import { comoSePesa, deFase, enRiesgo, persona } from '@/lib/plan'
 import {
@@ -22,7 +23,12 @@ const horas = (m: number | null | undefined) =>
 
 // ── Resumen ─────────────────────────────────────────────────────────────────
 
-export function Resumen({ v }: { v: VistaDePlan }) {
+/** Un tramo del plan en la dirección: [fase, ...ruta de grupos] (#200). */
+export type Tramo = Array<string | null>
+export const enlaceDeTramo = (base: string, t: Tramo): string =>
+  `${base}?v=tablero&en=${encodeURIComponent(JSON.stringify(t))}`
+
+export function Resumen({ v, base }: { v: VistaDePlan; base: string }) {
   const e = v.estado
   const p = e.punto
   // «Lo que requiere atención» son las que TRAEN SEÑALES, no todo lo abierto.
@@ -85,7 +91,7 @@ export function Resumen({ v }: { v: VistaDePlan }) {
         <CurvaS v={v} />
       </section>
 
-      <AvanceDelProyecto v={v} />
+      <AvanceDelProyecto v={v} base={base} />
 
       <section className="pt-tarjeta">
         <header>
@@ -145,19 +151,24 @@ export function Resumen({ v }: { v: VistaDePlan }) {
  * los agregó el contrato con la misma ponderación que el plan (fases y
  * grupos con `avanceDe`); aquí solo se dibuja el árbol.
  */
-function AvanceDelProyecto({ v }: { v: VistaDePlan }) {
+function AvanceDelProyecto({ v, base }: { v: VistaDePlan; base: string }) {
   const e = v.estado
   const p = e.punto
   const grupos = v.grupos ?? []
   const fila = (o: {
     k: string; nivel: number; nombre: string; real: number; esperado: number | null
     total: number; abiertos?: number; hitos?: number; vence?: string | null; orden?: number | null; fase?: boolean
+    href?: string
   }) => (
     <div key={o.k} style={{ display: 'grid', gap: 5, paddingLeft: Math.max(0, o.nivel - 1) * 18 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap',
                     fontSize: o.nivel === 0 ? 14.5 : o.nivel === 1 ? 13.5 : 12.5 }}>
         {o.fase && <Franja orden={o.orden ?? null} />}
-        <b style={{ fontWeight: o.nivel <= 1 ? 650 : 550, minWidth: 0, overflowWrap: 'anywhere' }}>{o.nombre}</b>
+        {/* Cada nivel abre su detalle: el Tablero con solo lo de ese tramo (#200). */}
+        <Link href={o.href ?? `${base}?v=tablero`} title="Ver sus actividades"
+              style={{ fontWeight: o.nivel <= 1 ? 650 : 550, minWidth: 0, overflowWrap: 'anywhere', color: 'inherit' }}>
+          {o.nombre}
+        </Link>
         {!!o.hitos && <span className="pt-bandera">{o.hitos} hito{o.hitos === 1 ? '' : 's'}</span>}
         <span style={{ marginLeft: 'auto', color: 'var(--ink-3)', fontSize: 12, whiteSpace: 'nowrap' }}>
           {o.abiertos !== undefined ? `${o.total - o.abiertos}/${o.total} cerradas` : `${o.total} actividades`}
@@ -189,10 +200,11 @@ function AvanceDelProyecto({ v }: { v: VistaDePlan }) {
           return (
             <div key={f.nombre ?? 'sin'} style={{ display: 'grid', gap: 12, paddingLeft: 18 }}>
               {!sinFases && fila({ k: `f:${f.nombre}`, nivel: 1, nombre: f.nombre ?? 'Fuera de fase', real: f.punto.declarado,
-                esperado: f.punto.esperado, total: f.total, abiertos: f.abiertos, hitos: f.hitos, orden: f.orden, fase: true })}
+                esperado: f.punto.esperado, total: f.total, abiertos: f.abiertos, hitos: f.hitos, orden: f.orden, fase: true,
+                href: enlaceDeTramo(base, [f.nombre]) })}
               {suyos.map(g => fila({ k: JSON.stringify([g.fase, ...g.ruta]), nivel: g.nivel + (sinFases ? 0 : 1),
                 nombre: g.nombre, real: g.punto.declarado, esperado: g.punto.esperado, total: g.total,
-                abiertos: g.abiertos, hitos: g.hitos, vence: g.vence }))}
+                abiertos: g.abiertos, hitos: g.hitos, vence: g.vence, href: enlaceDeTramo(base, [g.fase, ...g.ruta]) }))}
             </div>
           )
         })}
@@ -293,9 +305,22 @@ function CurvaS({ v }: { v: VistaDePlan }) {
 
 // ── Tablero ─────────────────────────────────────────────────────────────────
 
-export function Tablero({ v }: { v: VistaDePlan }) {
+export function Tablero({ v, en, base }: { v: VistaDePlan; en?: Tramo | null; base: string }) {
   const e = v.estado
+  // EL DETALLE DE UN TRAMO (#200): la misma tabla, con solo lo que cuelga de
+  // esa fase o ese entregable. La dirección lo dice, así que se puede mandar.
+  const ruta = en?.slice(1).filter((x): x is string => typeof x === 'string') ?? []
+  const fases = en ? v.fases.filter(f => f.nombre === (en[0] ?? null)) : v.fases
+  const delTramo = (rs: Renglon[]) => (en ? rs.filter(r => ruta.every((x, k) => r.grupo?.[k] === x)) : rs)
   return (
+    <>
+    {en && (
+      <div className="pt-tarjeta" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12, padding: '10px 14px' }}>
+        <span style={{ color: 'var(--ink-3)', fontSize: 13 }}>Viendo</span>
+        <b style={{ fontSize: 13.5, overflowWrap: 'anywhere' }}>{[en[0] ?? 'Fuera de fase', ...ruta].join(' › ')}</b>
+        <Link href={`${base}?v=tablero`} className="ed-btn suave chico" style={{ marginLeft: 'auto' }}>Ver todo el plan</Link>
+      </div>
+    )}
     <div className="pt-tabla-caja">
       <div className="pt-scroll">
         <table className="pt-tabla">
@@ -311,8 +336,8 @@ export function Tablero({ v }: { v: VistaDePlan }) {
               <th style={{ width: 150 }}>Avance</th>
             </tr>
           </thead>
-          {v.fases.map(f => {
-            const rs = deFase(e, f.nombre)
+          {fases.map(f => {
+            const rs = delTramo(deFase(e, f.nombre))
             if (!rs.length) return null
             // Los encabezados de grupo (#197): se pintan donde cambia la ruta,
             // un renglón por cada nivel que cambió.
@@ -414,6 +439,7 @@ export function Tablero({ v }: { v: VistaDePlan }) {
         </table>
       </div>
     </div>
+    </>
   )
 }
 

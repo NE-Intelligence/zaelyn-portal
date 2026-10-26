@@ -407,6 +407,26 @@ export async function verificarHoras(folio: string, huella: string): Promise<Ver
   }
 }
 
+/** La foto de un avance para la tarjeta de Telegram (#200). Sin sesión: el token es la llave. */
+export type FilaDeTarjeta = { nombre: string; nivel: number; fase: boolean; real: number; esperado: number | null; cerradas: number; total: number; hitos: number }
+export type DatosDeTarjeta = {
+  titulo: string; subtitulo: string; hoy: string
+  veredicto: 'sin_fechas' | 'atrasado' | 'al_dia' | 'adelantado'
+  real: number; esperado: number | null; comprobado: number; cerradas: number; total: number
+  base: 'minutos' | 'duracion' | 'cantidad'; pesoSoporte: number | null; vence: string | null
+  filas: FilaDeTarjeta[]; resto: number
+}
+export async function tarjetaDeAvance(token: string): Promise<DatosDeTarjeta | null> {
+  if (!hayApi() || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null
+  try {
+    const r = await fetch(`${base()}/portal/tarjeta/${token}`, { cache: 'no-store' })
+    if (!r.ok) return null
+    return (await r.json()) as DatosDeTarjeta
+  } catch {
+    return null
+  }
+}
+
 /** El presupuesto de UN proyecto (#195). Solo quien lo dirige; 403 se distingue de «no existe». */
 export async function elPresupuesto(groupId: string): Promise<
   | { ok: true; dato: import('@/lib/presupuesto').EstadoPresupuesto }

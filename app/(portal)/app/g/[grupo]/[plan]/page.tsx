@@ -15,7 +15,16 @@ export default async function Plan({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const { grupo, plan } = await params
-  const vista = esVista((await searchParams).v)
+  const sp = await searchParams
+  const vista = esVista(sp.v)
+  // El tramo del Tablero (#200): [fase, ...grupos], tal como lo arma el Resumen.
+  let en: Array<string | null> | null = null
+  if (typeof sp.en === 'string') {
+    try {
+      const x: unknown = JSON.parse(sp.en)
+      if (Array.isArray(x) && x.length && x.length <= 12 && x.every(y => y === null || (typeof y === 'string' && y.length <= 200))) en = x as Array<string | null>
+    } catch { /* una dirección rota es el plan entero */ }
+  }
   const leido = new Date().toISOString()
 
   const r = await elPlan(grupo, plan)
@@ -42,7 +51,7 @@ export default async function Plan({
             ? <><Link className="ed-btn suave chico" href={`/app/g/${grupo}/horas`}>Horas del proyecto</Link>{r.dato.rol !== 'stakeholder' && <Link className="ed-btn suave chico" href={`/app/g/${grupo}/presupuesto`}>Presupuesto</Link>}</>
             : <Link className="ed-btn suave chico" href="/app/horas">Registrar mis horas</Link>}
         </div>
-        <Lienzo v={r.dato} vista={vista} base={`/app/g/${grupo}/${plan}`} leido={leido} />
+        <Lienzo v={r.dato} vista={vista} base={`/app/g/${grupo}/${plan}`} leido={leido} en={en} />
       </main>
       <Pie />
     </>
