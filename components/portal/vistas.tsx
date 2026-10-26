@@ -75,59 +75,17 @@ export function Resumen({ v }: { v: VistaDePlan }) {
 
       <ZaelynHoy v={v} />
 
-      <div className="pt-rejilla" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
-        <section className="pt-tarjeta pt-curva">
-          <header>
-            <h2>Avance contra lo esperado</h2>
-            <span className="pt-overline">
-              {v.curva.paso === 7 ? 'por semana' : `cada ${v.curva.paso} días`}
-            </span>
-          </header>
-          <CurvaS v={v} />
-        </section>
+      <section className="pt-tarjeta pt-curva">
+        <header>
+          <h2>Avance contra lo esperado</h2>
+          <span className="pt-overline">
+            {v.curva.paso === 7 ? 'por semana' : `cada ${v.curva.paso} días`}
+          </span>
+        </header>
+        <CurvaS v={v} />
+      </section>
 
-        <section className="pt-tarjeta">
-          <header>
-            <h2>Avance por fase</h2>
-            <span className="pt-overline">
-              {comoSePesa(e.punto.base)}
-            </span>
-          </header>
-          <div style={{ display: 'grid', gap: 14 }}>
-            {v.fases.map(f => (
-              <div key={f.nombre ?? 'sin'} style={{ display: 'grid', gap: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
-                  <Franja orden={f.orden} />
-                  <b style={{ fontWeight: 600 }}>{f.nombre ?? 'Sin fase'}</b>
-                  {f.hitos > 0 && <span className="pt-bandera">{f.hitos} hito(s)</span>}
-                  <span style={{ marginLeft: 'auto', color: 'var(--ink-3)', fontSize: 12 }}>
-                    {f.total} actividades
-                  </span>
-                </div>
-                {/* EL AVANCE DE LA FASE LO AGREGÓ EL CONTRATO (#169). El
-                    promedio de los porcentajes no es el avance de la fase. */}
-                <Avance real={f.punto.declarado} esperado={f.punto.esperado} />
-                {/* Y SI ESTA FASE SE PESÓ DISTINTO QUE EL PLAN, SE DICE: el
-                    número significa otra cosa, y leerlo igual sería leerlo mal. */}
-                {f.punto.base !== e.punto.base && (
-                  <span style={{ fontSize: 11.5, color: 'var(--ink-3)' }}>
-                    Esta fase se pesó {comoSePesa(f.punto.base)}
-                    {f.punto.base === 'cantidad' ? ': a alguna le faltan horas o fechas.' : '.'}
-                  </span>
-                )}
-              </div>
-            ))}
-            {v.fases.length === 1 && v.fases[0]!.nombre === null && (
-              <p style={{ fontSize: 12.5, color: 'var(--ink-3)', margin: 0 }}>
-                Ninguna actividad trae fase. Si tu Excel tiene una columna
-                «Etapa» o «Fase», súbelo otra vez y se agrupan solas.
-              </p>
-            )}
-          </div>
-        </section>
-      </div>
-
-      {!!v.grupos?.length && <Entregables grupos={v.grupos} hoy={e.hoy} base={e.punto.base} pesoSoporte={e.punto.pesoSoporte} />}
+      <AvanceDelProyecto v={v} />
 
       <section className="pt-tarjeta">
         <header>
@@ -180,41 +138,70 @@ export function Resumen({ v }: { v: VistaDePlan }) {
  * eso ya lo eligió el motor.
  */
 /**
- * El avance de cada entregable (#197).
+ * El avance del proyecto como está armado: proyecto → fase → entregable →
+ * subgrupo (#197, #199).
  *
- * Los grupos del archivo, sangrados por nivel. El número lo agregó el
- * contrato con la misma ponderación que el plan; aquí solo se dibuja.
+ * Cada nivel es el avance acumulado de todo lo que cuelga de él. Los números
+ * los agregó el contrato con la misma ponderación que el plan (fases y
+ * grupos con `avanceDe`); aquí solo se dibuja el árbol.
  */
-function Entregables({ grupos, hoy, base, pesoSoporte }: { grupos: GrupoDePlan[]; hoy: string; base: VistaDePlan['estado']['punto']['base']; pesoSoporte: number | null | undefined }) {
+function AvanceDelProyecto({ v }: { v: VistaDePlan }) {
+  const e = v.estado
+  const p = e.punto
+  const grupos = v.grupos ?? []
+  const fila = (o: {
+    k: string; nivel: number; nombre: string; real: number; esperado: number | null
+    total: number; abiertos?: number; hitos?: number; vence?: string | null; orden?: number | null; fase?: boolean
+  }) => (
+    <div key={o.k} style={{ display: 'grid', gap: 5, paddingLeft: Math.max(0, o.nivel - 1) * 18 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap',
+                    fontSize: o.nivel === 0 ? 14.5 : o.nivel === 1 ? 13.5 : 12.5 }}>
+        {o.fase && <Franja orden={o.orden ?? null} />}
+        <b style={{ fontWeight: o.nivel <= 1 ? 650 : 550, minWidth: 0, overflowWrap: 'anywhere' }}>{o.nombre}</b>
+        {!!o.hitos && <span className="pt-bandera">{o.hitos} hito{o.hitos === 1 ? '' : 's'}</span>}
+        <span style={{ marginLeft: 'auto', color: 'var(--ink-3)', fontSize: 12, whiteSpace: 'nowrap' }}>
+          {o.abiertos !== undefined ? `${o.total - o.abiertos}/${o.total} cerradas` : `${o.total} actividades`}
+          {o.vence && ` · ${o.abiertos === 0 ? 'terminó' : 'termina'} ${fecha(o.vence)}`}
+        </span>
+      </div>
+      <Avance real={o.real} esperado={o.esperado} />
+    </div>
+  )
   return (
     <section className="pt-tarjeta">
       <header>
-        <h2>Avance por entregable</h2>
-        <span className="pt-overline">{comoSePesa(base)}</span>
+        <h2>Avance por fase y entregable</h2>
+        <span className="pt-overline">{comoSePesa(p.base)}</span>
       </header>
-      {pesoSoporte != null && (
+      {p.pesoSoporte != null && (
         <p style={{ fontSize: 12, color: 'var(--ink-3)', margin: '0 0 10px' }}>
-          El soporte posterior al go-live vale {pesoSoporte}% del avance: con todo lo demás entregado, el plan va al {100 - pesoSoporte}%.
+          El soporte posterior al go-live vale {p.pesoSoporte}% del avance: con todo lo demás entregado, el plan va al {100 - p.pesoSoporte}%.
         </p>
       )}
       <div style={{ display: 'grid', gap: 12 }}>
-        {grupos.map(g => {
+        {fila({ k: 'proyecto', nivel: 0, nombre: e.plan?.nombre ?? e.grupo.nombre, real: p.declarado, esperado: p.esperado,
+                total: p.total, abiertos: p.total - p.cerrados, vence: v.ruta.venceElPlan })}
+        {v.fases.map(f => {
+          const suyos = grupos.filter(g => (g.fase ?? null) === f.nombre)
+          // Un plan sin fases no repite la misma barra dos veces: los grupos
+          // cuelgan directo del proyecto.
+          const sinFases = v.fases.length === 1 && f.nombre === null
           return (
-            <div key={JSON.stringify([g.fase, ...g.ruta])}
-                 style={{ display: 'grid', gap: 5, paddingLeft: (g.nivel - 1) * 18 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontSize: g.nivel === 1 ? 13.5 : 12.5, flexWrap: 'wrap' }}>
-                <b style={{ fontWeight: g.nivel === 1 ? 650 : 550, minWidth: 0, overflowWrap: 'anywhere' }}>{g.nombre}</b>
-                {g.hitos > 0 && <span className="pt-bandera">{g.hitos} hito{g.hitos === 1 ? '' : 's'}</span>}
-                <span style={{ marginLeft: 'auto', color: 'var(--ink-3)', fontSize: 12, whiteSpace: 'nowrap' }}>
-                  {g.total - g.abiertos}/{g.total} cerradas
-                  {g.vence && ` · ${g.abiertos === 0 ? 'terminó' : 'termina'} ${fecha(g.vence)}`}
-                  {g.abiertos > 0 && g.vence && g.vence < hoy && ' · vencido'}
-                </span>
-              </div>
-              <Avance real={g.punto.declarado} esperado={g.punto.esperado} />
+            <div key={f.nombre ?? 'sin'} style={{ display: 'grid', gap: 12, paddingLeft: 18 }}>
+              {!sinFases && fila({ k: `f:${f.nombre}`, nivel: 1, nombre: f.nombre ?? 'Fuera de fase', real: f.punto.declarado,
+                esperado: f.punto.esperado, total: f.total, abiertos: f.abiertos, hitos: f.hitos, orden: f.orden, fase: true })}
+              {suyos.map(g => fila({ k: JSON.stringify([g.fase, ...g.ruta]), nivel: g.nivel + (sinFases ? 0 : 1),
+                nombre: g.nombre, real: g.punto.declarado, esperado: g.punto.esperado, total: g.total,
+                abiertos: g.abiertos, hitos: g.hitos, vence: g.vence }))}
             </div>
           )
         })}
+        {v.fases.length === 1 && v.fases[0]!.nombre === null && !grupos.length && (
+          <p style={{ fontSize: 12.5, color: 'var(--ink-3)', margin: 0 }}>
+            Ninguna actividad trae fase ni grupo. Si tu Excel tiene fases o entregables,
+            súbelo en el editor y se agrupan solas.
+          </p>
+        )}
       </div>
     </section>
   )
@@ -338,7 +325,7 @@ export function Tablero({ v }: { v: VistaDePlan }) {
                   <td colSpan={8}>
                     <span className="tit">
                       <Franja orden={f.orden} />
-                      {f.nombre ?? 'Sin fase'}
+                      {f.nombre ?? 'Fuera de fase'}
                       <span style={{ color: 'var(--ink-3)', fontWeight: 400, marginLeft: 4 }}>· {rs.length}</span>
                     </span>
                   </td>
