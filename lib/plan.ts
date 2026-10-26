@@ -38,7 +38,7 @@ export type Senal =
   | 'atrasado' | 'vencido' | 'bloqueado' | 'sin_dueno' | 'eterno'
   | 'estancado' | 'sin_declarar' | 'salto' | 'retroceso'
 
-export type Vista = 'resumen' | 'tablero' | 'gantt' | 'ruta' | 'equipo' | 'bitacora'
+export type Vista = 'resumen' | 'tablero' | 'gantt' | 'ruta' | 'equipo' | 'bitacora' | 'general'
 
 export const ESTATUS_NOMBRE: Record<Estatus, string> = {
   abierto: 'Sin iniciar',
@@ -128,6 +128,7 @@ export const VISTA_NOMBRE: Record<Vista, string> = {
   ruta: 'Ruta crítica',
   equipo: 'Equipo',
   bitacora: 'Bitácora',
+  general: 'General y reportes',
 }
 
 // ── el payload ──────────────────────────────────────────────────────────────

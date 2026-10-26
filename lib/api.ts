@@ -110,6 +110,56 @@ export async function bienvenida(): Promise<Bienvenida> {
   }
 }
 
+// ── la sección General y los reportes (#202) ───────────────────────────────
+
+export type TipoContacto = 'sponsor' | 'cliente' | 'equipo' | 'otro'
+export type Contacto = { tipo: TipoContacto; nombre: string; rol: string; empresa: string; email: string; telefono: string }
+export type ClaveDeFacturacion = { tipo: 'fase' | 'grupo' | 'actividad'; tramo: Array<string | null> | null; pendienteId: string | null; nombre: string; concepto: string }
+export type Ficha = {
+  cliente: string; sponsor: string; liderProyecto: string; objetivo: string; alcance: string; descripcion: string
+  contactos: Contacto[]; facturacion: ClaveDeFacturacion[]; publicarCliente: boolean
+}
+export type VistaDeFicha = { ficha: Ficha; logos: { sponsor: boolean; cliente: boolean }; puede: boolean }
+export type TipoReporte = 'kickoff' | 'semanal' | 'fase_inicio' | 'fase_cierre' | 'golive' | 'cierre' | 'facturacion'
+export type Ritmo = 'hecho' | 'atrasado' | 'riesgo' | 'bien' | 'futuro'
+export type ActividadDeReporte = { texto: string; quien: string | null; tramo: string; inicia: string | null; vence: string | null; real: number; esperado: number | null; fecha: string | null; diasTarde: number }
+export type Textos = { resumen: string; logros: string; causas: string; acciones: string; siguientes: string; comentarios: string }
+export type DatosDeReporte = {
+  folio: string; tipo: TipoReporte; titulo: string; emitido: string; emitidoPor: string; hoy: string
+  periodo: { desde: string; hasta: string }
+  proyecto: { nombre: string; grupo: string; inicia: string | null; termina: string | null; fase: string | null }
+  ficha: Ficha
+  avance: { real: number; esperado: number | null; comprobado: number; veredicto: 'sin_fechas' | 'atrasado' | 'al_dia' | 'adelantado'; cerradas: number; total: number; base: 'minutos' | 'duracion' | 'cantidad'; pesoSoporte: number | null }
+  lectura: Array<{ tono: 'bien' | 'atencion' | 'falta'; titulo: string; texto: string }>
+  arbol: Array<{ nombre: string; nivel: number; tipo: 'fase' | 'grupo'; real: number; esperado: number | null; cerradas: number; total: number; vence: string | null; ritmo: Ritmo }>
+  realizado: ActividadDeReporte[]; siguiente: ActividadDeReporte[]; atrasados: ActividadDeReporte[]
+  hitos: Array<{ texto: string; vence: string | null; cumplido: boolean; tramo: string }>
+  facturacion: Array<{ nombre: string; concepto: string; tipo: 'fase' | 'grupo' | 'actividad'; estado: 'cumplido' | 'en_curso' | 'pendiente'; real: number; cerradas: number; total: number; fecha: string | null; minutos: number }>
+  minutosPeriodo: number | null
+  textos: Textos
+}
+export type ReporteEnLista = { id: string; folio: string; tipo: TipoReporte; titulo: string; emitido: string; emitidoPor: string; periodo: { desde: string; hasta: string }; real: number }
+
+const ids = (g: string, p: string) => `${encodeURIComponent(g)}/${encodeURIComponent(p)}`
+export const fichaDelPlan = (g: string, p: string) => leer<VistaDeFicha>(`/portal/ficha/${ids(g, p)}`)
+export const reportesDelPlan = (g: string, p: string) => leer<ReporteEnLista[]>(`/portal/reportes/${ids(g, p)}`)
+export const reporteDelPlan = (g: string, p: string, id: string) => leer<DatosDeReporte>(`/portal/reportes/${ids(g, p)}/${encodeURIComponent(id)}`)
+export const todosLosReportes = (g: string, p: string) => leer<DatosDeReporte[]>(`/portal/reportes/${ids(g, p)}/todos`)
+
+/** Un logo del proyecto, en bytes, con la sesión puesta. Null si no hay. */
+export async function logoDelPlan(g: string, p: string, cual: 'sponsor' | 'cliente'): Promise<{ mime: string; datos: ArrayBuffer } | null> {
+  if (!hayApi()) return null
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return null
+  try {
+    const r = await fetch(`${base()}/portal/ficha/${ids(g, p)}/logo/${cual}`, { headers: { authorization: `Bearer ${token}` }, cache: 'no-store' })
+    if (!r.ok) return null
+    return { mime: r.headers.get('content-type') ?? 'image/png', datos: await r.arrayBuffer() }
+  } catch {
+    return null
+  }
+}
+
 export const elPlan = (groupId: string, planId?: string) =>
   leer<VistaDePlan>(`/portal/grupo/${encodeURIComponent(groupId)}`
     + (planId ? `?plan=${encodeURIComponent(planId)}` : ''))
@@ -171,6 +221,7 @@ export type AccionEditor =
   | 'excel' | 'revisar'
   | 'horas' | 'horas-borrar' | 'horas-enviar' | 'horas-resolver' | 'horas-retirar'
   | 'presupuesto-tarifa' | 'presupuesto-monto'
+  | 'ficha' | 'ficha-logo' | 'reporte-vista' | 'reporte-emitir'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
 function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
@@ -196,6 +247,10 @@ function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo
     case 'horas-retirar': return { metodo: 'POST', ruta: '/portal/horas/retirar' }
     case 'presupuesto-tarifa': return { metodo: 'POST', ruta: '/portal/presupuesto/tarifa' }
     case 'presupuesto-monto': return { metodo: 'POST', ruta: '/portal/presupuesto/monto' }
+    case 'ficha': return { metodo: 'POST', ruta: '/portal/ficha' }
+    case 'ficha-logo': return { metodo: 'POST', ruta: '/portal/ficha/logo' }
+    case 'reporte-vista': return { metodo: 'POST', ruta: '/portal/reporte/vista' }
+    case 'reporte-emitir': return { metodo: 'POST', ruta: '/portal/reporte/emitir' }
     case 'liberar-vista': return { metodo: 'POST', ruta: '/portal/editor/liberar/vista' }
     case 'liberar': return { metodo: 'POST', ruta: '/portal/editor/liberar' }
     case 'grupo-crear': return { metodo: 'POST', ruta: '/portal/grupos/crear' }

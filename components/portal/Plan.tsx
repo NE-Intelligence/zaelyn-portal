@@ -5,6 +5,7 @@
  * `/demo` con el ejemplo. Es la prueba más barata de que la pantalla no sabe
  * de dónde vienen los números — si lo supiera, no se podría reutilizar así.
  */
+import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { Salud, fecha, plural } from './atomos'
 import { Avance } from './atomos'
@@ -29,7 +30,7 @@ function frescura(iso: string, ahora = Date.now()): string {
 }
 
 export function Lienzo({
-  v, vista, base, leido, en,
+  v, vista, base, leido, en, general,
 }: {
   v: VistaDePlan
   vista: Vista
@@ -39,6 +40,8 @@ export function Lienzo({
   leido: string
   /** El tramo que se está viendo en el Tablero: [fase, ...grupos] (#200). */
   en?: Array<string | null> | null
+  /** La sección General (#202), solo cuando se pide y hay un plan. */
+  general?: ReactNode
 }) {
   const e = v.estado
   const nombre = e.plan?.nombre ?? e.grupo.nombre
@@ -67,7 +70,7 @@ export function Lienzo({
         </div>
 
         <nav className="pt-pestanas" aria-label="Vistas del plan">
-          {VISTAS.map(x => (
+          {VISTAS.filter(x => x !== 'general' || e.plan).map(x => (
             <Link
               key={x}
               href={x === 'resumen' ? base : `${base}?v=${x}`}
@@ -85,6 +88,7 @@ export function Lienzo({
       {vista === 'ruta' && <Ruta v={v} />}
       {vista === 'equipo' && <Equipo v={v} />}
       {vista === 'bitacora' && <Bitacora v={v} />}
+      {vista === 'general' && general}
     </>
   )
 }

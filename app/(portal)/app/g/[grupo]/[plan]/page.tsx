@@ -3,7 +3,9 @@ import { Barra, Pie } from '@/components/portal/Marco'
 import { Lienzo, esVista } from '@/components/portal/Plan'
 import { SinSesion } from '@/components/portal/SinSesion'
 import { Reabrir } from '@/components/editor/Reabrir'
-import { elPlan } from '@/lib/api'
+import { elPlan, fichaDelPlan, reportesDelPlan } from '@/lib/api'
+import { General } from '@/components/portal/General'
+import { filasDelArbol } from '@/lib/arbol'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,9 +53,21 @@ export default async function Plan({
             ? <><Link className="ed-btn suave chico" href={`/app/g/${grupo}/horas`}>Horas del proyecto</Link>{r.dato.rol !== 'stakeholder' && <Link className="ed-btn suave chico" href={`/app/g/${grupo}/presupuesto`}>Presupuesto</Link>}</>
             : <Link className="ed-btn suave chico" href="/app/horas">Registrar mis horas</Link>}
         </div>
-        <Lienzo v={r.dato} vista={vista} base={`/app/g/${grupo}/${plan}`} leido={leido} en={en} />
+        <Lienzo v={r.dato} vista={vista} base={`/app/g/${grupo}/${plan}`} leido={leido} en={en}
+          general={vista === 'general' && e.plan ? await seccionGeneral(grupo, e.plan.id, `/app/g/${grupo}/${plan}`, r.dato) : null} />
       </main>
       <Pie />
     </>
+  )
+}
+
+/** La sección General (#202): la ficha, los reportes emitidos y el árbol para marcar facturación. */
+async function seccionGeneral(grupo: string, planId: string, base: string, v: Parameters<typeof filasDelArbol>[0]) {
+  const [f, rs] = await Promise.all([fichaDelPlan(grupo, planId), reportesDelPlan(grupo, planId)])
+  if (!f.ok) return <div className="pt-vacio"><b>No pude leer la sección General</b><span>Vuelve a intentarlo en un momento.</span></div>
+  return (
+    <General grupo={grupo} plan={planId} base={base} inicial={f.dato} reportes={rs.ok ? rs.dato : []}
+      filas={filasDelArbol(v, false)} fases={v.fases.map(x => x.nombre).filter((x): x is string => !!x)}
+      hoy={v.estado.hoy} veredicto={v.estado.veredicto} />
   )
 }
