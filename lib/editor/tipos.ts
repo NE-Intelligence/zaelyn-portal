@@ -45,6 +45,10 @@ export type Nodo = {
   responsable?: string | null
   /** El puesto que la hace: viaja en las plantillas; la persona se elige al liberar. */
   puesto?: string
+  /** Quienes apoyan además del responsable: personas del grupo (#197). */
+  apoyan?: string[]
+  /** Quienes apoyan, por puesto: se asignan al liberar (#197). */
+  apoyo?: string[]
   inicio?: string | null
   dias?: number | null
   horas?: number | null

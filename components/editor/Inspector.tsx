@@ -127,6 +127,46 @@ export function Inspector({
               </div>
             </label>
           )}
+          {n.tipo === 'actividad' && (
+            <label className="ancho">
+              <span>Apoyo <em>quién más participa; le llegan los avisos de la fecha</em></span>
+              <input key={`apoyo:${n.id}:${(n.apoyo ?? []).join('|')}`} list="ed-puestos" disabled={!puede}
+                defaultValue={(n.apoyo ?? []).join(', ')} placeholder="Ej.: Consultor funcional (separa con comas)"
+                onBlur={e => {
+                  const v = [...new Set(e.target.value.split(/\s*[,;]\s*/).map(x => x.trim()).filter(Boolean))]
+                  if (v.join('|') !== (n.apoyo ?? []).join('|')) onCambiar(n.id, { apoyo: v.length ? v : undefined })
+                }} />
+            </label>
+          )}
+          {n.tipo === 'actividad' && personas.length > 0 && (
+            <label className="ancho">
+              <span>Apoyan <em>personas del grupo</em></span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                {(n.apoyan ?? []).map(id => {
+                  const p = personas.find(x => x.id === id)
+                  if (!p) return null
+                  return (
+                    <span key={id} className="ed-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <Avatar p={p} chico />{p.nombre}
+                      {puede && (
+                        <button type="button" aria-label={`Quitar a ${p.nombre}`} className="ed-x"
+                          onClick={() => onCambiar(n.id, { apoyan: (n.apoyan ?? []).filter(x => x !== id) })}>×</button>
+                      )}
+                    </span>
+                  )
+                })}
+                <select value="" disabled={!puede}
+                  onChange={e => {
+                    if (!e.target.value) return
+                    onCambiar(n.id, { apoyan: [...new Set([...(n.apoyan ?? []), e.target.value])] })
+                  }}>
+                  <option value="">{n.apoyan?.length ? 'Agregar otra…' : n.apoyo?.length ? `Se asigna al liberar (${n.apoyo.join(', ')})` : 'Agregar a alguien…'}</option>
+                  {personas.filter(p => p.id !== n.responsable && !(n.apoyan ?? []).includes(p.id))
+                    .map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+                </select>
+              </div>
+            </label>
+          )}
           {n.tipo === 'actividad' && personas.length === 0 && (
             <p className="ed-nota ancho">Este borrador todavía no es de un grupo: pon el puesto y la persona se elige al liberarlo.</p>
           )}

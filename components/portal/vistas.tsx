@@ -10,8 +10,8 @@
  * un número que nadie puso: un hueco se llena, y un número inventado con cara
  * de cálculo se cree.
  */
-import type { PuntoDeCurva, Renglon, VistaDePlan } from '@/lib/plan'
-import { deFase, enRiesgo, persona } from '@/lib/plan'
+import type { GrupoDePlan, PuntoDeCurva, Renglon, VistaDePlan } from '@/lib/plan'
+import { comoSePesa, deFase, enRiesgo, persona } from '@/lib/plan'
 import {
   Avance, Avatar, Chispa, Crit, Distribucion, Franja, Kpi, Margen, Pill, Senales,
   cuando, dias, fecha, plural, tarde,
@@ -90,7 +90,7 @@ export function Resumen({ v }: { v: VistaDePlan }) {
           <header>
             <h2>Avance por fase</h2>
             <span className="pt-overline">
-              {e.punto.base === 'minutos' ? 'ponderado por horas' : 'por número de actividades'}
+              {comoSePesa(e.punto.base)}
             </span>
           </header>
           <div style={{ display: 'grid', gap: 14 }}>
@@ -111,7 +111,8 @@ export function Resumen({ v }: { v: VistaDePlan }) {
                     número significa otra cosa, y leerlo igual sería leerlo mal. */}
                 {f.punto.base !== e.punto.base && (
                   <span style={{ fontSize: 11.5, color: 'var(--ink-3)' }}>
-                    Esta fase se pesó por número de actividades: {f.punto.sinEstimacion} sin horas.
+                    Esta fase se pesó {comoSePesa(f.punto.base)}
+                    {f.punto.base === 'cantidad' ? ': a alguna le faltan horas o fechas.' : '.'}
                   </span>
                 )}
               </div>
@@ -125,6 +126,8 @@ export function Resumen({ v }: { v: VistaDePlan }) {
           </div>
         </section>
       </div>
+
+      {!!v.grupos?.length && <Entregables grupos={v.grupos} hoy={e.hoy} base={e.punto.base} />}
 
       <section className="pt-tarjeta">
         <header>
@@ -176,6 +179,42 @@ export function Resumen({ v }: { v: VistaDePlan }) {
  * Una pantalla que redacta su propio diagnóstico elige qué es «va atrasado», y
  * eso ya lo eligió el motor.
  */
+/**
+ * El avance de cada entregable (#197).
+ *
+ * Los grupos del archivo, sangrados por nivel. El número lo agregó el
+ * contrato con la misma ponderación que el plan; aquí solo se dibuja.
+ */
+function Entregables({ grupos, hoy, base }: { grupos: GrupoDePlan[]; hoy: string; base: VistaDePlan['estado']['punto']['base'] }) {
+  return (
+    <section className="pt-tarjeta">
+      <header>
+        <h2>Avance por entregable</h2>
+        <span className="pt-overline">{comoSePesa(base)}</span>
+      </header>
+      <div style={{ display: 'grid', gap: 12 }}>
+        {grupos.map(g => {
+          return (
+            <div key={JSON.stringify([g.fase, ...g.ruta])}
+                 style={{ display: 'grid', gap: 5, paddingLeft: (g.nivel - 1) * 18 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, fontSize: g.nivel === 1 ? 13.5 : 12.5, flexWrap: 'wrap' }}>
+                <b style={{ fontWeight: g.nivel === 1 ? 650 : 550, minWidth: 0, overflowWrap: 'anywhere' }}>{g.nombre}</b>
+                {g.hitos > 0 && <span className="pt-bandera">{g.hitos} hito{g.hitos === 1 ? '' : 's'}</span>}
+                <span style={{ marginLeft: 'auto', color: 'var(--ink-3)', fontSize: 12, whiteSpace: 'nowrap' }}>
+                  {g.total - g.abiertos}/{g.total} cerradas
+                  {g.vence && ` · ${g.abiertos === 0 ? 'terminó' : 'termina'} ${fecha(g.vence)}`}
+                  {g.abiertos > 0 && g.vence && g.vence < hoy && ' · vencido'}
+                </span>
+              </div>
+              <Avance real={g.punto.declarado} esperado={g.punto.esperado} />
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 function ZaelynHoy({ v }: { v: VistaDePlan }) {
   return (
     <section className="pt-zaelyn">
@@ -283,6 +322,11 @@ export function Tablero({ v }: { v: VistaDePlan }) {
           {v.fases.map(f => {
             const rs = deFase(e, f.nombre)
             if (!rs.length) return null
+            // Los encabezados de grupo (#197): se pintan donde cambia la ruta,
+            // un renglón por cada nivel que cambió.
+            const deGrupo = new Map((v.grupos ?? []).filter(g => g.fase === f.nombre)
+              .map(g => [JSON.stringify(g.ruta), g]))
+            let antes: string[] = []
             return (
               <tbody key={f.nombre ?? 'sin'}>
                 <tr className="fase">
@@ -296,7 +340,27 @@ export function Tablero({ v }: { v: VistaDePlan }) {
                 </tr>
                 {rs.map(r => {
                   const d = tarde(r, e.hoy)
-                  return (
+                  const ruta = r.grupo ?? []
+                  let comun = 0
+                  while (comun < ruta.length && comun < antes.length && ruta[comun] === antes[comun]) comun++
+                  const nuevos = ruta.slice(comun).map((_, k) => deGrupo.get(JSON.stringify(ruta.slice(0, comun + k + 1))))
+                    .filter((g): g is GrupoDePlan => !!g)
+                  antes = ruta
+                  return [
+                    ...nuevos.map(g => (
+                      <tr key={`g:${r.id}:${g.nivel}`} className="grupo">
+                        <td colSpan={7} style={{ paddingLeft: 12 + (g.nivel - 1) * 16, fontWeight: 600, fontSize: 12.5 }}>
+                          {g.nombre}
+                          <span style={{ color: 'var(--ink-3)', fontWeight: 400, marginLeft: 6 }}>· {g.total}</span>
+                        </td>
+                        <td>
+                          <Avance real={g.punto.declarado} esperado={g.punto.esperado} cifras={false} />
+                          <div className="pt-mono" style={{ color: 'var(--ink-3)', marginTop: 3 }}>
+                            {g.punto.declarado}%{g.punto.esperado !== null && ` · esp ${g.punto.esperado}%`}
+                          </div>
+                        </td>
+                      </tr>
+                    )),
                     <tr key={r.id} className={r.manda ? 'critica' : undefined}>
                       <td>
                         <div className="nombre">
@@ -318,7 +382,14 @@ export function Tablero({ v }: { v: VistaDePlan }) {
                           </div>
                         )}
                       </td>
-                      <td><Avatar persona={persona(e, r.personaId)} /></td>
+                      <td>
+                        <Avatar persona={persona(e, r.personaId)} />
+                        {!!r.apoyos?.length && (
+                          <div style={{ fontSize: 11.5, color: 'var(--ink-3)', marginTop: 3 }}>
+                            Apoyo: {r.apoyos.map(a => a.nombre).join(', ')}
+                          </div>
+                        )}
+                      </td>
                       <td><Pill estatus={r.estatus} /></td>
                       <td><Crit criticidad={r.criticidad} /></td>
                       <td className="pt-mono" style={{ color: 'var(--ink-3)' }}>{fecha(r.inicia)}</td>
@@ -341,8 +412,8 @@ export function Tablero({ v }: { v: VistaDePlan }) {
                           {r.abierto && r.esperado !== null && ` · esp ${r.esperado}%`}
                         </div>
                       </td>
-                    </tr>
-                  )
+                    </tr>,
+                  ]
                 })}
               </tbody>
             )

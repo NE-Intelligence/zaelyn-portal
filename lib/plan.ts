@@ -151,6 +151,12 @@ export type Renglon = {
   fase: string | null
   faseOrden: number | null
   hito: boolean
+  /** La ruta de grupos del archivo: «Entregable 3» → «DEV-03» (#197). */
+  grupo?: string[] | null
+  /** La duración planeada en días (#197). */
+  dias?: number | null
+  /** Quienes apoyan además del responsable (#197). */
+  apoyos?: Array<{ id: string; nombre: string }>
   /** Días que puede recorrerse sin empujar nada. `null` = no se puede saber. */
   holgura: number | null
   /** Holgura cero: manda sobre la fecha final. */
@@ -176,7 +182,7 @@ export type Punto = {
   esperado: number | null
   declarado: number
   comprobado: number
-  base: 'minutos' | 'cantidad'
+  base: Base
   sinEstimacion: number
   sinFecha: number
   total: number
@@ -241,7 +247,27 @@ export type Curva = {
   paso: number
   desde: string | null
   sinBitacora: number
-  base: 'minutos' | 'cantidad'
+  base: Base
+}
+
+/** Cómo se ponderó un avance (#197). Se dice siempre: cambia lo que significa. */
+export type Base = 'minutos' | 'duracion' | 'cantidad'
+
+export const comoSePesa = (b: Base): string =>
+  b === 'minutos' ? 'ponderado por horas' : b === 'duracion' ? 'ponderado por duración' : 'por número de actividades'
+
+/** El avance de un grupo del archivo —un entregable— a todos sus niveles (#197). */
+export type GrupoDePlan = {
+  ruta: string[]
+  nombre: string
+  nivel: number
+  fase: string | null
+  punto: Punto
+  total: number
+  abiertos: number
+  hitos: number
+  inicia: string | null
+  vence: string | null
 }
 
 export type FaseDePlan = {
@@ -286,6 +312,8 @@ export type VistaDePlan = {
   ruta: Ruta
   curva: Curva
   fases: FaseDePlan[]
+  /** Desde #197. Opcional: el demo y un motor viejo no lo traen. */
+  grupos?: GrupoDePlan[]
   narrativa: Narrativa
   bitacora: Suceso[]
   /** Los ids de lo abierto, ordenados por lo que cuesta no verlo hoy. */

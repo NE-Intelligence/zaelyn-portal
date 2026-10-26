@@ -680,6 +680,12 @@
   background: var(--surface-2);
   padding: 7px 12px;
 }
+/* Los encabezados de grupo del archivo (#197): más quietos que la fase. */
+.pt-tabla .grupo td {
+  border-top: 1px solid var(--line, rgba(0,0,0,.08));
+  padding-top: 8px;
+  padding-bottom: 6px;
+}
 .pt-tabla .fase .tit {
   display: inline-flex;
   align-items: center;
