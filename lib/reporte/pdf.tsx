@@ -45,7 +45,8 @@ const s = StyleSheet.create({
   kpiDet: { fontSize: 7.5, color: COLOR.tinta3, marginTop: 1 },
   h2: { fontSize: 12, fontWeight: 600, marginTop: 18, marginBottom: 6, color: COLOR.tinta, borderBottomWidth: 1.5, borderBottomColor: COLOR.marca, paddingBottom: 3 },
   parrafo: { fontSize: 9.5, lineHeight: 1.45, color: COLOR.tinta },
-  vacio: { fontSize: 9, color: COLOR.tinta3, fontStyle: 'italic' },
+  // Sin cursiva: Prompt no trae archivo itálico y react-pdf truena sin él.
+  vacio: { fontSize: 9, color: COLOR.tinta3 },
   fila: { flexDirection: 'row', borderBottomWidth: 0.5, borderBottomColor: COLOR.linea, paddingVertical: 4, alignItems: 'center' },
   enc: { flexDirection: 'row', backgroundColor: COLOR.fondo, paddingVertical: 4, borderBottomWidth: 0.5, borderBottomColor: COLOR.linea },
   th: { fontSize: 7, color: COLOR.tinta3, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: 600 },

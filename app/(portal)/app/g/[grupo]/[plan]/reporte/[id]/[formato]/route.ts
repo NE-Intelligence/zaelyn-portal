@@ -1,7 +1,5 @@
 import { logoDelPlan, reporteDelPlan, todosLosReportes, type DatosDeReporte } from '@/lib/api'
 import { logoZaelyn, type Logos } from '@/lib/reporte/marca'
-import { pdfDeReportes } from '@/lib/reporte/pdf'
-import { presentacion } from '@/lib/reporte/pptx'
 
 /**
  * Un reporte emitido como PDF o PowerPoint, o todos en un PDF (#202).
@@ -32,12 +30,16 @@ export async function GET(_req: Request, { params }: { params: Promise<{ grupo: 
   }
   const nombre = id === 'todos' ? `Reportes-${nombreDe(lista[0]!).split('-').slice(2).join('-')}` : nombreDe(lista[0]!)
   if (formato === 'pptx') {
+    // Cada formato carga solo su librería: si una falla, la otra sigue
+    // funcionando (un PDF no tiene por qué depender de PowerPoint).
+    const { presentacion } = await import('@/lib/reporte/pptx')
     const b = await presentacion(lista[0]!, logos)
     return new Response(new Uint8Array(b), { headers: {
       'content-type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       'content-disposition': `attachment; filename="${nombre}.pptx"`, 'cache-control': 'private, no-store',
     } })
   }
+  const { pdfDeReportes } = await import('@/lib/reporte/pdf')
   const b = await pdfDeReportes(lista, logos)
   return new Response(new Uint8Array(b), { headers: {
     'content-type': 'application/pdf', 'content-disposition': `inline; filename="${nombre}.pdf"`, 'cache-control': 'private, no-store',
