@@ -15,7 +15,7 @@ import { nombreDeRol } from '@/lib/plan-uso/tipos'
 
 export function Inspector({
   doc, nodo, medida, personas, puede, critica,
-  onCambiar, onQuitar, onAgregarDentro, onEnlazar, onDesenlazar, onSeleccion, onSubtarea,
+  onCambiar, onQuitar, onAgregarDentro, onEnlazar, onDesenlazar, onSeleccion, onSubtarea, onConvertirEnFase,
 }: {
   doc: Doc
   nodo: Nodo
@@ -30,6 +30,8 @@ export function Inspector({
   onDesenlazar: (sucesor: string, antecesor: string) => void
   onSeleccion: (id: string) => void
   onSubtarea: (padre: string, titulo: string) => void
+  /** Una actividad suelta que en realidad es una fase: la envuelve en una. */
+  onConvertirEnFase?: (id: string) => void
 }) {
   const { hijos, porId } = useMemo(() => arbol(doc), [doc])
   const [nuevaSub, setNuevaSub] = useState('')
@@ -279,6 +281,12 @@ export function Inspector({
 
       {puede && (
         <div className="ed-ins-acciones">
+          {onConvertirEnFase && n.tipo === 'actividad' && !n.padre && (
+            <div className="ed-convertir">
+              <span className="ed-nota">Está suelta, fuera de toda fase. Si en realidad es una fase (como una «Fase 0» de análisis), conviértela: queda una fase con esta actividad adentro, y su avance se conserva.</span>
+              <button className="ed-btn suave" onClick={() => onConvertirEnFase(n.id)}>Convertir en fase</button>
+            </div>
+          )}
           {hijosPosibles.filter(t => t !== 'subtarea').map(t => (
             <button key={t} className="ed-btn suave" onClick={() => onAgregarDentro(n.id, t)}>+ {TIPO_NOMBRE[t]} dentro</button>
           ))}

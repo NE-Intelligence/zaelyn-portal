@@ -233,6 +233,25 @@ export function Editor({
     crear(t, { padre, antesDe: null })
   }, [doc, crear])
 
+  /**
+   * Una actividad suelta en la raíz que en realidad es una fase (#204): se
+   * envuelve en una fase con su mismo nombre, en su mismo lugar. La actividad
+   * conserva su id, que es la clave con que el plan la reconoce al liberar,
+   * así que su avance y su historia siguen siendo suyos.
+   */
+  const convertirEnFase = useCallback((i: string) => {
+    const n = h.presente.nodos.find(x => x.id === i)
+    if (!n || n.padre || n.tipo !== 'actividad') return
+    const fid = nuevoId(h.presente)
+    const conFase = insertar(h.presente, { id: fid, tipo: 'fase', padre: null, titulo: n.titulo }, { padre: null, antesDe: n.id })
+    const nuevo = recolocar(conFase, n.id, { padre: fid, antesDe: null })
+    if (nuevo === conFase) { setAviso('No pude meterla en una fase.'); return }
+    comprometer(nuevo)
+    setSeleccion(fid)
+    setRecien(new Set([fid, n.id]))
+    setTimeout(() => setRecien(new Set()), 2600)
+  }, [h.presente, comprometer])
+
   // ── teclado
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
@@ -493,7 +512,7 @@ export function Editor({
         )}
 
         <div className="ed-pr-acciones">
-          <span className={`ed-estado e-${guardado}`}>{estadoTexto[guardado]}</span>
+          <span className={`ed-estado e-${guardado}`} title={estadoTexto[guardado]}><span className="txt">{estadoTexto[guardado]}</span></span>
           <button className="ed-btn icono" onClick={deshacer} disabled={!h.pasado.length} title="Deshacer (Ctrl+Z)">↶</button>
           <button className="ed-btn icono" onClick={rehacer} disabled={!h.futuro.length} title="Rehacer (Ctrl+Shift+Z)">↷</button>
           {puede && (id
@@ -675,6 +694,7 @@ export function Editor({
                 onDesenlazar={(s, a) => comprometer(desenlazar(h.presente, s, a))}
                 onSeleccion={setSeleccion}
                 onSubtarea={(p, titulo) => comprometer(insertar(h.presente, { id: nuevoId(h.presente), tipo: 'subtarea', padre: p, titulo }, { padre: p, antesDe: null }))}
+                onConvertirEnFase={puede ? convertirEnFase : undefined}
               />
             ) : (
               <div className="ed-sin-sel">
