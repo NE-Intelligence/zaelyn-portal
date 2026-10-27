@@ -1664,3 +1664,13 @@ a.pt-plan:hover {
   .gn-social { grid-template-columns: 1fr; }
   .gn-concepto { width: 120px !important; flex-basis: 120px; }
 }
+
+/* #208 · descargar o mandármelo a Telegram */
+.gn-entrega { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.gn-tg { color: #229ed9; }
+.gn-tg svg { width: 14px; height: 14px; }
+.ed-btn.gn-tg svg { color: #229ed9; }
+.gn-entrega-estado { flex-basis: 100%; font-size: 12px; }
+.gn-entrega-estado.ok { color: var(--st-hecha-ink); }
+.gn-entrega-estado.mal { color: var(--critica); }
+.gn-entrega-estado.yendo { color: var(--ink-3); }

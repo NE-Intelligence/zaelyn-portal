@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og'
-import { elPlan, fichaDelPlan, logoDelPlan } from '@/lib/api'
+import { elPlan, enviarAlChat, fichaDelPlan, logoDelPlan } from '@/lib/api'
 import { COLOR, logoZaelyn } from '@/lib/reporte/marca'
 import { fuentesOg } from '@/lib/reporte/og'
 
@@ -100,4 +100,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ grupo: s
     return new Response(b, { headers: { 'content-type': 'image/png', 'content-disposition': `attachment; filename="zaelyn-${etapa}.png"` } })
   }
   return img
+}
+
+/** La tarjeta, al chat de Telegram de quien la pide (#208). */
+export async function POST(req: Request, ctx: { params: Promise<{ grupo: string; plan: string }> }) {
+  const r = await GET(req, ctx)
+  if (!r.ok) return Response.json({ error: r.status === 401 ? 'SIN_SESION' : 'NO_LO_ENCUENTRO' }, { status: r.status })
+  const etapa = new URL(req.url).searchParams.get('etapa') ?? 'avance'
+  const envio = await enviarAlChat(await r.arrayBuffer(), `zaelyn-${etapa}.png`, 'Tarjeta para redes')
+  return envio === 'OK' ? Response.json({ ok: true }) : Response.json({ error: envio }, { status: envio === 'SIN_SESION' ? 401 : envio === 'SIN_TELEGRAM' ? 409 : 502 })
 }

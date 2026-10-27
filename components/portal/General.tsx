@@ -126,7 +126,7 @@ export function General({
         <div className="gn-botones">
           <button className="ed-btn primario" disabled={!puede} onClick={() => setDialogo('pdf')}>Reporte formal (PDF)</button>
           <button className="ed-btn primario" disabled={!puede} onClick={() => setDialogo('pptx')}>Presentación ejecutiva (PowerPoint)</button>
-          {reportes.length > 0 && <a className="ed-btn suave" href={`${base}/reporte/todos/pdf`}>Exportar todos (PDF)</a>}
+          {reportes.length > 0 && <Entrega archivos={[{ etiqueta: 'Todos (PDF)', href: `${base}/reporte/todos/pdf` }]} />}
         </div>
         {!puede && <p className="gn-nota">Los reportes los emite quien dirige el proyecto; aquí puedes descargar los emitidos.</p>}
         {reportes.length > 0 && (
@@ -141,9 +141,11 @@ export function General({
                     <td>{fechaCorta(r.periodo.desde)} – {fechaCorta(r.periodo.hasta)}</td>
                     <td>{fechaCorta(r.emitido)}{r.emitidoPor ? ` · ${r.emitidoPor}` : ''}</td>
                     <td>{r.real}%</td>
-                    <td style={{ whiteSpace: 'nowrap' }}>
-                      <a className="ed-btn suave chico" href={`${base}/reporte/${r.id}/pdf`}>PDF</a>{' '}
-                      <a className="ed-btn suave chico" href={`${base}/reporte/${r.id}/pptx`}>PowerPoint</a>
+                    <td>
+                      <Entrega chico archivos={[
+                        { etiqueta: 'PDF', href: `${base}/reporte/${r.id}/pdf` },
+                        { etiqueta: 'PowerPoint', href: `${base}/reporte/${r.id}/pptx` },
+                      ]} />
                     </td>
                   </tr>
                 ))}
@@ -325,7 +327,6 @@ function DialogoReporte({
     if (!r.ok) { setError(decirError(r)); return }
     setEmitido(r.dato)
     onEmitido({ id: r.dato.id, folio: r.dato.folio, tipo, titulo: NOMBRE_TIPO[tipo], emitido: new Date().toISOString(), emitidoPor: '', periodo: { desde, hasta }, real: vista?.avance.real ?? 0 })
-    window.location.href = `${base}/reporte/${r.dato.id}/${formato}`
   }
   const area = (k: keyof typeof t, etiqueta: string, ayuda: string) => (
     <label className="gn-campo ancho">
@@ -343,10 +344,11 @@ function DialogoReporte({
         </header>
         {emitido ? (
           <div className="gn-listo">
-            <p>Emitido con folio <b className="pt-mono">{emitido.folio}</b> y guardado en el historial. La descarga empezó.</p>
+            <p>Emitido con folio <b className="pt-mono">{emitido.folio}</b> y guardado en el historial. Descárgalo o mándatelo a Telegram, donde lo puedes guardar o reenviar.</p>
+            <Entrega archivos={formato === 'pdf'
+              ? [{ etiqueta: 'PDF', href: `${base}/reporte/${emitido.id}/pdf` }, { etiqueta: 'PowerPoint', href: `${base}/reporte/${emitido.id}/pptx` }]
+              : [{ etiqueta: 'PowerPoint', href: `${base}/reporte/${emitido.id}/pptx` }, { etiqueta: 'PDF', href: `${base}/reporte/${emitido.id}/pdf` }]} />
             <div className="gn-botones">
-              <a className="ed-btn suave" href={`${base}/reporte/${emitido.id}/pdf`}>Descargar PDF</a>
-              <a className="ed-btn suave" href={`${base}/reporte/${emitido.id}/pptx`}>Descargar PowerPoint</a>
               <button className="ed-btn primario" onClick={onCerrar}>Listo</button>
             </div>
           </div>
@@ -385,7 +387,7 @@ function DialogoReporte({
             </div>
             {error && <div className="ed-error">{error}</div>}
             <div className="gn-botones">
-              <button className="ed-btn primario" onClick={emitir} disabled={estado !== ''}>{estado === 'emitiendo' ? 'Emitiendo…' : 'Emitir y descargar'}</button>
+              <button className="ed-btn primario" onClick={emitir} disabled={estado !== ''}>{estado === 'emitiendo' ? 'Emitiendo…' : 'Emitir'}</button>
               <span className="gn-nota">Al emitirlo se guarda con folio en el historial y ya no cambia.</span>
             </div>
           </>
@@ -429,11 +431,52 @@ function TarjetaSocial({
           {etapa === 'avance' && veredicto === 'atrasado' && (
             <p className="gn-nota">El proyecto va atrasado: la tarjeta dice el avance sin celebrarlo.</p>
           )}
-          <a className="ed-btn primario" href={`${src}&descargar=1`} download>Descargar imagen</a>
+          <Entrega archivos={[{ etiqueta: 'Imagen', href: `${src}&descargar=1` }]} />
         </div>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={`gn-social-img ${formato}`} src={src} alt="Vista previa de la tarjeta" />
       </div>
     </section>
+  )
+}
+
+/**
+ * Descargar, o mandármelo a Telegram (#208).
+ *
+ * Quien entra al portal desde el chat lo ve en el navegador de Telegram, y
+ * ahí un archivo se abre en la página sin forma de guardarlo. Mandado al chat
+ * llega como documento: se guarda, se reenvía o se abre con otra app.
+ */
+function Entrega({ archivos, chico = false }: { archivos: Array<{ etiqueta: string; href: string }>; chico?: boolean }) {
+  const [estado, setEstado] = useState<{ tono: 'ok' | 'mal' | 'yendo'; texto: string } | null>(null)
+  async function alChat(a: { etiqueta: string; href: string }) {
+    setEstado({ tono: 'yendo', texto: `Mandando ${a.etiqueta}…` })
+    try {
+      const r = await fetch(a.href, { method: 'POST' })
+      const j = (await r.json().catch(() => ({}))) as { error?: string }
+      if (r.ok) { setEstado({ tono: 'ok', texto: `Listo: ${a.etiqueta} va en camino a tu chat de Telegram.` }); return }
+      setEstado({ tono: 'mal', texto: j.error === 'SIN_TELEGRAM'
+        ? 'Tu cuenta no tiene Telegram vinculado: usa el botón de descargar.'
+        : j.error === 'SIN_SESION' ? 'Tu sesión se cerró. Pídele a Zaelyn un enlace nuevo.'
+          : 'No pude mandarlo. Inténtalo otra vez.' })
+    } catch {
+      setEstado({ tono: 'mal', texto: 'No hay conexión. Inténtalo otra vez.' })
+    }
+  }
+  const c = chico ? ' chico' : ''
+  return (
+    <span className="gn-entrega">
+      {archivos.map(a => (
+        <a key={a.href} className={`ed-btn suave${c}`} href={a.href} download title={`Descargar ${a.etiqueta}`}>↓ {a.etiqueta}</a>
+      ))}
+      {archivos.map(a => (
+        <button key={`tg-${a.href}`} type="button" className={`ed-btn suave gn-tg${c}`} disabled={estado?.tono === 'yendo'}
+          onClick={() => void alChat(a)} title={`Mandarme ${a.etiqueta} a mi chat de Telegram`}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.5 4.3 2.9 11.5c-1.1.4-1 1.9.1 2.2l4.6 1.4 1.8 5.5c.3.9 1.4 1.1 2 .4l2.6-2.7 4.6 3.4c.8.6 1.9.1 2.1-.9l3.1-14.9c.2-1.1-.9-2-1.9-1.6Z" fill="currentColor" /></svg>
+          {archivos.length > 1 ? a.etiqueta : 'A Telegram'}
+        </button>
+      ))}
+      {estado && <span className={`gn-entrega-estado ${estado.tono}`} role="status">{estado.texto}</span>}
+    </span>
   )
 }

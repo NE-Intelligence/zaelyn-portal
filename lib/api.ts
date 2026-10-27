@@ -146,6 +146,30 @@ export const reportesDelPlan = (g: string, p: string) => leer<ReporteEnLista[]>(
 export const reporteDelPlan = (g: string, p: string, id: string) => leer<DatosDeReporte>(`/portal/reportes/${ids(g, p)}/${encodeURIComponent(id)}`)
 export const todosLosReportes = (g: string, p: string) => leer<DatosDeReporte[]>(`/portal/reportes/${ids(g, p)}/todos`)
 
+/**
+ * Un archivo generado aquí, al chat de Telegram de quien tiene la sesión
+ * (#208). El navegador de Telegram abre los PDF en la página y no deja
+ * guardarlos; en el chat sí.
+ */
+export async function enviarAlChat(datos: ArrayBuffer | Uint8Array, nombre: string, pie: string): Promise<'OK' | 'SIN_TELEGRAM' | 'SIN_SESION' | 'FALLO'> {
+  if (!hayApi()) return 'FALLO'
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return 'SIN_SESION'
+  try {
+    const r = await fetch(`${base()}/portal/enviar-archivo`, {
+      method: 'POST', cache: 'no-store',
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ base64: Buffer.from(datos instanceof Uint8Array ? datos : new Uint8Array(datos)).toString('base64'), nombre, pie }),
+    })
+    if (r.ok) return 'OK'
+    if (r.status === 401 || r.status === 403) return 'SIN_SESION'
+    const j = (await r.json().catch(() => ({}))) as { error?: string }
+    return j.error === 'SIN_TELEGRAM' ? 'SIN_TELEGRAM' : 'FALLO'
+  } catch {
+    return 'FALLO'
+  }
+}
+
 /** Un logo del proyecto, en bytes, con la sesión puesta. Null si no hay. */
 export async function logoDelPlan(g: string, p: string, cual: 'sponsor' | 'cliente'): Promise<{ mime: string; datos: ArrayBuffer } | null> {
   if (!hayApi()) return null
