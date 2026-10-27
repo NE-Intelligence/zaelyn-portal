@@ -28,9 +28,9 @@ export function CanjearCodigo({ prueba }: { prueba: { expira: string; tipo: stri
           {prueba!.tipo === 'invitacion' ? 'Tu invitación' : 'Tu prueba'} de Zaelyn completa vence el <b>{vence}</b>. Después tu cuenta sigue gratis en Kickoff, o puedes contratar PMO aquí mismo.
         </div>
       )}
-      <p className="pu-nota">La guía de inicio trae un código para 3 días de Zaelyn completa. Si alguien del equipo de Zaelyn te invitó, su código te completa el mes.</p>
+      <p className="pu-nota">Toda cuenta nueva ya trae 7 días de Zaelyn completa, sin código. Si alguien del equipo de Zaelyn te invitó, su código te completa el mes.</p>
       <div className="og-form">
-        <label>Código<input className="og-codigo" value={codigo} onChange={e => setCodigo(e.target.value.toUpperCase())} maxLength={24} placeholder="ZAELYN3" /></label>
+        <label>Código<input className="og-codigo" value={codigo} onChange={e => setCodigo(e.target.value.toUpperCase())} maxLength={24} placeholder="ZAI-…" /></label>
         <button className="ed-btn primario" disabled={enviando || codigo.trim().length < 4} onClick={() => void canjear()}>
           {enviando ? 'Activando…' : 'Activar código'}
         </button>

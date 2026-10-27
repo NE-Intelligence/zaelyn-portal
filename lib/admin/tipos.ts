@@ -14,6 +14,9 @@ export type TableroAdmin = {
     activos30d: number
     porPais: { pais: string; region: string | null; n: number }[]
     porPlan: { plan: string; n: number }[]
+    /** En prueba de 7 días hoy, y quienes la tuvieron y hoy pagan (#194). */
+    enPrueba?: number
+    pruebasConvertidas?: number
     altasPorMes: { mes: string; n: number }[]
   }
   suscripciones: { plan: string; estado: string; moneda: string; n: number }[]

@@ -171,6 +171,9 @@ function Resumen({ d }: { d: TableroAdmin }) {
         <Tarjeta t="Usuarios por plan">
           <Tabla cab={['Plan', 'Usuarios']} derecha={[1]} filas={d.usuarios.porPlan.map((p) => [plan(p.plan), entero(p.n)])} vacio="Sin usuarios." />
           <p className="ad-nota">
+            En prueba hoy: <b>{entero(d.usuarios.enPrueba ?? 0)}</b> · pruebas que ya pagan: <b>{entero(d.usuarios.pruebasConvertidas ?? 0)}</b>
+          </p>
+          <p className="ad-nota">
             Facturas solicitadas: <b>{d.facturacion.solicitadas}</b> · pendientes de emitir: <b>{d.facturacion.pendientes}</b>
           </p>
         </Tarjeta>

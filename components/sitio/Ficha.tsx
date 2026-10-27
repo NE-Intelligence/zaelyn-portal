@@ -26,6 +26,9 @@ export function Ficha({ espacio, t }: { espacio: 'personal' | 'familia' | 'proye
               {t(`fi.${k}.plan` as Clave)}{' '}
               <Link href="/precios" className="st-enlace">{t('fi.precios')} →</Link>
             </dd>
+            <dd className="st-ficha-cta">
+              <Link href={`/empezar?para=${espacio}`} className="st-btn st-btn-1">{t('fi.probar')}</Link>
+            </dd>
           </div>
         </dl>
       </div>

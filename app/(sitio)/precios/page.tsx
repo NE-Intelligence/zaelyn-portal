@@ -76,9 +76,12 @@ export default async function Precios() {
                   {p.id === 'pmo' && <p className="st-anual">{t('pc.anio')}</p>}
                 </div>
                 <p className="st-plan-resumen">{t(p.resumen)}</p>
-                <a className={`st-btn ${p.destacado ? 'st-btn-1' : 'st-btn-2'} st-plan-cta`} href={p.id === 'kickoff' ? '/#empieza' : `/app/plan?plan=${NIVEL[p.id]}`}>
-                  {t(p.cta)}
-                </a>
+                <div className="st-plan-cta">
+                  <Link className={`st-btn ${p.destacado ? 'st-btn-1' : 'st-btn-2'}`} href={p.id === 'kickoff' ? '/empezar' : `/empezar?para=${p.espacio}`}>
+                    {p.id === 'kickoff' ? t(p.cta) : t('fi.probar')}
+                  </Link>
+                  {p.id !== 'kickoff' && <a className="st-plan-ya" href={`/app/plan?plan=${NIVEL[p.id]}`}>{t(p.cta)}</a>}
+                </div>
                 <p className="st-incluye">{t(p.incluye ?? 'pc.inc.k')}</p>
                 <ul className="st-rasgos">
                   {p.rasgos.map((r) => <li key={r}>{t(r)}</li>)}
@@ -177,7 +180,7 @@ export default async function Precios() {
           </div>
           <p className="st-nota">{t('pc.nota')}</p>
           <div className="st-acciones st-acciones-izq">
-            <a className="st-btn st-btn-1" href="/#empieza">{t('hero.cta0')}</a>
+            <Link className="st-btn st-btn-1" href="/empezar">{t('hero.cta0')}</Link>
             <Link className="st-btn st-btn-2" href="/legal/terminos">{t('pie.terminos')}</Link>
           </div>
         </div>

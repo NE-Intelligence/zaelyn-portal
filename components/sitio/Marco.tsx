@@ -47,7 +47,7 @@ export function Encabezado({ lang, tema }: { lang: Idioma; tema: Tema }) {
           <Link className="st-btn st-btn-2 st-entrar" href="/app" title={t('nav.entrar.ayuda')}>
             {t('nav.entrar')}
           </Link>
-          <Link className="st-btn st-btn-1 st-empezar" href="/#empieza">
+          <Link className="st-btn st-btn-1 st-empezar" href="/empezar">
             {t('nav.empezar')}
           </Link>
         </div>
