@@ -23,6 +23,8 @@ import { carga, empezar, terminar, tipoDe, MARCA } from '@/lib/editor/arrastre'
 import { Avatar, ChipSeguimiento, IconoTipo, corta, mesCorto } from './comun'
 
 const FILA = 38
+const MIN_IZQ = 320
+const CLAVE_ANCHO = 'zaelyn.editor.anchoEstructura'
 
 type Zona = 'antes' | 'dentro' | 'despues'
 type Indicador = { id: string | null; zona: Zona; ok: boolean } | null
@@ -36,7 +38,7 @@ const calEntre = (a: string, b: string) => entre(a, b, false)
 
 export function Lienzo({
   doc, medidas, personas, seleccion, onSeleccion, colapsados, onColapso, px, critica, recien,
-  puede, onPreview, onCommit, onSoltarNuevo, editando, onEditando, onRenombrar,
+  puede, onPreview, onCommit, onSoltarNuevo, onAgregarDentro, editando, onEditando, onRenombrar,
 }: {
   doc: Doc
   medidas: Map<string, Medida>
@@ -52,6 +54,8 @@ export function Lienzo({
   onPreview: (d: Doc) => void
   onCommit: (d: Doc, base: Doc) => void
   onSoltarNuevo: (tipo: TipoNodo, destino: Destino) => void
+  /** El «+» de la fila: agrega lo que quepa adentro. */
+  onAgregarDentro: (padre: string) => void
   editando: string | null
   onEditando: (id: string | null) => void
   onRenombrar: (id: string, titulo: string) => void
@@ -61,15 +65,48 @@ export function Lienzo({
   const [indicador, setIndicador] = useState<Indicador>(null)
   const [gesto, setGesto] = useState<Gesto | null>(null)
   const cuerpo = useRef<HTMLDivElement>(null)
-  // La columna de estructura se angosta en un teléfono: con 400 px no
-  // quedaría nada del Gantt a la vista.
-  const [IZQ, setIzq] = useState(400)
+  const [arrastrada, setArrastrada] = useState<string | null>(null)
+  // La columna de estructura: ancha para que los nombres se lean, y la
+  // persona la ajusta arrastrando su orilla. Se recuerda en este navegador.
+  // En un teléfono se angosta: con más no quedaría nada del Gantt a la vista.
+  const [IZQ, setIzq] = useState(620)
+  const [movil, setMovil] = useState(false)
   useEffect(() => {
-    const medir = () => setIzq(window.innerWidth < 640 ? 230 : 400)
+    const medir = () => {
+      const m = window.innerWidth < 640
+      setMovil(m)
+      if (m) { setIzq(240); return }
+      let guardado = 0
+      try { guardado = Number(localStorage.getItem(CLAVE_ANCHO)) || 0 } catch { /* sin almacenamiento */ }
+      const tope = Math.max(MIN_IZQ, Math.round(window.innerWidth * 0.7))
+      setIzq(Math.min(tope, Math.max(MIN_IZQ, guardado || Math.round(Math.min(820, window.innerWidth * 0.58)))))
+    }
     medir()
     window.addEventListener('resize', medir)
     return () => window.removeEventListener('resize', medir)
   }, [])
+  const divisor = useRef<{ x0: number; w0: number } | null>(null)
+  function bajarDivisor(e: React.PointerEvent) {
+    e.stopPropagation(); e.preventDefault()
+    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    divisor.current = { x0: e.clientX, w0: IZQ }
+  }
+  function moverDivisor(e: React.PointerEvent) {
+    if (!divisor.current) return
+    e.stopPropagation()
+    const tope = Math.max(MIN_IZQ, Math.round(window.innerWidth * 0.75))
+    setIzq(Math.min(tope, Math.max(MIN_IZQ, divisor.current.w0 + e.clientX - divisor.current.x0)))
+  }
+  function soltarDivisor(e: React.PointerEvent) {
+    if (!divisor.current) return
+    e.stopPropagation()
+    divisor.current = null
+    try { localStorage.setItem(CLAVE_ANCHO, String(IZQ)) } catch { /* sin almacenamiento */ }
+  }
+  // Las columnas de estado y responsable se esconden si no caben.
+  const columnas = !movil && IZQ >= 470
+  // Un borrador que nunca se liberó no tiene avance que enseñar.
+  const conEstado = columnas && doc.nodos.some(n => n.seguimiento)
 
   // ── el rango del calendario
   const hoy = hoyISO()
@@ -168,11 +205,12 @@ export function Lienzo({
   function bajar(e: React.PointerEvent, n: Nodo, modo: 'mover' | 'estirar' | 'enlazar') {
     if (!puede || e.button !== 0) return
     e.stopPropagation()
-    onSeleccion(n.id)
     const m = medidas.get(n.id)
     const ini = (n.tipo === 'sprint' ? n.inicio : m?.inicio) ?? null
     const fin = m?.fin ?? ini
-    if (!ini || !fin) return
+    // Se selecciona al soltar sin haber movido: así arrastrar una barra no
+    // abre el panel encima del Gantt a medio gesto.
+    if (!ini || !fin) { onSeleccion(n.id); return }
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
     if (modo === 'enlazar') {
       const caja = cuerpo.current!.getBoundingClientRect()
@@ -224,6 +262,7 @@ export function Lienzo({
       return
     }
     if (g.movido) onCommit(doc, g.base)
+    else onSeleccion(g.id)
   }
 
   // ── el encabezado del calendario
@@ -296,8 +335,15 @@ export function Lienzo({
           {/* encabezado */}
           <div className="ed-cab">
             <div className="ed-cab-izq" style={{ width: IZQ }}>
-              <span>Estructura</span>
-              <span className="mono">{filas.length} objetos</span>
+              <span className="c-nombre">Nombre <span className="mono">· {filas.length}</span></span>
+              {conEstado && <span className="c-estado">Estado</span>}
+              {columnas && <span className="c-quien">Responsable</span>}
+              <span className="c-dur">Dur.</span>
+              {!movil && (
+                <span className="ed-divisor" role="separator" aria-orientation="vertical" aria-label="Ancho de la estructura"
+                  title="Arrastra para ensanchar o angostar la estructura"
+                  onPointerDown={bajarDivisor} onPointerMove={moverDivisor} onPointerUp={soltarDivisor} onPointerCancel={soltarDivisor} />
+              )}
             </div>
             <div className="ed-cab-cal" style={{ width: ancho }}>
               <div className="ed-meses">
@@ -335,7 +381,7 @@ export function Lienzo({
               return (
                 <div
                   key={n.id}
-                  className={`ed-fila t-${n.tipo}${sel ? ' sel' : ''}${ind ? ` ind-${ind.zona}${ind.ok ? '' : ' no'}` : ''}${recien.has(n.id) ? ' recien' : ''}`}
+                  className={`ed-fila t-${n.tipo}${sel ? ' sel' : ''}${arrastrada === n.id ? ' arrastrada' : ''}${ind ? ` ind-${ind.zona}${ind.ok ? '' : ' no'}` : ''}${recien.has(n.id) ? ' recien' : ''}`}
                   style={{ height: FILA }}
                   onDragOver={e => sobreFila(e, n)}
                   onDragLeave={() => setIndicador(i => (i?.id === n.id ? null : i))}
@@ -344,51 +390,64 @@ export function Lienzo({
                 >
                   <div
                     className="ed-celda"
-                    style={{ width: IZQ, paddingLeft: 8 + nivel * 18 }}
+                    style={{ width: IZQ }}
                     draggable={puede && editando !== n.id}
-                    onDragStart={e => { empezar(e, { id: n.id, tipo: n.tipo }) }}
-                    onDragEnd={() => { terminar(); setIndicador(null) }}
+                    onDragStart={e => { empezar(e, { id: n.id, tipo: n.tipo }); setArrastrada(n.id) }}
+                    onDragEnd={() => { terminar(); setIndicador(null); setArrastrada(null) }}
                   >
-                    <span className="ed-asa" aria-hidden="true">⋮⋮</span>
-                    <button
-                      className={`ed-caret${tieneHijos ? '' : ' vacio'}${colapsados.has(n.id) ? ' cerrado' : ''}`}
-                      onClick={e => { e.stopPropagation(); if (tieneHijos) onColapso(n.id) }}
-                      aria-label={colapsados.has(n.id) ? 'Abrir' : 'Cerrar'}
-                      tabIndex={tieneHijos ? 0 : -1}
-                    >▾</button>
-                    <span className={`ed-tipo t-${n.tipo}`} title={TIPO_NOMBRE[n.tipo]} style={{ color: colorDe(n) }}><IconoTipo tipo={n.tipo} /></span>
-                    <span className="ed-wbs mono" title={n.clave ? `ID del archivo · posición ${wbs}` : undefined}>{n.clave ?? wbs}</span>
-                    {editando === n.id ? (
-                      <input
-                        className="ed-titulo-input"
-                        autoFocus
-                        defaultValue={n.titulo}
-                        onFocus={e => e.currentTarget.select()}
-                        onClick={e => e.stopPropagation()}
-                        onBlur={e => { onRenombrar(n.id, e.currentTarget.value); onEditando(null) }}
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') { onRenombrar(n.id, e.currentTarget.value); onEditando(null) }
-                          if (e.key === 'Escape') onEditando(null)
-                          e.stopPropagation()
-                        }}
-                      />
-                    ) : (
-                      <span
-                        className={`ed-titulo${n.tipo === 'subtarea' && n.hecho ? ' hecha' : ''}`}
-                        onDoubleClick={e => { if (puede) { e.stopPropagation(); onEditando(n.id) } }}
-                        title={n.objetivo ? `Para qué: ${n.objetivo}` : n.titulo}
-                      >{n.titulo || <i>Sin título</i>}</span>
+                    <div className="c-nombre" style={{ paddingLeft: 4 + nivel * 18 }}>
+                      <span className="ed-asa" aria-hidden="true" title="Arrastra para mover">⋮⋮</span>
+                      <button
+                        className={`ed-caret${tieneHijos ? '' : ' vacio'}${colapsados.has(n.id) ? ' cerrado' : ''}`}
+                        onClick={e => { e.stopPropagation(); if (tieneHijos) onColapso(n.id) }}
+                        aria-label={colapsados.has(n.id) ? 'Abrir' : 'Cerrar'}
+                        tabIndex={tieneHijos ? 0 : -1}
+                      >▾</button>
+                      <span className={`ed-tipo t-${n.tipo}`} title={TIPO_NOMBRE[n.tipo]} style={{ color: colorDe(n) }}><IconoTipo tipo={n.tipo} /></span>
+                      <span className="ed-wbs mono" title={n.clave ? `ID del archivo · posición ${wbs}` : undefined}>{n.clave ?? wbs}</span>
+                      {editando === n.id ? (
+                        <input
+                          className="ed-titulo-input"
+                          autoFocus
+                          defaultValue={n.titulo}
+                          onFocus={e => e.currentTarget.select()}
+                          onClick={e => e.stopPropagation()}
+                          onBlur={e => { onRenombrar(n.id, e.currentTarget.value); onEditando(null) }}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') { onRenombrar(n.id, e.currentTarget.value); onEditando(null) }
+                            if (e.key === 'Escape') onEditando(null)
+                            e.stopPropagation()
+                          }}
+                        />
+                      ) : (
+                        <span
+                          className={`ed-titulo${n.tipo === 'subtarea' && n.hecho ? ' hecha' : ''}`}
+                          onDoubleClick={e => { if (puede) { e.stopPropagation(); onEditando(n.id) } }}
+                          title={n.objetivo ? `${n.titulo}\nPara qué: ${n.objetivo}` : n.titulo}
+                        >{n.titulo || <i>Sin título</i>}</span>
+                      )}
+                      {n.soporte && <span className="ed-etiqueta" title="Soporte post go-live: pesa poco en el avance">soporte</span>}
+                      {puede && editando !== n.id && (CONTENEDORES.includes(n.tipo) || n.tipo === 'actividad') && (
+                        <button className="ed-mas" onClick={e => { e.stopPropagation(); onAgregarDentro(n.id) }}
+                          title={n.tipo === 'actividad' ? 'Agregar una subtarea' : 'Agregar adentro'} aria-label="Agregar adentro">+</button>
+                      )}
+                    </div>
+                    {conEstado && (
+                      <div className="c-estado">
+                        <ChipSeguimiento n={n} />
+                      </div>
                     )}
-                    <span className="ed-meta">
-                      <ChipSeguimiento n={n} />
-                      {n.soporte && <span className="ed-puesto" title="Soporte post go-live: pesa poco en el avance">Soporte</span>}
-                      {!p && n.puesto && <span className="ed-puesto" title={`Puesto: ${n.puesto}`}>{n.puesto}</span>}
-                      {n.tipo === 'actividad' && !n.responsable && !n.puesto && <span className="ed-falta" title="Sin responsable ni puesto">sin dueño</span>}
-                      {p && <Avatar p={p} chico />}
-                      {n.tipo === 'hito' ? <span className="ed-dur mono">◆ {corta(m?.inicio)}</span>
-                        : n.tipo === 'subtarea' ? null
-                          : <span className="ed-dur mono">{m?.dias ?? 0} d</span>}
-                    </span>
+                    {columnas && (
+                      <div className="c-quien">
+                        {p ? <><Avatar p={p} chico /><span className="nom" title={p.nombre}>{p.nombre}</span></>
+                          : n.puesto ? <span className="ed-puesto" title={`Puesto: ${n.puesto}`}>{n.puesto}</span>
+                            : n.tipo === 'actividad' ? <span className="ed-falta" title="Sin responsable ni puesto">sin dueño</span> : null}
+                      </div>
+                    )}
+                    <div className="c-dur mono">
+                      {!columnas && p && <Avatar p={p} chico />}
+                      {n.tipo === 'hito' ? <>◆ {corta(m?.inicio)}</> : n.tipo === 'subtarea' ? null : <>{m?.dias ?? 0} d</>}
+                    </div>
                   </div>
 
                   <div className="ed-pista" style={{ width: ancho }}>

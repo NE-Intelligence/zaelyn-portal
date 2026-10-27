@@ -82,6 +82,16 @@ export function Editor({
   const [traido, setTraido] = useState(reabierto)
   const [reorgAplicada, setReorgAplicada] = useState<{ cambios: number; antes: string | null; despues: string | null } | null>(null)
   const [dialogo, setDialogo] = useState<'plantilla' | 'fabrica' | null>(null)
+  const [ajustes, setAjustes] = useState(false)
+  const [descartado, setDescartado] = useState(false)
+  const refAjustes = useRef<HTMLDivElement>(null)
+  // Los ajustes del plan se cierran al tocar fuera, como cualquier menú.
+  useEffect(() => {
+    if (!ajustes) return
+    const fuera = (e: MouseEvent) => { if (!refAjustes.current?.contains(e.target as Node)) setAjustes(false) }
+    document.addEventListener('mousedown', fuera)
+    return () => document.removeEventListener('mousedown', fuera)
+  }, [ajustes])
   // Lo que se leyó del Excel, si este borrador acaba de salir de uno.
   useEffect(() => {
     if (!inicial.id) return
@@ -209,6 +219,20 @@ export function Editor({
     setTimeout(() => setRecien(new Set()), 2600)
   }, [doc, puede, comprometer])
 
+  /** Tocar algo en el lienzo o el tablero abre su detalle en el panel. */
+  const elegir = useCallback((i: string | null) => {
+    setSeleccion(i)
+    if (i) setPanel('detalle')
+  }, [])
+
+  /** El «+» de una fila: lo que quepa adentro, primero una actividad. */
+  const agregarDentro = useCallback((padre: string) => {
+    const t = (['actividad', 'subtarea', 'hito'] as TipoNodo[]).find(x => cabe(doc, x, padre))
+    if (!t) { setAviso('Aquí adentro no cabe nada más.'); return }
+    setColapsados(c => { if (!c.has(padre)) return c; const n = new Set(c); n.delete(padre); return n })
+    crear(t, { padre, antesDe: null })
+  }, [doc, crear])
+
   // ── teclado
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
@@ -218,7 +242,12 @@ export function Editor({
       if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); if (e.shiftKey) rehacer(); else deshacer(); return }
       if (mod && e.key.toLowerCase() === 'y') { e.preventDefault(); rehacer(); return }
       if (mod && e.key.toLowerCase() === 's') { e.preventDefault(); void guardar(); return }
-      if (e.key === 'Escape') { setSeleccion(null); return }
+      if (e.key === 'Escape') {
+        if (ajustes) setAjustes(false)
+        else if (panel !== 'detalle') setPanel('detalle')
+        else setSeleccion(null)
+        return
+      }
       if (!seleccionado || !puede) return
       if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); comprometer(quitar(doc, seleccionado.id)); setSeleccion(null); return }
       if (e.key === 'F2') { setEditando(seleccionado.id); return }
@@ -250,7 +279,7 @@ export function Editor({
     }
     window.addEventListener('keydown', tecla)
     return () => window.removeEventListener('keydown', tecla)
-  }, [doc, seleccionado, puede, deshacer, rehacer, guardar, comprometer, crear])
+  }, [doc, seleccionado, puede, deshacer, rehacer, guardar, comprometer, crear, ajustes, panel])
 
   useEffect(() => { if (aviso) { const t = setTimeout(() => setAviso(''), 4200); return () => clearTimeout(t) } }, [aviso])
 
@@ -350,69 +379,119 @@ export function Editor({
 
   const cambiarDoc = (c: Partial<Doc>, clave?: string) => comprometer(programar({ ...h.presente, ...c }), clave ? { clave } : {})
 
+  const arranque = (fijaGolive ? inicioProyecto(doc) : doc.inicio) ?? null
+  const golive = (fijaGolive ? doc.golive : finDelProyecto(doc)) ?? null
+  const tarde0 = fijaGolive && inicioProyecto(doc) && inicioProyecto(doc)! < hoyISO()
+  const nombreMetodo = fichas.find(f => f.clave === metodologia)?.nombre ?? metodologia
+  const sinLiberar = !!(liberado && version && liberado.version && version > liberado.version)
+  const cuentaRevision = revisado ? revisado.errores + revisado.avisos : 0
+  const abierto = panel !== 'detalle' || !!seleccionado || (!doc.nodos.length && !descartado)
+  const cerrarPanel = () => {
+    if (panel !== 'detalle') setPanel('detalle')
+    else if (seleccionado) setSeleccion(null)
+    else setDescartado(true)
+  }
+  const alternar = (p: 'zaelyn' | 'revision') => setPanel(x => (x === p ? 'detalle' : p))
+
   return (
     <div className="ed">
-      {/* barra del proyecto */}
+      {/* barra del proyecto: una sola franja */}
       <div className="ed-proyecto">
-        <div className="ed-pr-nombre">
-          <input value={nombre} onChange={e => tocarNombre(e.target.value)} disabled={!puede} placeholder="Nombre del proyecto" aria-label="Nombre del proyecto" />
-          <div className="ed-pr-datos">
-            <label>
-              <span>Metodología</span>
-              <select value={metodologia} onChange={e => tocarMetodo(e.target.value)} disabled={!puede}>
-                {fichas.map(f => <option key={f.clave} value={f.clave}>{f.nombre}</option>)}
-              </select>
-            </label>
-            <div className="ed-fijar" role="group" aria-label="Qué fecha manda">
-              <span>Programar</span>
-              <div className="ed-segmentos chico">
-                <button className={fijaGolive ? '' : 'on'} disabled={!puede} onClick={() => fijaGolive && comprometer({ ...h.presente, fijar: 'inicio' })}
-                  title="Pones el arranque; el go-live sale de sumar">Desde el arranque</button>
-                <button className={fijaGolive ? 'on' : ''} disabled={!puede} onClick={() => !fijaGolive && comprometer({ ...h.presente, fijar: 'golive', golive: h.presente.golive ?? finDelProyecto(h.presente) })}
-                  title="Pones el go-live; el arranque sale de restar">Hacia atrás desde el go-live</button>
+        <input className="ed-pr-titulo" value={nombre} onChange={e => tocarNombre(e.target.value)} disabled={!puede} placeholder="Nombre del proyecto" aria-label="Nombre del proyecto" />
+
+        <div className="ed-ajustes-env" ref={refAjustes}>
+          <button className={`ed-plan-resumen${ajustes ? ' on' : ''}`} onClick={() => setAjustes(a => !a)} aria-expanded={ajustes} title="Ajustes del plan: metodología, fechas, calendario, objetivo y alcance">
+            <span>{nombreMetodo}</span>
+            <span className="sep" />
+            <span className="mono">{corta(arranque)} → {corta(golive)}</span>
+            {fijaGolive && <span className="fijo" title="El go-live está fijo; el arranque sale de restar">go-live fijo</span>}
+            {tarde0 && <span className="alerta">arranque en el pasado</span>}
+            <span className="sep" />
+            <span>{doc.habiles ? 'Días hábiles' : 'Calendario'} · {doc.unidad === 'dias' ? 'días' : 'horas'}</span>
+            <svg viewBox="0 0 24 24" className="ed-icono chico" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+          </button>
+          {ajustes && (
+            <div className="ed-ajustes" role="dialog" aria-label="Ajustes del plan">
+              <div className="ed-aj-rejilla">
+                <label>
+                  <span>Metodología</span>
+                  <select value={metodologia} onChange={e => tocarMetodo(e.target.value)} disabled={!puede}>
+                    {fichas.map(f => <option key={f.clave} value={f.clave}>{f.nombre}</option>)}
+                  </select>
+                </label>
+                <div className="ed-aj-campo ancho2" role="group" aria-label="Qué fecha manda">
+                  <span>Programar</span>
+                  <div className="ed-segmentos chico">
+                    <button className={fijaGolive ? '' : 'on'} disabled={!puede} onClick={() => fijaGolive && comprometer({ ...h.presente, fijar: 'inicio' })}
+                      title="Pones el arranque; el go-live sale de sumar">Desde el arranque</button>
+                    <button className={fijaGolive ? 'on' : ''} disabled={!puede} onClick={() => !fijaGolive && comprometer({ ...h.presente, fijar: 'golive', golive: h.presente.golive ?? finDelProyecto(h.presente) })}
+                      title="Pones el go-live; el arranque sale de restar">Hacia atrás desde el go-live</button>
+                  </div>
+                </div>
+                <label className={fijaGolive ? 'calculada' : ''} title={fijaGolive ? 'Sale de restar desde el go-live' : 'Mueve todo el proyecto, respetando el calendario'}>
+                  <span>Arranque{fijaGolive ? ' · calculado' : ''}</span>
+                  <input type="date" value={arranque ?? ''} disabled={!puede || fijaGolive}
+                    onChange={e => e.target.value && comprometer(arrancarEn(h.presente, e.target.value))} />
+                </label>
+                <label className={fijaGolive ? '' : 'calculada'} title={fijaGolive ? 'Mueve todo para terminar ese día' : 'Sale de sumar desde el arranque'}>
+                  <span>Go-live{fijaGolive ? '' : ' · calculado'}</span>
+                  <input type="date" value={golive ?? ''} disabled={!puede || !fijaGolive}
+                    onChange={e => e.target.value && comprometer(terminarEn(h.presente, e.target.value))} />
+                </label>
+                <label className="ed-aj-check">
+                  <input type="checkbox" checked={doc.habiles} disabled={!puede} onChange={e => cambiarDoc({ habiles: e.target.checked })} />
+                  <span>Solo días hábiles</span>
+                </label>
+                {/* Cómo se enseña el esfuerzo (#189): se guarda en horas, se ve como prefieras. */}
+                <div className="ed-aj-campo" role="group" aria-label="Esfuerzo en">
+                  <span>Esfuerzo en</span>
+                  <div className="ed-segmentos chico">
+                    <button className={doc.unidad === 'dias' ? '' : 'on'} disabled={!puede}
+                      onClick={() => doc.unidad === 'dias' && comprometer({ ...h.presente, unidad: undefined })}>Horas</button>
+                    <button className={doc.unidad === 'dias' ? 'on' : ''} disabled={!puede}
+                      onClick={() => doc.unidad !== 'dias' && comprometer({ ...h.presente, unidad: 'dias' })}>Días</button>
+                  </div>
+                </div>
+                <label title="Horas de una jornada: con esto se convierten días de trabajo en horas">
+                  <span>Jornada (h)</span>
+                  <input type="number" min={1} max={24} step={0.5} value={jornadaDe(doc)} disabled={!puede}
+                    onChange={e => { const v = Number(e.target.value); if (v >= 1 && v <= 24) comprometer({ ...h.presente, jornada: v === 8 ? undefined : v }, { clave: 'doc:jornada' }) }} />
+                </label>
+                {doc.nodos.some(n => n.soporte) && (
+                  <label title="Entre todas, las actividades de soporte post go-live valen este % del avance. Con 5, todo entregado y solo el soporte pendiente = 95%.">
+                    <span>Peso del soporte (%)</span>
+                    <input type="number" min={0} max={50} step={1} value={doc.pesoSoporte ?? 5} disabled={!puede}
+                      onChange={e => { const v = Math.round(Number(e.target.value)); if (v >= 0 && v <= 50) comprometer({ ...h.presente, pesoSoporte: v === 5 ? undefined : v }, { clave: 'doc:pesoSoporte' }) }} />
+                  </label>
+                )}
+              </div>
+              {tarde0 && <span className="ed-alerta">Para salir ese día tendrías que haber arrancado el {corta(inicioProyecto(doc))}</span>}
+              <div className="ed-aj-textos">
+                <label><span>Objetivo del proyecto</span>
+                  <textarea rows={3} value={h.presente.objetivo ?? ''} disabled={!puede}
+                    onChange={e => cambiarDoc({ objetivo: e.target.value || undefined } as Partial<Doc>, 'doc:objetivo')} placeholder="Para qué existe este proyecto" />
+                </label>
+                <label><span>Alcance</span>
+                  <textarea rows={3} value={h.presente.alcance ?? ''} disabled={!puede}
+                    onChange={e => cambiarDoc({ alcance: e.target.value || undefined } as Partial<Doc>, 'doc:alcance')} placeholder="Qué entra y qué no" />
+                </label>
+              </div>
+              <div className="ed-aj-pie">
+                {puede && <button className="ed-btn texto" onClick={() => { setAjustes(false); setNombrePlantilla(nombre); setDialogo('plantilla') }} disabled={!doc.nodos.length}>Guardar como plantilla</button>}
+                <button className="ed-btn suave" onClick={() => setAjustes(false)}>Listo</button>
               </div>
             </div>
-            <label className={fijaGolive ? 'calculada' : ''} title={fijaGolive ? 'Sale de restar desde el go-live' : 'Mueve todo el proyecto, respetando el calendario'}>
-              <span>Arranque{fijaGolive ? ' · calculado' : ''}</span>
-              <input type="date" value={(fijaGolive ? inicioProyecto(doc) : doc.inicio) ?? ''} disabled={!puede || fijaGolive}
-                onChange={e => e.target.value && comprometer(arrancarEn(h.presente, e.target.value))} />
-            </label>
-            <label className={fijaGolive ? '' : 'calculada'} title={fijaGolive ? 'Mueve todo para terminar ese día' : 'Sale de sumar desde el arranque'}>
-              <span>Go-live{fijaGolive ? '' : ' · calculado'}</span>
-              <input type="date" value={(fijaGolive ? doc.golive : finDelProyecto(doc)) ?? ''} disabled={!puede || !fijaGolive}
-                onChange={e => e.target.value && comprometer(terminarEn(h.presente, e.target.value))} />
-            </label>
-            {fijaGolive && inicioProyecto(doc) && inicioProyecto(doc)! < hoyISO() && (
-              <span className="ed-alerta">Para salir ese día tendrías que haber arrancado el {corta(inicioProyecto(doc))}</span>
-            )}
-            <label className="ed-interruptor">
-              <input type="checkbox" checked={doc.habiles} disabled={!puede} onChange={e => cambiarDoc({ habiles: e.target.checked })} />
-              <span>Solo días hábiles</span>
-            </label>
-            {/* Cómo se enseña el esfuerzo (#189): se guarda en horas, se ve como prefieras. */}
-            <div className="ed-fijar" role="group" aria-label="Esfuerzo en">
-              <span>Esfuerzo en</span>
-              <div className="ed-segmentos chico">
-                <button className={doc.unidad === 'dias' ? '' : 'on'} disabled={!puede}
-                  onClick={() => doc.unidad === 'dias' && comprometer({ ...h.presente, unidad: undefined })}>Horas</button>
-                <button className={doc.unidad === 'dias' ? 'on' : ''} disabled={!puede}
-                  onClick={() => doc.unidad !== 'dias' && comprometer({ ...h.presente, unidad: 'dias' })}>Días</button>
-              </div>
-            </div>
-            <label className="ed-jornada" title="Horas de una jornada: con esto se convierten días de trabajo en horas">
-              <span>Jornada (h)</span>
-              <input type="number" min={1} max={24} step={0.5} value={jornadaDe(doc)} disabled={!puede}
-                onChange={e => { const v = Number(e.target.value); if (v >= 1 && v <= 24) comprometer({ ...h.presente, jornada: v === 8 ? undefined : v }, { clave: 'doc:jornada' }) }} />
-            </label>
-            {doc.nodos.some(n => n.soporte) && (
-              <label className="ed-jornada" title="Entre todas, las actividades de soporte post go-live valen este % del avance. Con 5, todo entregado y solo el soporte pendiente = 95%.">
-                <span>Peso del soporte (%)</span>
-                <input type="number" min={0} max={50} step={1} value={doc.pesoSoporte ?? 5} disabled={!puede}
-                  onChange={e => { const v = Math.round(Number(e.target.value)); if (v >= 0 && v <= 50) comprometer({ ...h.presente, pesoSoporte: v === 5 ? undefined : v }, { clave: 'doc:pesoSoporte' }) }} />
-              </label>
-            )}
-          </div>
+          )}
         </div>
+
+        {liberado && (
+          liberado.groupId && liberado.planId
+            ? <a className={`ed-liberado${sinLiberar ? ' pendiente' : ''}`} href={`/app/g/${liberado.groupId}/${liberado.planId}`} title="Ver el seguimiento">
+                {sinLiberar ? 'Cambios sin liberar' : `Liberado ${corta(liberado.en.slice(0, 10))}`} <span aria-hidden="true">↗</span>
+              </a>
+            : <span className={`ed-liberado${sinLiberar ? ' pendiente' : ''}`}>{sinLiberar ? 'Cambios sin liberar' : `Liberado ${corta(liberado.en.slice(0, 10))}`}</span>
+        )}
+
         <div className="ed-pr-acciones">
           <span className={`ed-estado e-${guardado}`}>{estadoTexto[guardado]}</span>
           <button className="ed-btn icono" onClick={deshacer} disabled={!h.pasado.length} title="Deshacer (Ctrl+Z)">↶</button>
@@ -420,7 +499,6 @@ export function Editor({
           {puede && (id
             ? <button className="ed-btn suave" onClick={() => void guardar()} disabled={guardado === 'guardando'}>Guardar</button>
             : <button className="ed-btn primario" onClick={() => void guardar()} disabled={guardado === 'guardando'}>Guardar borrador</button>)}
-          {puede && <button className="ed-btn suave" onClick={() => { setNombrePlantilla(nombre); setDialogo('plantilla') }} disabled={!doc.nodos.length}>Guardar como plantilla</button>}
           {puede && <button className="ed-btn liberar on" onClick={abrirLiberar} disabled={!doc.nodos.length || guardado === 'guardando'}>
             <Chispa />{liberado ? 'Liberar cambios' : 'Liberar a Zaelyn'}
           </button>}
@@ -437,16 +515,6 @@ export function Editor({
           {guardado === 'error' && <button className="ed-btn suave" onClick={() => void guardar()}>Reintentar</button>}
         </div>
       )}
-      {liberado && (
-        <div className="ed-banda liberado">
-          <span>
-            Liberado a Zaelyn el {corta(liberado.en.slice(0, 10))}{version && liberado.version && version > liberado.version ? ' · tiene cambios sin liberar' : ' · Zaelyn ya lo sigue'}.
-          </span>
-          {liberado.groupId && liberado.planId && (
-            <a className="ed-btn suave" href={`/app/g/${liberado.groupId}/${liberado.planId}`}>Ver el seguimiento</a>
-          )}
-        </div>
-      )}
       {traido && (
         <div className="ed-banda zaelyn">
           <Chispa className="ch" />
@@ -454,9 +522,9 @@ export function Editor({
             Traje el plan como está hoy en el seguimiento: {traido.actualizados} al día
             {traido.agregados ? `, ${traido.agregados} nueva${traido.agregados === 1 ? '' : 's'} desde el chat` : ''}
             {traido.quitados ? `, ${traido.quitados} cancelada${traido.quitados === 1 ? '' : 's'} fuera` : ''}.
-            {' '}Lo que ya avanzó lleva su porcentaje y no se puede quitar. Reorganiza y luego libera los cambios.
+            {' '}Lo que ya avanzó lleva su porcentaje y no se puede quitar.
           </span>
-          <button className="ed-btn suave" onClick={() => setTraido(null)}>Entendido</button>
+          <button className="ed-btn texto" onClick={() => setTraido(null)}>Entendido</button>
         </div>
       )}
       {reorgAplicada && (
@@ -469,81 +537,90 @@ export function Editor({
               : reorgAplicada.despues ? <> · termina el <b>{corta(reorgAplicada.despues)}</b></> : null}.
             {' '}Nada se guarda hasta que guardes.
           </span>
-          <button className="ed-btn suave" onClick={() => { deshacer(); setReorgAplicada(null) }}>Deshacer</button>
-          <button className="ed-btn suave" onClick={() => setReorgAplicada(null)}>Cerrar</button>
+          <button className="ed-btn texto" onClick={() => { deshacer(); setReorgAplicada(null) }}>Deshacer</button>
+          <button className="ed-btn texto" onClick={() => setReorgAplicada(null)}>Cerrar</button>
         </div>
       )}
       {ultima && recien.size > 0 && (
         <div className="ed-banda zaelyn">
           <Chispa className="ch" />
           <span>Zaelyn armó {ultima.doc.nodos.length} objetos con <b>{METODOLOGIA_CORTA[ultima.metodologia]}</b>. Revisa, mueve lo que quieras; si no te convence, deshaz.</span>
-          <button className="ed-btn suave" onClick={deshacer}>Deshacer la propuesta</button>
+          <button className="ed-btn texto" onClick={deshacer}>Deshacer la propuesta</button>
         </div>
       )}
 
-      <div className="ed-cuerpo">
-        {/* paleta */}
-        <aside className="ed-paleta" aria-label="Objetos">
-          <span className="ed-overline">Arrastra</span>
-          {TIPOS_NODO.map(t => (
-            <button
-              key={t}
-              className={`ed-pieza t-${t}`}
-              draggable={puede}
-              disabled={!puede}
-              onDragStart={e => empezar(e, { nuevo: t })}
-              onDragEnd={terminar}
-              onClick={() => crear(t, destinoPara(t))}
-              title={`${TIPO_NOMBRE[t]} — ${TIPO_DICE[t]}`}
-            >
-              <IconoTipo tipo={t} />
-              <span>{TIPO_NOMBRE[t]}</span>
+      {/* barra de herramientas: vistas, objetos para arrastrar y los paneles */}
+      <div className="ed-vistas">
+        <div className="ed-segmentos" role="tablist">
+          <button className={modo === 'gantt' ? 'on' : ''} onClick={() => setModo('gantt')}>Estructura y Gantt</button>
+          <button className={modo === 'tablero' ? 'on' : ''} onClick={() => setModo('tablero')}>Tablero</button>
+        </div>
+        {puede && (
+          <div className="ed-paleta" aria-label="Agregar: arrastra al lienzo o toca">
+            <span className="ed-overline">Agregar</span>
+            {TIPOS_NODO.map(t => (
+              <button
+                key={t}
+                className={`ed-pieza t-${t}`}
+                draggable
+                onDragStart={e => empezar(e, { nuevo: t })}
+                onDragEnd={terminar}
+                onClick={() => crear(t, destinoPara(t))}
+                title={`${TIPO_NOMBRE[t]} — ${TIPO_DICE[t]}. Arrástralo a su lugar, o tócalo para ponerlo junto a lo seleccionado.`}
+              >
+                <IconoTipo tipo={t} />
+                <span>{TIPO_NOMBRE[t]}</span>
+              </button>
+            ))}
+            <button className="ed-pieza fabrica" onClick={() => setDialogo('fabrica')} title="Empezar desde una plantilla de metodología">
+              <svg viewBox="0 0 24 24" className="ed-icono"><path d="M4 5h16v14H4z M4 9h16 M9 9v10" fill="none" stroke="currentColor" strokeWidth="1.8" /></svg>
+              <span>Plantilla</span>
             </button>
-          ))}
-          <span className="ed-sep" />
-          {puede && <button className="ed-pieza fabrica" onClick={() => setDialogo('fabrica')} title="Empezar desde una plantilla de metodología">
-            <svg viewBox="0 0 24 24" className="ed-icono"><path d="M4 5h16v14H4z M4 9h16 M9 9v10" fill="none" stroke="currentColor" strokeWidth="1.8" /></svg>
-            <span>Plantilla</span>
-          </button>}
-          <button className={`ed-pieza zaelyn${panel === 'zaelyn' ? ' activa' : ''}`} onClick={() => setPanel('zaelyn')} title="Armar con Zaelyn">
-            <Chispa className="ed-icono" /><span>Zaelyn</span>
+          </div>
+        )}
+        {modo === 'gantt' && (
+          <div className="ed-segmentos chico">
+            {(Object.keys(ZOOM) as Array<keyof typeof ZOOM>).map(z => (
+              <button key={z} className={zoom === z ? 'on' : ''} onClick={() => setZoom(z)}>{z === 'dia' ? 'Día' : z === 'semana' ? 'Semana' : 'Mes'}</button>
+            ))}
+          </div>
+        )}
+        {modo === 'gantt' && <>
+          <button className="ed-btn icono texto" onClick={() => setColapsados(new Set(doc.nodos.filter(n => n.tipo === 'fase' || n.tipo === 'sprint').map(n => n.id)))} title="Contraer: cerrar todas las fases" aria-label="Contraer">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l5 5 5-5M7 20l5-5 5 5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
-        </aside>
+          <button className="ed-btn icono texto" onClick={() => setColapsados(new Set())} title="Expandir: abrir todo" aria-label="Expandir">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9l5-5 5 5M7 15l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
+        </>}
+        <span className="ed-ayuda" tabIndex={0}
+          title={'Arrastra el asa ⋮⋮ de una fila para moverla o meterla dentro de otra.\nArrastra una barra para moverla; su orilla, para cambiar la duración; su punto, hasta otra barra para enlazarlas.\nDoble clic renombra · Enter agrega otro · Tab mete adentro · Supr quita · Esc cierra el panel.'}>?</span>
+        <span className="ed-vistas-sep" />
+        <button className={`ed-btn zaelyn-suave${panel === 'zaelyn' ? ' on' : ''}`} onClick={() => alternar('zaelyn')} title="Armar o reorganizar con Zaelyn">
+          <Chispa />Zaelyn
+        </button>
+        <button className={`ed-btn suave${panel === 'revision' ? ' on' : ''}`} onClick={() => alternar('revision')} title="Revisión del plan antes de liberar">
+          Revisión{cuentaRevision > 0 && <span className={`ed-badge${revisado?.errores ? ' error' : ''}`}>{cuentaRevision}</span>}
+        </button>
+      </div>
 
+      <div className="ed-cuerpo">
         {/* lienzo */}
         <main className="ed-centro">
-          <div className="ed-vistas">
-            <div className="ed-segmentos" role="tablist">
-              <button className={modo === 'gantt' ? 'on' : ''} onClick={() => setModo('gantt')}>Estructura y Gantt</button>
-              <button className={modo === 'tablero' ? 'on' : ''} onClick={() => setModo('tablero')}>Tablero</button>
-            </div>
-            {modo === 'gantt' && (
-              <div className="ed-segmentos chico">
-                {(Object.keys(ZOOM) as Array<keyof typeof ZOOM>).map(z => (
-                  <button key={z} className={zoom === z ? 'on' : ''} onClick={() => setZoom(z)}>{z === 'dia' ? 'Día' : z === 'semana' ? 'Semana' : 'Mes'}</button>
-                ))}
-              </div>
-            )}
-            {modo === 'gantt' && <>
-              <button className="ed-btn texto" onClick={() => setColapsados(new Set(doc.nodos.filter(n => n.tipo === 'fase' || n.tipo === 'sprint').map(n => n.id)))}>Contraer</button>
-              <button className="ed-btn texto" onClick={() => setColapsados(new Set())}>Expandir</button>
-            </>}
-            <span className="ed-ayuda">Doble clic renombra · Enter agrega otro · Tab mete adentro · Supr quita</span>
-          </div>
-
           {modo === 'gantt' ? (
             <Lienzo
-              doc={doc} medidas={medidas} personas={porPersona} seleccion={seleccion} onSeleccion={setSeleccion}
+              doc={doc} medidas={medidas} personas={porPersona} seleccion={seleccion} onSeleccion={elegir}
               colapsados={colapsados} onColapso={i => setColapsados(c => { const n = new Set(c); if (n.has(i)) n.delete(i); else n.add(i); return n })}
               px={ZOOM[zoom]} critica={critica} recien={recien} puede={puede}
               onPreview={setVista} onCommit={(d, b) => comprometer(d, { base: b })}
               onSoltarNuevo={(t, d) => crear(t, d)}
+              onAgregarDentro={agregarDentro}
               editando={editando} onEditando={setEditando}
               onRenombrar={(i, titulo) => { const v = titulo.trim(); if (v && v !== doc.nodos.find(n => n.id === i)?.titulo) comprometer(cambiar(h.presente, i, { titulo: v })) }}
             />
           ) : (
             <Tablero
-              doc={doc} medidas={medidas} personas={porPersona} seleccion={seleccion} onSeleccion={setSeleccion}
+              doc={doc} medidas={medidas} personas={porPersona} seleccion={seleccion} onSeleccion={elegir}
               critica={critica} recien={recien} puede={puede} onCommit={(d, b) => comprometer(d, { base: b })}
             />
           )}
@@ -560,66 +637,59 @@ export function Editor({
           </div>
         </main>
 
-        {/* panel derecho */}
-        <aside className="ed-panel">
-          <div className="ed-segmentos panel">
-            <button className={panel === 'detalle' ? 'on' : ''} onClick={() => setPanel('detalle')}>Detalle</button>
-            <button className={panel === 'zaelyn' ? 'on zaelyn' : 'zaelyn'} onClick={() => setPanel('zaelyn')}><Chispa className="ch" />Zaelyn</button>
-            <button className={panel === 'revision' ? 'on' : ''} onClick={() => setPanel('revision')}>
-              Revisión{revisado && revisado.errores + revisado.avisos > 0 && <span className={`ed-badge${revisado.errores ? ' error' : ''}`}>{revisado.errores + revisado.avisos}</span>}
-            </button>
-          </div>
-          {/* Siempre montada: así la pestaña lleva la cuenta aunque no esté abierta. */}
-          <div hidden={panel !== 'revision'}>
-            <Revision
-              doc={h.presente} groupId={grupo?.id ?? null} lectura={lectura} puede={puede}
-              onAplicar={aplicarArreglos} onIr={setSeleccion} onRevisado={setRevisado}
-              onVistos={c => comprometer({ ...h.presente, revisados: c === null ? undefined : [...new Set([...(h.presente.revisados ?? []), ...c])] })}
-            />
-          </div>
-          {panel === 'revision' ? null : panel === 'zaelyn' ? (
-            <Asistente
-              groupId={grupo?.id ?? null} nombre={nombre} doc={h.presente} metodologia={metodologia}
-              fichas={fichas} ia={ia} puede={puede} ultima={ultima} onPropuesta={recibirPropuesta}
-              onReorganizar={recibirReorganizacion}
-            />
-          ) : seleccionado ? (
-            <Inspector
-              doc={doc} nodo={seleccionado} medida={medidas.get(seleccionado.id)} personas={personas} puede={puede}
-              critica={critica.has(seleccionado.id)}
-              onCambiar={(i, c) => comprometer(cambiar(h.presente, i, c), { clave: `${i}:${Object.keys(c).join(',')}` })}
-              onQuitar={i => { comprometer(quitar(h.presente, i)); if (i === seleccion) setSeleccion(null) }}
-              onAgregarDentro={(p, t) => crear(t, { padre: p, antesDe: null })}
-              onEnlazar={(s, a) => comprometer(enlazar(h.presente, s, a))}
-              onDesenlazar={(s, a) => comprometer(desenlazar(h.presente, s, a))}
-              onSeleccion={setSeleccion}
-              onSubtarea={(p, titulo) => comprometer(insertar(h.presente, { id: nuevoId(h.presente), tipo: 'subtarea', padre: p, titulo }, { padre: p, antesDe: null }))}
-            />
-          ) : (
-            <div className="ed-sin-sel">
-              <b>{doc.nodos.length ? 'Selecciona un objeto' : 'Empieza a armar'}</b>
-              <p>{doc.nodos.length
-                ? 'Toca una fila, una barra o una tarjeta para ver para qué existe, quién la tiene, cuánto dura y de qué depende.'
-                : 'Arrastra una fase desde la paleta, usa una plantilla de metodología, o deja que Zaelyn te proponga el plan completo.'}</p>
-              {!doc.nodos.length && puede && (
-                <div className="ed-arranques">
-                  <button className="ed-btn zaelyn" onClick={() => setPanel('zaelyn')}><Chispa />Armar con Zaelyn</button>
-                  <button className="ed-btn suave" onClick={() => setDialogo('fabrica')}>Usar una plantilla</button>
-                  <button className="ed-btn suave" onClick={() => crear('fase', { padre: null, antesDe: null })}>Primera fase a mano</button>
-                </div>
-              )}
-              <div className="ed-proyecto-info">
-                <label><span>Objetivo del proyecto</span>
-                  <textarea rows={3} value={h.presente.objetivo ?? ''} disabled={!puede}
-                    onChange={e => cambiarDoc({ objetivo: e.target.value || undefined } as Partial<Doc>, 'doc:objetivo')} placeholder="Para qué existe este proyecto" />
-                </label>
-                <label><span>Alcance</span>
-                  <textarea rows={3} value={h.presente.alcance ?? ''} disabled={!puede}
-                    onChange={e => cambiarDoc({ alcance: e.target.value || undefined } as Partial<Doc>, 'doc:alcance')} placeholder="Qué entra y qué no" />
-                </label>
-              </div>
+        {/* el panel: se abre al seleccionar algo, o al pedir a Zaelyn o la revisión */}
+        <aside className={`ed-panel${abierto ? ' abierto' : ''}`} aria-hidden={!abierto}>
+          <div className="ed-panel-cab">
+            <div className="ed-segmentos panel">
+              <button className={panel === 'detalle' ? 'on' : ''} onClick={() => setPanel('detalle')} disabled={!seleccionado && doc.nodos.length > 0}>Detalle</button>
+              <button className={panel === 'zaelyn' ? 'on zaelyn' : 'zaelyn'} onClick={() => setPanel('zaelyn')}><Chispa className="ch" />Zaelyn</button>
+              <button className={panel === 'revision' ? 'on' : ''} onClick={() => setPanel('revision')}>
+                Revisión{cuentaRevision > 0 && <span className={`ed-badge${revisado?.errores ? ' error' : ''}`}>{cuentaRevision}</span>}
+              </button>
             </div>
-          )}
+            <button className="x grande" onClick={cerrarPanel} aria-label="Cerrar el panel" title="Cerrar (Esc)">×</button>
+          </div>
+          <div className="ed-panel-cuerpo">
+            {/* Siempre montada: así la pestaña lleva la cuenta aunque no esté abierta. */}
+            <div hidden={panel !== 'revision'}>
+              <Revision
+                doc={h.presente} groupId={grupo?.id ?? null} lectura={lectura} puede={puede}
+                onAplicar={aplicarArreglos} onIr={setSeleccion} onRevisado={setRevisado}
+                onVistos={c => comprometer({ ...h.presente, revisados: c === null ? undefined : [...new Set([...(h.presente.revisados ?? []), ...c])] })}
+              />
+            </div>
+            {panel === 'revision' ? null : panel === 'zaelyn' ? (
+              <Asistente
+                groupId={grupo?.id ?? null} nombre={nombre} doc={h.presente} metodologia={metodologia}
+                fichas={fichas} ia={ia} puede={puede} ultima={ultima} onPropuesta={recibirPropuesta}
+                onReorganizar={recibirReorganizacion}
+              />
+            ) : seleccionado ? (
+              <Inspector
+                doc={doc} nodo={seleccionado} medida={medidas.get(seleccionado.id)} personas={personas} puede={puede}
+                critica={critica.has(seleccionado.id)}
+                onCambiar={(i, c) => comprometer(cambiar(h.presente, i, c), { clave: `${i}:${Object.keys(c).join(',')}` })}
+                onQuitar={i => { comprometer(quitar(h.presente, i)); if (i === seleccion) setSeleccion(null) }}
+                onAgregarDentro={(p, t) => crear(t, { padre: p, antesDe: null })}
+                onEnlazar={(s, a) => comprometer(enlazar(h.presente, s, a))}
+                onDesenlazar={(s, a) => comprometer(desenlazar(h.presente, s, a))}
+                onSeleccion={setSeleccion}
+                onSubtarea={(p, titulo) => comprometer(insertar(h.presente, { id: nuevoId(h.presente), tipo: 'subtarea', padre: p, titulo }, { padre: p, antesDe: null }))}
+              />
+            ) : (
+              <div className="ed-sin-sel">
+                <b>Empieza a armar</b>
+                <p>Arrastra una fase desde «Agregar», usa una plantilla de metodología, o deja que Zaelyn te proponga el plan completo.</p>
+                {puede && (
+                  <div className="ed-arranques">
+                    <button className="ed-btn zaelyn" onClick={() => setPanel('zaelyn')}><Chispa />Armar con Zaelyn</button>
+                    <button className="ed-btn suave" onClick={() => setDialogo('fabrica')}>Usar una plantilla</button>
+                    <button className="ed-btn suave" onClick={() => crear('fase', { padre: null, antesDe: null })}>Primera fase a mano</button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </aside>
       </div>
 
