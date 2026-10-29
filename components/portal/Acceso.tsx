@@ -42,8 +42,15 @@ async function pedir(ruta: string, cuerpo: unknown): Promise<{ status: number; j
   }
 }
 
-export function Acceso({ telegram, destino = '/app' }: { telegram?: ReactNode; destino?: string }) {
+export function Acceso({ telegram, destino = '/app', registro = 'portal' }: {
+  telegram?: ReactNode
+  destino?: string
+  /** El marco donde se pinta: la landing (`sitio`) o el portal. Solo cambia los botones. */
+  registro?: 'sitio' | 'portal'
+}) {
   const router = useRouter()
+  const b1 = registro === 'sitio' ? 'st-btn st-btn-1 ac-ancho' : 'pt-boton ac-ancho'
+  const b2 = registro === 'sitio' ? 'st-btn st-btn-2 ac-ancho' : 'pt-boton pt-boton-sec ac-ancho'
   const [paso, setPaso] = useState<Paso>('inicio')
   const [email, setEmail] = useState('')
   const [codigo, setCodigo] = useState('')
@@ -114,11 +121,11 @@ export function Acceso({ telegram, destino = '/app' }: { telegram?: ReactNode; d
     <div className="ac-caja">
       {paso === 'inicio' && (
         <>
-          <button type="button" className="pt-boton ac-ancho" onClick={conPasskey} disabled={ocupado}>
-            Entrar con passkey
+          <button type="button" className={b1} onClick={conPasskey} disabled={ocupado}>
+            <Llave /> Entrar con passkey
           </button>
-          <button type="button" className="pt-boton pt-boton-sec ac-ancho" onClick={() => { setError(null); setPaso('correo') }}>
-            Entrar o crear cuenta con mi correo
+          <button type="button" className={b2} onClick={() => { setError(null); setPaso('correo') }}>
+            <Sobre /> Con un código a mi correo
           </button>
           {telegram && <div className="ac-o"><span>o</span></div>}
           {telegram}
@@ -131,7 +138,7 @@ export function Acceso({ telegram, destino = '/app' }: { telegram?: ReactNode; d
           <input id="ac-correo" type="email" autoComplete="email" inputMode="email" required
             value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@correo.com" />
           <p className="nota">Te mando un código de seis números. Si no tienes cuenta, la creamos.</p>
-          <button className="pt-boton ac-ancho" type="submit" disabled={ocupado || !email}>Mandarme el código</button>
+          <button className={b1} type="submit" disabled={ocupado || !email}>Mandarme el código</button>
           <button type="button" className="ac-volver" onClick={() => setPaso('inicio')}>Volver</button>
         </form>
       )}
@@ -141,7 +148,7 @@ export function Acceso({ telegram, destino = '/app' }: { telegram?: ReactNode; d
           <label htmlFor="ac-codigo">El código que llegó a {email}</label>
           <input id="ac-codigo" inputMode="numeric" autoComplete="one-time-code" pattern="\d{6}" maxLength={6} required
             value={codigo} onChange={e => setCodigo(e.target.value.replace(/\D/g, ''))} placeholder="000000" className="ac-codigo" />
-          <button className="pt-boton ac-ancho" type="submit" disabled={ocupado || codigo.length !== 6}>Entrar</button>
+          <button className={b1} type="submit" disabled={ocupado || codigo.length !== 6}>Entrar</button>
           <button type="button" className="ac-volver" onClick={() => void mandarCodigo()} disabled={ocupado}>Mandar otro</button>
         </form>
       )}
@@ -154,7 +161,7 @@ export function Acceso({ telegram, destino = '/app' }: { telegram?: ReactNode; d
               onChange={e => setArroba(e.target.value)} autoCapitalize="none" autoCorrect="off" />
           </div>
           <p className="nota">Es como te van a llamar en tus grupos y proyectos. Es único y es tuyo en todos lados.</p>
-          <button className="pt-boton ac-ancho" type="submit" disabled={ocupado}>Crear mi cuenta</button>
+          <button className={b1} type="submit" disabled={ocupado}>Crear mi cuenta</button>
         </form>
       )}
 
@@ -162,7 +169,7 @@ export function Acceso({ telegram, destino = '/app' }: { telegram?: ReactNode; d
         <div className="ac-form">
           <b>Listo, ya tienes cuenta.</b>
           <p className="nota">Activa la entrada con huella o Face ID en este equipo: la próxima vez entras con un toque.</p>
-          <button type="button" className="pt-boton ac-ancho" onClick={activarPasskey} disabled={ocupado}>Activar passkey</button>
+          <button type="button" className={b1} onClick={activarPasskey} disabled={ocupado}>Activar passkey</button>
           <button type="button" className="ac-volver" onClick={ir}>Ahora no</button>
         </div>
       )}
@@ -180,3 +187,14 @@ export function nombreDeEquipo(): string {
   const nav = /Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : ''
   return nav ? `${so} · ${nav}` : so
 }
+
+const Llave = () => (
+  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="8" cy="15" r="4" /><path d="m10.8 12.2 8.7-8.7M17 6l2.5 2.5M14.5 8.5 16.5 10.5" />
+  </svg>
+)
+const Sobre = () => (
+  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="5" width="18" height="14" rx="2.5" /><path d="m4 7 8 6 8-6" />
+  </svg>
+)
