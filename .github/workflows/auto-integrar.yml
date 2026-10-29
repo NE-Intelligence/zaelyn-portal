@@ -124,6 +124,14 @@ jobs:
       - name: Integrar
         if: steps.puerta.outputs.ok == 'si'
         run: |
-          gh pr merge "${{ steps.pr.outputs.n }}" -R "$REPO" --squash --delete-branch \
-            --match-head-commit "$SHA"
+          N=${{ steps.pr.outputs.n }}
+          if ! gh pr merge "$N" -R "$REPO" --squash --delete-branch --match-head-commit "$SHA"; then
+            # NE-0004: con varias conversaciones a la vez, un PR puede chocar con
+            # lo que otra integró antes. Se dice en el PR para que la
+            # conversación dueña lo resuelva, en vez de quedarse atorado callado.
+            if [ "$(gh pr view "$N" -R "$REPO" --json mergeable --jq .mergeable)" = "CONFLICTING" ]; then
+              gh pr comment "$N" -R "$REPO" --body "**Auto-integrar no pudo integrar:** este PR choca con lo que entró a \`main\` después de abrirlo. En la rama: \`git fetch origin && git merge origin/main\`, resolver conservando los dos lados, y subir. El CI vuelve a correr y lo integra solo (NE-0004)."
+            fi
+            exit 1
+          fi
 

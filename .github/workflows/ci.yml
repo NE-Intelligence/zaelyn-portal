@@ -11,6 +11,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # NE-0004: varias conversaciones trabajan a la vez en este repo. Los
+      # archivos que antes compartían todas ya no reciben entradas nuevas, y
+      # dos migraciones no pueden tener la misma versión.
+      - name: Documentación sin choques entre conversaciones
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch -q --depth=1 origin "$BASE" 2>/dev/null || true
+          mal=0
+          for f in docs/DECISIONS.md docs/HANDOFF.md; do
+            git show "$BASE:$f" 2>/dev/null | grep -q 'archivo-cerrado: NE-0004' || continue
+            if git diff --unified=0 "$BASE" HEAD -- "$f" | grep -qE '^\+[^+]'; then
+              echo "::error file=$f::$f es archivo histórico (NE-0004). Una decisión nueva va en su propio archivo docs/decisiones/AAAA-MM-DD-tema.md; el estado del trabajo va en docs/estado/<frente>.md. Mueve ahí lo que agregaste y quítalo de $f."
+              mal=1
+            fi
+          done
+          dup=$(ls supabase/migrations 2>/dev/null | grep -oE '^[0-9]{14}' | sort | uniq -d | tr '\n' ' ')
+          if [ -n "$dup" ]; then
+            echo "::error::Dos migraciones con la misma versión: $dup(NE-0004). Renombra la tuya con la hora UTC actual: date -u +%Y%m%d%H%M%S"
+            mal=1
+          fi
+          exit $mal
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
