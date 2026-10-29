@@ -3,7 +3,7 @@ import Campo from '@/components/sitio/Campo'
 import { Acceso } from '@/components/portal/Acceso'
 import { bienvenida } from '@/lib/api'
 
-export const metadata = { title: 'Entrar · Zaelyn' }
+export const metadata = { title: 'Entrar' }
 
 export const dynamic = 'force-dynamic'
 
