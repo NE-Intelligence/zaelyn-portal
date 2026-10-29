@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description:
     'Tu asistente personal, familiar y de proyectos. Se habla en el chat y se ve en el portal. Zaelyn by NE National Expertise.',
   icons: { icon: '/favicon.ico', apple: '/apple-touch-icon.png' },
+  // Instalable en iPhone como app (fase 2): sin barra de Safari al abrirla
+  // desde la pantalla de inicio. El manifiesto lo pone `app/manifest.ts`.
+  appleWebApp: { capable: true, title: 'Zaelyn', statusBarStyle: 'black' },
 }
 
 export const viewport = {

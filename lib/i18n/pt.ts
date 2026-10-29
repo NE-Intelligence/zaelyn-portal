@@ -633,8 +633,8 @@ export const pt: Partial<Record<Clave, string>> = {
   'chat.descargar': 'Baixar',
   'po.ejemplo': 'Dados de exemplo',
   'po.ejemplo.p': 'As pessoas, os grupos e as datas desta tela são inventados. Com seus dados reais a tela é a mesma: muda de onde vêm os números, não como são desenhados.',
-  'po.pie.sesion': 'Você entrou com um link de uso único pedido no seu chat: aqui não há senha. Esta sessão dura 14 dias neste navegador; para encerrá-la em todos os lugares, diga à Zaelyn «cierra todas» (encerrar todas).',
-  'po.pie.lectura': 'Muda-se conversando, não aqui: o portal só mostra.',
+  'po.pie.sesion': 'Aqui não há senha: entra-se com passkey, com um código no e-mail ou com um link do seu chat. Esta sessão dura 14 dias neste navegador; para encerrá-la em todos os lugares, diga à Zaelyn «cierra todas» (encerrar todas).',
+  'po.pie.lectura': 'Muda-se falando com a Zaelyn, aqui ou no seu chat: o portal mostra o que ela faz.',
   'po.pie.editor': 'O que você monta aqui é um rascunho: a Zaelyn acompanha quando você libera.',
   'po.pie.cuenta': 'O pagamento é processado pela Stripe: a Zaelyn nunca vê seu cartão.',
   'po.pie.admin': 'Dados lidos ao vivo da Zaelyn e da Stripe. Só você vê.',
@@ -682,7 +682,7 @@ export const pt: Partial<Record<Clave, string>> = {
   'po.cu.legal': 'Seus dados e privacidade',
   'po.cu.legal.d': 'Como tratamos seus dados e como exercer seus direitos ARCO (acesso, retificação, cancelamento e oposição).',
   'po.cu.sesiones': 'Suas sessões',
-  'po.cu.sesiones.d': 'São revisadas e encerradas pelo chat: «mis sesiones» (minhas sessões), «cierra todas» (encerra todas).',
+  'po.cu.sesiones.d': 'São revisadas e encerradas falando com a Zaelyn: «mis sesiones» (minhas sessões), «cierra todas» (encerra todas).',
 
   // ── ficha de cada espaço ─────────────────────────────────────────────
   'fi.para': 'Para quem',

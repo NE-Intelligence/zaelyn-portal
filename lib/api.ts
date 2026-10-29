@@ -201,7 +201,7 @@ export async function elPlan(groupId: string, planId?: string) {
 
 /** El canje del pase. No lleva sesión: ES la que la crea. */
 export async function canjear(pase: string): Promise<
-  { ok: true; token: string; expira: string; destino: string | null }
+  { ok: true; token: string; expira: string; destino: string | null; cuentaWeb?: boolean }
   | { ok: false; error: string }
 > {
   if (!hayApi()) return { ok: false, error: 'SIN_API' }
@@ -571,3 +571,92 @@ export async function reenviarChat(
     return { status: 502, cuerpo: JSON.stringify({ error: 'CAIDO' }) }
   }
 }
+
+// ── Identidad web (fase 2, Zaelyn DECISIONS #228) ──────────────────────
+//
+// Entrar sin Telegram: código al correo o passkey. Igual que el chat, el
+// navegador habla con `app/api/acceso/*` y `app/api/cuenta/*`; este servidor
+// reenvía al motor. El token de sesión que devuelve el motor NUNCA llega al
+// JavaScript de la página: la ruta lo convierte en la cookie httpOnly.
+
+const RUTAS_ACCESO = {
+  codigo: '/web/codigo',
+  verificar: '/web/codigo/verificar',
+  alta: '/web/alta',
+  'passkey-opciones': '/web/passkey/opciones',
+  'passkey-entrar': '/web/passkey/entrar',
+} as const
+export type AccionAcceso = keyof typeof RUTAS_ACCESO
+export const esAccionAcceso = (a: string): a is AccionAcceso => a in RUTAS_ACCESO
+
+/** Reenvía una acción de acceso (sin sesión). Devuelve código y JSON. */
+export async function acceso(
+  accion: AccionAcceso, cuerpo: string, ip: string | null,
+): Promise<{ status: number; json: Record<string, unknown> }> {
+  if (!hayApi()) return { status: 503, json: { error: 'SIN_API' } }
+  try {
+    const r = await fetch(`${base()}${RUTAS_ACCESO[accion]}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', ...(ip ? { 'x-forwarded-for': ip } : {}) },
+      body: cuerpo || '{}',
+      cache: 'no-store',
+      signal: AbortSignal.timeout(15_000),
+    })
+    if (r.status >= 500) return { status: r.status === 503 ? 503 : 502, json: { error: r.status === 503 ? ((await r.json().catch(() => ({}))) as { error?: string }).error ?? 'CAIDO' : 'CAIDO' } }
+    return { status: r.status, json: (await r.json().catch(() => ({}))) as Record<string, unknown> }
+  } catch {
+    return { status: 502, json: { error: 'CAIDO' } }
+  }
+}
+
+const RUTAS_CUENTA = {
+  web: { ruta: '/portal/cuenta/web', metodo: 'GET' },
+  correo: { ruta: '/portal/cuenta/correo', metodo: 'POST' },
+  'correo-verificar': { ruta: '/portal/cuenta/correo/verificar', metodo: 'POST' },
+  'passkey-opciones': { ruta: '/portal/passkey/opciones', metodo: 'POST' },
+  'passkey-registrar': { ruta: '/portal/passkey/registrar', metodo: 'POST' },
+  'passkey-borrar': { ruta: '/portal/passkey/borrar', metodo: 'POST' },
+  'push-clave': { ruta: '/portal/push/clave', metodo: 'GET' },
+  'push-suscribir': { ruta: '/portal/push/suscribir', metodo: 'POST' },
+  'push-baja': { ruta: '/portal/push/baja', metodo: 'POST' },
+  vincular: { ruta: '/portal/vincular', metodo: 'POST' },
+} as const
+export type AccionCuenta = keyof typeof RUTAS_CUENTA
+export const esAccionCuenta = (a: string): a is AccionCuenta => a in RUTAS_CUENTA
+export const metodoDeCuenta = (a: AccionCuenta): 'GET' | 'POST' => RUTAS_CUENTA[a].metodo
+
+/** Reenvía una acción de la cuenta (con sesión). */
+export async function cuenta(
+  accion: AccionCuenta, cuerpo?: string,
+): Promise<{ status: number; cuerpo: string }> {
+  const { ruta, metodo } = RUTAS_CUENTA[accion]
+  if (!hayApi()) return { status: 503, cuerpo: JSON.stringify({ error: 'SIN_API' }) }
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return { status: 401, cuerpo: JSON.stringify({ error: 'SIN_SESION' }) }
+  try {
+    const r = await fetch(`${base()}${ruta}`, {
+      method: metodo,
+      headers: { authorization: `Bearer ${token}`, ...(metodo === 'POST' ? { 'content-type': 'application/json' } : {}) },
+      ...(metodo === 'POST' ? { body: cuerpo || '{}' } : {}),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(15_000),
+    })
+    if (r.status >= 500 && r.status !== 503) return { status: 502, cuerpo: JSON.stringify({ error: 'CAIDO' }) }
+    return { status: r.status, cuerpo: await r.text() }
+  } catch {
+    return { status: 502, cuerpo: JSON.stringify({ error: 'CAIDO' }) }
+  }
+}
+
+/** Lo que el portal enseña de la cuenta web (lectura de servidor). */
+export type CuentaWeb = {
+  email: string | null
+  handle: string | null
+  canales: string[]
+  passkeys: Array<{ id: string; nombre: string; creada: string; usada: string | null }>
+  avisos: number
+  correo: boolean
+  passkeys_activas: boolean
+  push: boolean
+}
+export const cuentaWeb = () => leer<CuentaWeb>('/portal/cuenta/web')

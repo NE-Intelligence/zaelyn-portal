@@ -106,6 +106,12 @@ export function Chat({ t }: { t: TextosChat }) {
   const pensandoHasta = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => { setMensajes(leerGuardados()) }, [])
+  // El service worker de avisos (fase 2). Registrarlo no pide permiso de
+  // nada: solo deja listo que el teléfono pueda instalar Zaelyn y, si la
+  // persona lo activa en su cuenta, recibir avisos.
+  useEffect(() => {
+    if ('serviceWorker' in navigator) void navigator.serviceWorker.register('/sw.js').catch(() => undefined)
+  }, [])
   useEffect(() => { guardar(mensajes) }, [mensajes])
   useEffect(() => {
     lista.current?.scrollTo({ top: lista.current.scrollHeight, behavior: 'smooth' })

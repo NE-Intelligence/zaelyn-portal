@@ -1,5 +1,7 @@
 import { headers } from 'next/headers'
 import { Barra, Pie } from '@/components/portal/Marco'
+import { Acceso } from '@/components/portal/Acceso'
+import { Entrar as BotonTelegram } from '@/components/portal/Entrar'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +43,23 @@ export default async function Entrar({
   // El nonce de la política de contenido (proxy.ts): sin él, el envío
   // automático del formulario no corre.
   const nonce = (await headers()).get('x-nonce') ?? undefined
+
+  // Sin pase: la puerta de la web (fase 2) — passkey, correo o Telegram.
+  if (!pase) {
+    return (
+      <>
+        <Barra migas={[{ texto: 'Entrar' }]} />
+        <main className="pt-lienzo">
+          <div className="pt-vacio" style={{ maxWidth: 460 }}>
+            <b>Entra a Zaelyn</b>
+            <span>Con tu passkey, con un código a tu correo, o desde tu chat de Telegram.</span>
+            <Acceso telegram={<BotonTelegram compacto />} />
+          </div>
+        </main>
+        <Pie />
+      </>
+    )
+  }
 
   return (
     <>
