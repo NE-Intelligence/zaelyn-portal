@@ -7,7 +7,7 @@ import { COOKIE, soyAdmin } from '@/lib/api'
 import { textos, type Clave } from '@/lib/copy'
 import { idiomaActual, temaActual } from '@/lib/preferencias'
 
-export type Area = 'inicio' | 'personal' | 'familia' | 'proyectos' | 'cuenta' | 'admin'
+export type Area = 'inicio' | 'personal' | 'familia' | 'proyectos' | 'mensajes' | 'cuenta' | 'admin'
 type Modo = 'lectura' | 'editor' | 'cuenta' | 'admin' | 'horas'
 
 /** La casa de cada área, con sesión y en el ejemplo. */
@@ -16,6 +16,7 @@ const CASA: Record<Area, { app: string; demo: string | null; k: Clave }> = {
   personal: { app: '/app/personal', demo: '/demo/personal', k: 'po.personal' },
   familia: { app: '/app/familia', demo: '/demo/familia', k: 'po.familia' },
   proyectos: { app: '/app/proyectos', demo: '/demo', k: 'po.proyectos' },
+  mensajes: { app: '/app/mensajes', demo: null, k: 'po.mensajes' },
   cuenta: { app: '/app/cuenta', demo: null, k: 'po.cuenta' },
   admin: { app: '/admin', demo: null, k: 'po.admin' },
 }
@@ -47,7 +48,7 @@ export async function Barra({
   const [lang, tema, admin] = await Promise.all([idiomaActual(), temaActual(), sesion ? soyAdmin() : Promise.resolve(false)])
   const t = textos(lang)
   const a: Area | undefined = area
-  const pestanas: Area[] = ejemplo ? ['personal', 'familia', 'proyectos'] : sesion ? ['inicio', 'personal', 'familia', 'proyectos', 'cuenta'] : []
+  const pestanas: Area[] = ejemplo ? ['personal', 'familia', 'proyectos'] : sesion ? ['inicio', 'personal', 'familia', 'proyectos', 'mensajes', 'cuenta'] : []
   if (admin) pestanas.push('admin')
   const href = (x: Area) => (ejemplo ? CASA[x].demo ?? '/' : CASA[x].app)
   // «Mis grupos» era la raíz de todo; ahora la raíz es el área.

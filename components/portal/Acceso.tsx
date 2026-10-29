@@ -3,7 +3,7 @@
 /**
  * Entrar a Zaelyn desde la web: passkey, código al correo, o Telegram.
  *
- * Ref: Zaelyn DECISIONS #228
+ * Ref: Zaelyn DECISIONS #229
  *
  * Si el correo no tiene cuenta, el mismo flujo la crea: después del código se
  * escoge el @ y listo — la zona se toma del navegador. Al final se ofrece la

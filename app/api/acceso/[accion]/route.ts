@@ -1,5 +1,5 @@
 /**
- * Entrar o darse de alta sin Telegram (Zaelyn DECISIONS #228). SOLO POST.
+ * Entrar o darse de alta sin Telegram (Zaelyn DECISIONS #229). SOLO POST.
  *
  * Cuando el motor devuelve una sesión, ESTA ruta la convierte en la cookie
  * httpOnly y le contesta al navegador solo `{ ok, destino }`: el token nunca

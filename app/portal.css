@@ -1764,3 +1764,42 @@ a.pt-plan:hover {
 .pt .cw-lista small { color: var(--ink-3); flex: 1; }
 .pt .cw-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .pt .cw-codigo { font-family: var(--fuente-dato), monospace; letter-spacing: 2px; }
+
+/* ── Mensajes entre personas (fase 2.5) ──────────────────────────────── */
+.pt .ms-lienzo { padding-top: 12px; }
+.pt .ms { display: grid; grid-template-columns: 320px 1fr; height: calc(100dvh - 210px); min-height: 420px; border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; background: var(--surface); }
+.pt .ms-lista { border-right: 1px solid var(--line); overflow-y: auto; display: flex; flex-direction: column; }
+.pt .ms-lista ul { list-style: none; margin: 0; padding: 0; }
+.pt .ms-nueva { display: flex; gap: 6px; padding: 10px; border-bottom: 1px solid var(--line); }
+.pt .ms-nueva input { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); color: var(--ink); }
+.pt .ms-item { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; width: 100%; text-align: left; padding: 10px 12px; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--ink); cursor: pointer; }
+.pt .ms-item.activo, .pt .ms-item:hover { background: var(--surface-2); }
+.pt .ms-titulo { grid-column: 1 / 2; font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt .ms-badge { grid-column: 2; grid-row: 1 / span 2; align-self: center; min-width: 20px; padding: 2px 6px; border-radius: var(--r-pill); background: var(--zaelyn); color: #fff; font-size: 12px; text-align: center; }
+.pt .ms-prev { grid-column: 1 / 2; font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pt .ms-conv { display: flex; flex-direction: column; min-width: 0; }
+.pt .ms-vacia { margin: auto; text-align: center; padding: 20px; }
+.pt .ms-cab { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.pt .ms-cab b { flex: 1; }
+.pt .ms-atras { display: none; border: 0; background: none; font-size: 20px; cursor: pointer; color: var(--ink); }
+.pt .ms-mensajes { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: var(--surface-2); }
+.pt .ms-msg { position: relative; align-self: flex-start; max-width: 78%; padding: 8px 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); font-size: 14px; }
+.pt .ms-msg.mio { align-self: flex-end; background: var(--brand-soft); border-color: transparent; }
+.pt .ms-msg p { margin: 2px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.pt .ms-autor { font-size: 12px; font-weight: 600; color: var(--brand-ink); }
+.pt .ms-pie { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 4px; font-size: 11px; color: var(--ink-3); }
+.pt .ms-z { color: var(--zaelyn-ink); font-weight: 600; }
+.pt .ms-mas { border: 0; background: none; cursor: pointer; color: var(--ink-3); font-size: 16px; min-width: 28px; min-height: 24px; }
+.pt .ms-menu { position: absolute; right: 6px; bottom: -6px; transform: translateY(100%); z-index: 5; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sombra-2); }
+.pt .ms-menu button { border: 0; background: none; padding: 8px 14px; text-align: left; cursor: pointer; color: var(--ink); font-size: 14px; white-space: nowrap; }
+.pt .ms-menu button:hover { background: var(--surface-2); }
+.pt .ms-foto { display: block; max-width: 260px; max-height: 260px; border-radius: var(--r-sm); margin-bottom: 4px; }
+.pt .ms audio { max-width: 260px; }
+@media (max-width: 760px) {
+  .pt .ms { grid-template-columns: 1fr; height: calc(100dvh - 180px); }
+  .pt .ms .ms-conv { display: none; }
+  .pt .ms.ms-abierta .ms-lista { display: none; }
+  .pt .ms.ms-abierta .ms-conv { display: flex; }
+  .pt .ms-atras { display: inline-block; }
+}
+.pt:has(.ms) .ch-lanzador { bottom: max(96px, env(safe-area-inset-bottom)); }

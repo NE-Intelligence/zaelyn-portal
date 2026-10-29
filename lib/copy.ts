@@ -622,6 +622,7 @@ const es = {
   'po.modo.editor': 'Editor · borrador',
   'po.modo.cuenta': 'Tu cuenta',
   'po.modo.admin': 'Administrador',
+  'po.mensajes': 'Mensajes',
   'po.modo.horas': 'Registro de horas',
   // ── chat de Zaelyn en el portal (fase 1) ─────────────────────
   'chat.abrir': 'Hablar con Zaelyn',
