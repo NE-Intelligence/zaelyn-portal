@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Barra, Pie } from './Marco'
 import { Entrar } from './Entrar'
+import { Acceso } from './Acceso'
 import type { Fallo } from '@/lib/api'
 
 /**
@@ -23,9 +24,8 @@ export function SinSesion({ fallo, inicio = 'portal' }: { fallo: Fallo; inicio?:
       titulo: 'Tu sesión no está abierta',
       cuerpo: (
         <>
-          El portal no tiene registro ni contraseña: <b>la llave es tu chat</b>. No
-          hay nada que dar de alta — tu cuenta de Telegram ya es tu identidad, y
-          desde ahí Zaelyn te deja entrar.
+          Entra con tu passkey o con un código a tu correo — sin contraseñas. Si
+          ya usas Zaelyn en Telegram, también puedes pedirle tu enlace ahí.
         </>
       ),
     },
@@ -72,7 +72,7 @@ export function SinSesion({ fallo, inicio = 'portal' }: { fallo: Fallo; inicio?:
           {/* EL BOTÓN SOLO DONDE SIRVE. En «no lo encuentro» ya hay sesión, y
               ofrecer entrar otra vez mandaría a alguien a resolver un problema
               que no tiene. */}
-          {fallo === 'SIN_SESION' && <Entrar inicio={inicio} />}
+          {fallo === 'SIN_SESION' && <Acceso telegram={<Entrar inicio={inicio} compacto />} />}
           <Link href="/proyectos" style={{ color: 'var(--brand)', marginTop: 6 }}>
             Cómo funciona Zaelyn para proyectos
           </Link>

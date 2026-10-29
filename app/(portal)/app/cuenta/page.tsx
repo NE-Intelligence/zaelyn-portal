@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { Barra, Pie } from '@/components/portal/Marco'
 import { SinSesion } from '@/components/portal/SinSesion'
-import { planYUso, soyAdmin } from '@/lib/api'
+import { cuentaWeb, planYUso, soyAdmin } from '@/lib/api'
+import { CuentaWeb } from '@/components/portal/CuentaWeb'
 import { textos } from '@/lib/copy'
 import { idiomaActual } from '@/lib/preferencias'
 
@@ -10,7 +11,7 @@ export const metadata = { title: 'Cuenta' }
 
 /** `/app/cuenta` — todo lo de la suscripción en un solo lugar (#186). */
 export default async function Cuenta() {
-  const [r, admin, lang] = await Promise.all([planYUso(), soyAdmin(), idiomaActual()])
+  const [r, admin, lang, web] = await Promise.all([planYUso(), soyAdmin(), idiomaActual(), cuentaWeb()])
   if (!r.ok) return <SinSesion fallo={r.fallo} />
   const t = textos(lang)
   const tarjetas: { href: string; t: string; d: string }[] = [
@@ -29,6 +30,12 @@ export default async function Cuenta() {
           <h1>{t('po.cu.h1')}</h1>
           <p>{t('po.cu.sub')} <b>{r.dato.plan.nombre}</b></p>
         </div>
+        {web.ok && (
+          <section className="pt-area cw-marco" data-area="cuenta" id="acceso">
+            <header><h2>Acceso web y avisos</h2></header>
+            <CuentaWeb inicial={web.dato} />
+          </section>
+        )}
         <div className="pt-areas-rejilla">
           {tarjetas.map((x) => (
             <Link key={x.href} href={x.href} className="pt-area" data-area={x.href === '/admin' ? 'admin' : 'cuenta'} style={{ textDecoration: 'none', color: 'inherit' }}>

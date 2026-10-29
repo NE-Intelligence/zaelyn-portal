@@ -1736,3 +1736,31 @@ a.pt-plan:hover {
   .pt .ch-pensando span, .pt .ch-punto { animation: none; }
 }
 @media print { .pt .ch-lanzador, .pt .ch-panel { display: none; } }
+
+/* ── Acceso web y cuenta (fase 2) ─────────────────────────────────────── */
+.pt .ac-caja { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 380px; margin-top: 8px; }
+.pt .ac-ancho { width: 100%; justify-content: center; }
+.pt .pt-boton-sec { background: var(--surface); color: var(--brand-ink); border: 1px solid var(--line-strong); }
+.pt .ac-o { display: flex; align-items: center; gap: 10px; color: var(--ink-3); font-size: 13px; }
+.pt .ac-o::before, .pt .ac-o::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.pt .ac-form { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.pt .ac-form label { font-weight: 500; font-size: 14px; }
+.pt .ac-form input { padding: 11px 12px; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); color: var(--ink); font-size: 16px; }
+.pt .ac-codigo { letter-spacing: 8px; font-family: var(--fuente-dato), monospace; text-align: center; font-size: 22px !important; }
+.pt .ac-arroba { display: flex; align-items: center; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); }
+.pt .ac-arroba span { padding-left: 12px; color: var(--ink-3); }
+.pt .ac-arroba input { border: 0 !important; flex: 1; }
+.pt .ac-volver { border: 0; background: none; color: var(--brand-ink); cursor: pointer; padding: 6px; font-size: 14px; text-decoration: underline; }
+.pt .ac-error { color: var(--critica); font-size: 14px; margin: 4px 0 0; }
+.pt .nota { color: var(--ink-3); font-size: 13px; margin: 0; }
+.pt .cw-marco { margin-bottom: 20px; }
+.pt .cw { display: flex; flex-direction: column; gap: 18px; }
+.pt .cw-bloque { display: flex; flex-direction: column; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.pt .cw-bloque:last-of-type { border-bottom: 0; }
+.pt .cw-bloque h3 { margin: 0; font: 600 15px/1.2 var(--fuente-display), sans-serif; }
+.pt .cw-bloque p { margin: 0; font-size: 14px; }
+.pt .cw-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pt .cw-lista li { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.pt .cw-lista small { color: var(--ink-3); flex: 1; }
+.pt .cw-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.pt .cw-codigo { font-family: var(--fuente-dato), monospace; letter-spacing: 2px; }

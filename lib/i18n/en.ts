@@ -634,8 +634,8 @@ export const en: Partial<Record<Clave, string>> = {
   'chat.descargar': 'Download',
   'po.ejemplo': 'Sample data',
   'po.ejemplo.p': 'The people, groups and dates on this screen are made up. With your real data the screen is the same: what changes is where the numbers come from, not how they’re drawn.',
-  'po.pie.sesion': 'You came in with a one-time link you requested in your chat: there is no password here. This session lasts 14 days in this browser; to close it everywhere, tell Zaelyn «cierra todas» (close all).',
-  'po.pie.lectura': 'Changes happen by talking, not here: the portal only shows.',
+  'po.pie.sesion': 'There is no password here: you come in with a passkey, an email code or a link from your chat. This session lasts 14 days in this browser; to close it everywhere, tell Zaelyn «cierra todas» (close all).',
+  'po.pie.lectura': 'Changes happen by talking to Zaelyn, here or in your chat: the portal shows what she does.',
   'po.pie.editor': 'What you build here is a draft: Zaelyn tracks it once you release it.',
   'po.pie.cuenta': 'Payments are processed by Stripe: Zaelyn never sees your card.',
   'po.pie.admin': 'Data read live from Zaelyn and Stripe. Only you can see it.',
@@ -683,7 +683,7 @@ export const en: Partial<Record<Clave, string>> = {
   'po.cu.legal': 'Your data and privacy',
   'po.cu.legal.d': 'How we handle your data and how to exercise your ARCO rights (access, rectification, cancellation, objection).',
   'po.cu.sesiones': 'Your sessions',
-  'po.cu.sesiones.d': 'Reviewed and closed from the chat: «mis sesiones» (my sessions), «cierra todas» (close all).',
+  'po.cu.sesiones.d': 'Reviewed and closed by telling Zaelyn: «mis sesiones» (my sessions), «cierra todas» (close all).',
 
   // ── space fact sheet ─────────────────────────────────────────────────
   'fi.para': 'Who it’s for',

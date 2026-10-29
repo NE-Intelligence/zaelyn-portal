@@ -104,3 +104,26 @@ buzón del motor caduca en un día.
 
 **Alternativa descartada.** Que el navegador hablara directo con el motor:
 obligaba a darle el token al JavaScript de la página y a abrir CORS.
+
+## P-0003 · Entrar sin Telegram, y Zaelyn instalable (fase 2)
+
+**Fecha:** 2026-10-29 · motor: Zaelyn DECISIONS #228
+
+**Decisión.**
+- `/entrar` sin pase es la puerta de la web: passkey, código al correo
+  (crea la cuenta si no existe, con su @ y la zona del navegador) o Telegram.
+  `app/api/acceso/*` convierte la sesión del motor en la cookie httpOnly: el
+  token nunca pasa por el JavaScript.
+- Cuenta → «Acceso web y avisos»: correo, passkeys, avisos en este
+  dispositivo («Recibir mis avisos aquí» la vuelve canal principal) y
+  vincular Telegram con código.
+- Quien entra con pase de Telegram sin correo pasa por `/app/acceso` (se le
+  pide «al entrar al portal», decisión del dueño); si el correo del motor
+  todavía no está conectado, sigue directo.
+- PWA: `app/manifest.ts`, íconos con la æ sobre negro (#222), `public/sw.js`
+  que SOLO muestra avisos (sin caché de páginas: el portal es estado vivo y
+  un teléfono puede ser compartido) y calla el aviso si el portal está a la
+  vista.
+
+**Alternativa descartada.** Un service worker con caché para uso sin red:
+mostraría planes viejos como si fueran de hoy y dejaría datos en un teléfono.

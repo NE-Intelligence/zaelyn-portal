@@ -38,7 +38,11 @@ export async function POST(req: NextRequest) {
 
   // 303 y no 307: después de un POST, la redirección se sigue con GET. Con
   // 307 el navegador reenviaría el POST a `/app` y eso es un 405.
-  const res = NextResponse.redirect(`${aqui}${ruta}`, { status: 303 })
+  // Sin acceso web todavía (Zaelyn #228, «solo al necesitarla»): entrar al
+  // portal es cuando se necesita, así que primero pasa a completarlo.
+  // `/app/acceso` deja seguir directo si el correo aún no está conectado.
+  const destinoFinal = r.cuentaWeb === false ? `/app/acceso?siguiente=${encodeURIComponent(ruta)}` : ruta
+  const res = NextResponse.redirect(`${aqui}${destinoFinal}`, { status: 303 })
   res.cookies.set({
     name: COOKIE,
     value: r.token,

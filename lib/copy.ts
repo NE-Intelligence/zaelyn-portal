@@ -643,8 +643,8 @@ const es = {
   'chat.descargar': 'Descargar',
   'po.ejemplo': 'Datos de ejemplo',
   'po.ejemplo.p': 'Las personas, los grupos y las fechas de esta pantalla están inventados. Con tus datos reales la pantalla es la misma: cambia de dónde salen los números, no cómo se pintan.',
-  'po.pie.sesion': 'Entraste con un enlace de un solo uso que pediste en tu chat: aquí no hay contraseña. Esta sesión dura 14 días en este navegador; para cerrarla en todos lados, dile a Zaelyn «cierra todas».',
-  'po.pie.lectura': 'Se cambia hablando, no aquí: el portal solo muestra.',
+  'po.pie.sesion': 'Aquí no hay contraseña: se entra con passkey, con un código al correo o con un enlace de tu chat. Esta sesión dura 14 días en este navegador; para cerrarla en todos lados, dile a Zaelyn «cierra todas».',
+  'po.pie.lectura': 'Se cambia hablándole a Zaelyn, aquí o en tu chat: el portal muestra lo que ella hace.',
   'po.pie.editor': 'Lo que armas aquí es un borrador: Zaelyn lo sigue cuando lo liberas.',
   'po.pie.cuenta': 'El pago lo procesa Stripe: Zaelyn nunca ve tu tarjeta.',
   'po.pie.admin': 'Datos leídos en vivo de Zaelyn y de Stripe. Solo los ves tú.',
@@ -692,7 +692,7 @@ const es = {
   'po.cu.legal': 'Tus datos y privacidad',
   'po.cu.legal.d': 'Cómo tratamos tus datos y cómo ejercer tus derechos ARCO.',
   'po.cu.sesiones': 'Tus sesiones',
-  'po.cu.sesiones.d': 'Se revisan y se cierran desde el chat: «mis sesiones», «cierra todas».',
+  'po.cu.sesiones.d': 'Se revisan y se cierran hablándole a Zaelyn: «mis sesiones», «cierra todas».',
 
   // ── ficha de cada espacio (#186) ─────────────────────────────────────
   'fi.para': 'Para quién',
