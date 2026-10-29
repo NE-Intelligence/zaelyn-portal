@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import { Barra, Pie } from '@/components/portal/Marco'
 
 export const dynamic = 'force-dynamic'
@@ -37,6 +38,9 @@ export default async function Entrar({
 }) {
   const crudo = (await searchParams).pase
   const pase = (Array.isArray(crudo) ? crudo[0] : crudo ?? '').trim().toUpperCase()
+  // El nonce de la política de contenido (proxy.ts): sin él, el envío
+  // automático del formulario no corre.
+  const nonce = (await headers()).get('x-nonce') ?? undefined
 
   return (
     <>
@@ -61,6 +65,7 @@ export default async function Entrar({
         JavaScript se queda aquí, que es justo lo que se busca.
       */}
       <script
+        nonce={nonce}
         dangerouslySetInnerHTML={{
           __html: `(function(){var f=document.getElementById('f');if(f)f.submit()})()`,
         }}

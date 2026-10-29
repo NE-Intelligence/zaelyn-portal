@@ -14,6 +14,7 @@
 import { cookies } from 'next/headers'
 import { cache } from 'react'
 import type { GrupoEnPortal, VistaDePlan } from './plan'
+import { faltasDePlan } from './contrato'
 import type { Abierto, Mesa, MisProyectos } from './editor/tipos'
 
 /** La cookie donde vive la sesión. Solo la lee este servidor. */
@@ -184,9 +185,19 @@ export async function logoDelPlan(g: string, p: string, cual: 'sponsor' | 'clien
   }
 }
 
-export const elPlan = (groupId: string, planId?: string) =>
-  leer<VistaDePlan>(`/portal/grupo/${encodeURIComponent(groupId)}`
+export async function elPlan(groupId: string, planId?: string) {
+  const r = await leer<VistaDePlan>(`/portal/grupo/${encodeURIComponent(groupId)}`
     + (planId ? `?plan=${encodeURIComponent(planId)}` : ''))
+  if (!r.ok) return r
+  // El contrato se comprueba antes de pintar (lib/contrato.ts). Si no cuadra,
+  // la pantalla dice «no disponible» y el registro dice qué campo.
+  const faltas = faltasDePlan(r.dato)
+  if (faltas.length) {
+    console.error(JSON.stringify({ evento: 'contrato.roto', ruta: '/portal/grupo', faltas: faltas.slice(0, 20) }))
+    return { ok: false as const, fallo: 'CAIDO' as const }
+  }
+  return r
+}
 
 /** El canje del pase. No lleva sesión: ES la que la crea. */
 export async function canjear(pase: string): Promise<
