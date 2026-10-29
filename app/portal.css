@@ -1674,3 +1674,65 @@ a.pt-plan:hover {
 .gn-entrega-estado.ok { color: var(--st-hecha-ink); }
 .gn-entrega-estado.mal { color: var(--critica); }
 .gn-entrega-estado.yendo { color: var(--ink-3); }
+
+/* ── El chat de Zaelyn (fase 1) ─────────────────────────────────────────
+ * Coral = la voz del agente (sistema de diseño). Flota sobre cualquier
+ * vista; en el teléfono ocupa la pantalla entera para que el teclado no
+ * tape lo que se escribe. */
+.pt .ch-lanzador {
+  position: fixed; right: 20px; bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 60; display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 18px; border: 0; border-radius: var(--r-pill);
+  background: var(--zaelyn); color: #fff; box-shadow: var(--sombra-2);
+  font: 500 15px/1 var(--fuente-texto), sans-serif; cursor: pointer;
+}
+.pt .ch-lanzador:hover { filter: brightness(1.06); }
+.pt .ch-lanzador:focus-visible, .pt .ch-panel :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.pt .ch-chispa { font-size: 14px; }
+.pt .ch-panel {
+  position: fixed; right: 20px; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 60;
+  width: min(400px, calc(100vw - 40px)); height: min(620px, calc(100dvh - 100px));
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  border-radius: var(--r-lg); box-shadow: var(--sombra-2);
+}
+.pt .ch-cab { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--zaelyn-soft); }
+.pt .ch-titulo { margin: 0; font: 600 16px/1.2 var(--fuente-display), sans-serif; color: var(--zaelyn-ink); }
+.pt .ch-sub { margin: 4px 0 0; font-size: 12px; color: var(--ink-3); }
+.pt .ch-cerrar { border: 0; background: none; font-size: 24px; line-height: 1; color: var(--ink-2); cursor: pointer; padding: 0 4px; min-width: 32px; min-height: 32px; }
+.pt .ch-lista { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: var(--surface-2); }
+.pt .ch-vacio { margin: auto 0; color: var(--ink-3); font-size: 14px; text-align: center; }
+.pt .ch-msg { max-width: 86%; padding: 9px 12px; border-radius: var(--r-md); font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; }
+.pt .ch-yo { align-self: flex-end; background: var(--brand); color: var(--on-brand); border-bottom-right-radius: var(--r-xs); white-space: pre-wrap; }
+.pt .ch-zaelyn { align-self: flex-start; background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--zaelyn); border-bottom-left-radius: var(--r-xs); }
+.pt .ch-aviso { align-self: center; background: var(--sunken); color: var(--ink-2); font-size: 13px; }
+.pt .ch-texto { margin: 0; white-space: pre-wrap; }
+.pt .ch-liga { color: var(--brand-ink); text-decoration: underline; word-break: break-all; }
+.pt .ch-archivo { display: inline-block; margin-top: 6px; color: var(--brand-ink); font-weight: 500; }
+.pt .ch-botones { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pt .ch-boton { border: 1px solid var(--zaelyn); background: var(--surface); color: var(--zaelyn-ink); border-radius: var(--r-pill); padding: 7px 12px; font-size: 13px; cursor: pointer; min-height: 36px; }
+.pt .ch-boton:hover { background: var(--zaelyn-soft); }
+.pt .ch-pensando { display: flex; gap: 4px; padding: 12px 14px; }
+.pt .ch-pensando span { width: 6px; height: 6px; border-radius: 50%; background: var(--zaelyn); animation: ch-respira 1.2s infinite ease-in-out; }
+.pt .ch-pensando span:nth-child(2) { animation-delay: .15s; }
+.pt .ch-pensando span:nth-child(3) { animation-delay: .3s; }
+@keyframes ch-respira { 0%, 80%, 100% { opacity: .25; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
+.pt .ch-redactar { display: flex; align-items: flex-end; gap: 8px; padding: 10px; border-top: 1px solid var(--line); background: var(--surface); }
+.pt .ch-entrada { flex: 1; resize: none; max-height: 120px; min-height: 40px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface); color: var(--ink); font: 15px/1.35 var(--fuente-texto), sans-serif; field-sizing: content; }
+.pt .ch-grabando { flex: 1; display: flex; align-items: center; gap: 8px; min-height: 40px; color: var(--zaelyn-ink); font-size: 14px; }
+.pt .ch-punto { width: 10px; height: 10px; border-radius: 50%; background: var(--critica); animation: ch-respira 1s infinite; }
+.pt .ch-micro, .pt .ch-enviar { flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer; font-size: 16px; }
+.pt .ch-micro { background: var(--zaelyn-soft); color: var(--zaelyn-ink); }
+.pt .ch-micro.activo { background: var(--critica); color: #fff; }
+.pt .ch-enviar { background: var(--brand); color: var(--on-brand); }
+.pt .ch-enviar:disabled { opacity: .4; cursor: default; }
+@media (max-width: 640px) {
+  .pt .ch-lanzador-txt { display: none; }
+  .pt .ch-lanzador { width: 56px; height: 56px; padding: 0; justify-content: center; font-size: 20px; }
+  .pt .ch-panel { inset: 0; width: 100%; height: 100dvh; border-radius: 0; border: 0; }
+  .pt .ch-msg { max-width: 92%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pt .ch-pensando span, .pt .ch-punto { animation: none; }
+}
+@media print { .pt .ch-lanzador, .pt .ch-panel { display: none; } }
