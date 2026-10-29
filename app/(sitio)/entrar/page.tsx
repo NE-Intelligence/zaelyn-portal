@@ -1,7 +1,9 @@
 import { headers } from 'next/headers'
-import { Barra, Pie } from '@/components/portal/Marco'
+import Campo from '@/components/sitio/Campo'
 import { Acceso } from '@/components/portal/Acceso'
-import { Entrar as BotonTelegram } from '@/components/portal/Entrar'
+import { bienvenida } from '@/lib/api'
+
+export const metadata = { title: 'Entrar · Zaelyn' }
 
 export const dynamic = 'force-dynamic'
 
@@ -45,38 +47,50 @@ export default async function Entrar({
   const nonce = (await headers()).get('x-nonce') ?? undefined
 
   // Sin pase: la puerta de la web (fase 2) — passkey, correo o Telegram.
+  // Vive en el marco del sitio (el de la landing), no en el del portal:
+  // quien llega aquí todavía no está dentro.
   if (!pase) {
+    const b = await bienvenida()
+    const telegram = b.telegram
+      ? (
+        <a className="st-btn st-btn-2 ac-ancho" href={b.telegram.enlace} rel="noopener">
+          <Telegrama /> Pedir mi enlace en Telegram
+        </a>
+      )
+      : null
     return (
-      <>
-        <Barra migas={[{ texto: 'Entrar' }]} />
-        <main className="pt-lienzo">
-          <div className="pt-vacio" style={{ maxWidth: 460 }}>
-            <b>Entra a Zaelyn</b>
-            <span>Con tu passkey, con un código a tu correo, o desde tu chat de Telegram.</span>
-            <Acceso telegram={<BotonTelegram compacto />} />
+      <main>
+        <Cabeza
+          etq="Tu cuenta"
+          a="Entra a"
+          b="Zaelyn."
+          bajada="Sin contraseña: con tu passkey, con un código a tu correo o desde tu chat de Telegram."
+        />
+        <section className="st-banda st-seccion st-seccion-pegada">
+          <div className="st-caja">
+            <div className="st-acceso">
+              <Acceso registro="sitio" telegram={telegram} />
+            </div>
+            <p className="st-acceso-nota">
+              ¿Primera vez? Con tu correo te creamos la cuenta en un minuto.
+            </p>
           </div>
-        </main>
-        <Pie />
-      </>
+        </section>
+      </main>
     )
   }
 
   return (
-    <>
-      <Barra migas={[{ texto: 'Entrar' }]} />
-      <main className="pt-lienzo">
-        <div className="pt-vacio" style={{ maxWidth: 560 }}>
-          <b>Abriendo tu portal…</b>
-          <span>
-            Un segundo. Si no pasa nada, toca el botón.
-          </span>
-          <form id="f" method="post" action="/entrar/canjear">
+    <main>
+      <Cabeza etq="Tu portal" a="Abriendo" b="tu portal…" bajada="Un segundo. Si no pasa nada, toca el botón." />
+      <section className="st-banda st-seccion st-seccion-pegada">
+        <div className="st-caja">
+          <form id="f" method="post" action="/entrar/canjear" className="st-acceso st-acceso-pase">
             <input type="hidden" name="pase" value={pase} />
-            <button className="pt-boton" type="submit">Entrar</button>
+            <button className="st-btn st-btn-1 ac-ancho" type="submit">Entrar</button>
           </form>
         </div>
-      </main>
-      <Pie />
+      </section>
       {/*
         Se envía solo. Va como script en el HTML y no como efecto de React
         para que ocurra antes de hidratar: lo que la persona ve es una
@@ -89,6 +103,26 @@ export default async function Entrar({
           __html: `(function(){var f=document.getElementById('f');if(f)f.submit()})()`,
         }}
       />
-    </>
+    </main>
   )
 }
+
+/** El encabezado de la landing: rótulo, titular con degradado y bajada. */
+function Cabeza({ etq, a, b, bajada }: { etq: string; a: string; b: string; bajada: string }) {
+  return (
+    <section className="st-banda st-hero st-hero-chico">
+      <Campo />
+      <div className="st-caja">
+        <p className="st-rotulo st-hero-etq">{etq}</p>
+        <h1><span>{a}</span> <em>{b}</em></h1>
+        <p className="st-bajada">{bajada}</p>
+      </div>
+    </section>
+  )
+}
+
+const Telegrama = () => (
+  <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true">
+    <path d="M21.9 4.3 18.6 20c-.25 1.1-.9 1.37-1.83.85l-5.06-3.73-2.44 2.35c-.27.27-.5.5-1.02.5l.36-5.15L17.9 6.3c.4-.36-.09-.56-.63-.2L6.7 12.68 1.7 11.1c-1.09-.34-1.1-1.09.23-1.61L20.5 2.68c.9-.33 1.69.21 1.4 1.62Z" />
+  </svg>
+)
