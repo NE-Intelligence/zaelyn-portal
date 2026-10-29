@@ -1,5 +1,5 @@
 # zaelyn-portal · CI (Estándar NE Producto): tipos y build en cada PR a main.
-# Pruebas con `node --test` (sin dependencias). El build no necesita secretos: sin ZAELYN_API el portal compila y
+# Pruebas con `node --test` (sin dependencias; Node 22 para leer TypeScript). El build no necesita secretos: sin ZAELYN_API el portal compila y
 # muestra el modo «sin conectar».
 name: CI
 on:
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
       - run: npm ci
       - name: Tipos
