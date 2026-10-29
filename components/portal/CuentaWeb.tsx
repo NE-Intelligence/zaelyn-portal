@@ -3,7 +3,7 @@
 /**
  * Acceso web, avisos y canales, en la cuenta.
  *
- * Ref: Zaelyn DECISIONS #228
+ * Ref: Zaelyn DECISIONS #229
  *
  *  - Correo: la llave de recuperación. Quien llegó por Telegram lo agrega
  *    aquí, desde su sesión (nunca se junta una cuenta con otra por correo).

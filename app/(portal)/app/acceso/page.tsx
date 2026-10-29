@@ -9,7 +9,7 @@ export const metadata = { title: 'Tu acceso web' }
 
 /**
  * `/app/acceso` — completar el acceso web de quien entró por Telegram
- * (Zaelyn DECISIONS #228: se pide «al entrar al portal»).
+ * (Zaelyn DECISIONS #229: se pide «al entrar al portal»).
  *
  * Mientras el correo no esté conectado del lado del motor, NO se detiene a
  * nadie: no tendría cómo cumplir el paso. Se sigue directo a donde iba.

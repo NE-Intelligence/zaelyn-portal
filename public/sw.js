@@ -1,5 +1,5 @@
 /*
- * El service worker de Zaelyn (fase 2 · Zaelyn DECISIONS #228).
+ * El service worker de Zaelyn (fase 2 · Zaelyn DECISIONS #229).
  *
  * Solo hace dos cosas, a propósito:
  *  1. Recibir los avisos y enseñarlos. Si el portal YA está a la vista, no

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next'
 
 /**
- * Zaelyn instalable en el teléfono (PWA, fase 2 · Zaelyn DECISIONS #219, #228).
+ * Zaelyn instalable en el teléfono (PWA, fase 2 · Zaelyn DECISIONS #219, #229).
  *
  * Abre directo en el portal, a pantalla completa, con el ícono de la marca
  * (la æ sobre negro, la regla del logotipo de #222). Con esto, en Android

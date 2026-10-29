@@ -1,6 +1,6 @@
 /**
  * La cuenta web desde el portal: correo, passkeys, avisos al navegador y
- * vincular Telegram (Zaelyn DECISIONS #228). Lista cerrada de acciones, para
+ * vincular Telegram (Zaelyn DECISIONS #229). Lista cerrada de acciones, para
  * que esta ruta no sea un proxy abierto a la API.
  */
 import { NextResponse, type NextRequest } from 'next/server'

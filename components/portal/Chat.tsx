@@ -106,6 +106,13 @@ export function Chat({ t }: { t: TextosChat }) {
   const pensandoHasta = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => { setMensajes(leerGuardados()) }, [])
+  // Desde los mensajes entre personas (#230): al mostrarle algo a Zaelyn, su
+  // respuesta llega aquí, así que el panel se abre solo.
+  useEffect(() => {
+    const abrir = () => setAbierto(true)
+    window.addEventListener('zaelyn:abrir-chat', abrir)
+    return () => window.removeEventListener('zaelyn:abrir-chat', abrir)
+  }, [])
   // El service worker de avisos (fase 2). Registrarlo no pide permiso de
   // nada: solo deja listo que el teléfono pueda instalar Zaelyn y, si la
   // persona lo activa en su cuenta, recibir avisos.
