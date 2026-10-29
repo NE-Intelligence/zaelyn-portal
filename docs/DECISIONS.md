@@ -54,3 +54,36 @@ PR; el CI es la puerta.
 **Consecuencia.** Lo que pase el CI llega a producción sin intervención. Por
 eso el CI tiene que ser honesto: una prueba que se salta es una puerta
 abierta.
+
+## P-0001 · Blindaje del portal antes de abrir el chat (fase 0)
+
+**Fecha:** 2026-10-29
+
+**Contexto.** El chat y la voz dentro del portal (fase 1) convierten al portal
+en un lugar desde el que se ejecutan acciones. La auditoría del 25 oct dejó
+abiertos, en el portal, una ejecución remota crítica en Next 16.2.1, un POST
+de canje sin revisar origen (fijación de sesión), sin CSP, una redirección
+abierta en `/idioma` y errores 500 del motor llegando tal cual al navegador.
+
+**Decisión.**
+- Next 16.4.3. `image-size` (dependencia de `pptxgenjs` que el código ni
+  carga) forzado a 2.0.4 con `overrides`.
+- `proxy.ts`: TODO método que no sea de lectura exige mismo origen
+  (`Origin`, o `Sec-Fetch-Site` si no hay `Origin`). Una regla en un lugar,
+  en vez de una revisión por ruta que alguna olvida.
+- CSP con nonce por petición (todas las páginas ya eran dinámicas):
+  scripts solo con nonce, `connect-src 'self'`, `frame-ancestors 'none'`.
+  Estilos con `'unsafe-inline'` porque los componentes usan `style={…}`.
+  HSTS, nosniff, `X-Frame-Options`, `Permissions-Policy` (micrófono solo
+  del propio sitio).
+- `/idioma` compara el ORIGEN ya resuelto, no el texto.
+- Un 5xx del motor llega al navegador como `{ error: 'CAIDO' }`.
+- `lib/contrato.ts` comprueba en ejecución el plan que llega del motor.
+- CI: `npm run typecheck`, `npm test` y `npm audit --audit-level=high`.
+
+**Alternativa descartada.** CSP sin nonce con `'unsafe-inline'` en scripts:
+deja pasar cualquier script inyectado, que es justo lo que la CSP debe
+detener.
+
+**Pendiente del motor.** El límite de peticiones a `/portal/editor/proponer`
+vive en el motor (el portal en Vercel no tiene memoria compartida).

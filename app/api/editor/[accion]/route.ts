@@ -41,5 +41,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ accion: st
   if (cuerpo.length > (accion === 'excel' ? 4_400_000 : 2_000_000)) return NextResponse.json({ error: 'DEMASIADO_GRANDE' }, { status: 413 })
   const r = await escribirEditor(accion as Accion, cuerpo)
   if (r.status === 204) return new NextResponse(null, { status: 204 })
+  // Un 500 del motor trae su detalle, y ese detalle es para el registro, no
+  // para el navegador (auditoría, 25 oct): nombres de tablas, rutas internas.
+  if (r.status >= 500) return NextResponse.json({ error: 'CAIDO' }, { status: 502 })
   return new NextResponse(r.cuerpo, { status: r.status, headers: { 'content-type': 'application/json' } })
 }

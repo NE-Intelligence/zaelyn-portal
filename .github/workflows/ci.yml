@@ -1,6 +1,5 @@
 # zaelyn-portal · CI (Estándar NE Producto): tipos y build en cada PR a main.
-# No hay scripts de lint ni de test en package.json, así que no hay paso para
-# ellos. El build no necesita secretos: sin ZAELYN_API el portal compila y
+# Pruebas con `node --test` (sin dependencias). El build no necesita secretos: sin ZAELYN_API el portal compila y
 # muestra el modo «sin conectar».
 name: CI
 on:
@@ -18,6 +17,10 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: Tipos
-        run: npx tsc --noEmit
+        run: npm run typecheck
+      - name: Pruebas
+        run: npm test
+      - name: Auditoría de dependencias
+        run: npm audit --omit=dev --audit-level=high
       - name: Build
         run: npm run build

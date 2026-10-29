@@ -1,6 +1,6 @@
 # BACKLOG — pendientes del portal (zaelyn.ai)
 
-**Actualizado:** 2026-10-28
+**Actualizado:** 2026-10-29
 
 Una línea por pendiente: etiqueta, qué, y entre paréntesis la fuente y la fecha.
 `[producto]` lo decide el dueño · `[técnico]` se construye · `[operación]` se
@@ -29,7 +29,6 @@ decisiones de producto del portal están en `NE-Intelligence/Zaelyn`,
 ## Técnico
 
 - [técnico] `TASTE_SKILL.md` dice «Tailwind para el 90%» y el portal decidió no usar Tailwind: actualizarlo o retirarlo. (22 oct 2026)
-- [técnico] `package.json` se llama `verif` y no declara `engines`; agregar scripts de `lint`, `typecheck` y pruebas. (auditoría, 25 oct 2026; CI llega con el PR #1)
 - [técnico] Vista «esperando resolución» para prórrogas y cesiones (hoy solo aparecen en la bitácora; resolver sigue siendo solo por chat). (22–27 oct 2026)
 - [técnico] Personal: memoria/búsqueda y «tu semana». (23 oct 2026)
 - [técnico] `README.md`: la tabla de rutas está corta (faltan `/precios`, `/nosotros`, `/legal`, `/empezar`, `/demo/familia`, `/demo/personal`, `/app/f/…`, `/app/personal`, `/app/plan`, `/app/horas`, `/admin`). (28 oct 2026)
