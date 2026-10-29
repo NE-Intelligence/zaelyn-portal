@@ -660,3 +660,44 @@ export type CuentaWeb = {
   push: boolean
 }
 export const cuentaWeb = () => leer<CuentaWeb>('/portal/cuenta/web')
+
+// ── Mensajes entre personas (fase 2.5, Zaelyn DECISIONS #229) ──────────
+
+export type ConversacionEnPortal = {
+  id: string
+  tipo: 'grupo' | 'directa'
+  groupId: string | null
+  titulo: string
+  con: string | null
+  ultimo: { texto: string; autor: string | null; en: string } | null
+  sinLeer: number
+}
+export const misConversaciones = () => leer<{ conversaciones: ConversacionEnPortal[] }>('/portal/mensajes')
+
+/**
+ * Reenvía al motor una petición de mensajería. `ruta` ya viene validada por
+ * la ruta de Next (lista cerrada de formas); el cuerpo pasa tal cual, sea JSON
+ * o un archivo.
+ */
+export async function reenviarMensajes(
+  ruta: string, init: { metodo: 'GET' | 'POST'; cuerpo?: ArrayBuffer | string; tipo?: string; cabeceras?: Record<string, string> },
+): Promise<Response> {
+  if (!hayApi()) return Response.json({ error: 'SIN_API' }, { status: 503 })
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return Response.json({ error: 'SIN_SESION' }, { status: 401 })
+  try {
+    const r = await fetch(`${base()}${ruta}`, {
+      method: init.metodo,
+      headers: { authorization: `Bearer ${token}`, ...(init.tipo ? { 'content-type': init.tipo } : {}), ...(init.cabeceras ?? {}) },
+      ...(init.cuerpo !== undefined ? { body: init.cuerpo } : {}),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(28_000),
+    })
+    if (r.status >= 500) return Response.json({ error: 'CAIDO' }, { status: 502 })
+    const cab = new Headers({ 'cache-control': 'private, no-store' })
+    for (const k of ['content-type', 'content-disposition']) { const v = r.headers.get(k); if (v) cab.set(k, v) }
+    return new Response(r.status === 204 ? null : await r.arrayBuffer(), { status: r.status, headers: cab })
+  } catch {
+    return Response.json({ error: 'CAIDO' }, { status: 502 })
+  }
+}

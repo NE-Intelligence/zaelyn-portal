@@ -127,3 +127,18 @@ obligaba a darle el token al JavaScript de la página y a abrir CORS.
 
 **Alternativa descartada.** Un service worker con caché para uso sin red:
 mostraría planes viejos como si fueran de hoy y dejaría datos en un teléfono.
+
+## P-0004 · Mensajes entre personas en el portal (fase 2.5)
+
+**Fecha:** 2026-10-29 · motor: Zaelyn DECISIONS #229
+
+**Decisión.** Pestaña «Mensajes»: la conversación de cada grupo y las
+directas (se abre una con el @ de alguien con quien se comparte grupo).
+Texto, foto, archivo y audio (hasta 4 MB desde el portal, por el tope de
+Vercel). El botón ✦ pone «@zaelyn» en el mensaje; al mandarlo, el chat de
+Zaelyn se abre solo porque ahí llega su respuesta (una propuesta con botones,
+casi siempre). «⋯» en cada mensaje: «Mostrar a Zaelyn» y «Borrar» en los
+propios, «Denunciar» en los ajenos; «Bloquear» en las directas. La marca
+«✦ Zaelyn» se ve en todo mensaje que se le mostró. La conversación abierta
+espera mensajes nuevos con espera larga; la lista se refresca cada 20 s.
+`app/api/mensajes/*` es lista cerrada de formas, no un proxy abierto.

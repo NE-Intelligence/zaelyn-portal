@@ -613,6 +613,7 @@ export const en: Partial<Record<Clave, string>> = {
   'po.modo.editor': 'Editor · draft',
   'po.modo.cuenta': 'Your account',
   'po.modo.admin': 'Administrator',
+  'po.mensajes': 'Messages',
   'po.modo.horas': 'Time tracking',
   // ── chat de Zaelyn en el portal (fase 1) ─────────────────────
   'chat.abrir': 'Talk to Zaelyn',

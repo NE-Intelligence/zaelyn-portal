@@ -612,6 +612,7 @@ export const pt: Partial<Record<Clave, string>> = {
   'po.modo.editor': 'Editor · rascunho',
   'po.modo.cuenta': 'Sua conta',
   'po.modo.admin': 'Administrador',
+  'po.mensajes': 'Mensagens',
   'po.modo.horas': 'Registro de horas',
   // ── chat de Zaelyn en el portal (fase 1) ─────────────────────
   'chat.abrir': 'Falar com a Zaelyn',
