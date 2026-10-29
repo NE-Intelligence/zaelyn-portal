@@ -87,3 +87,20 @@ detener.
 
 **Pendiente del motor.** El límite de peticiones a `/portal/editor/proponer`
 vive en el motor (el portal en Vercel no tiene memoria compartida).
+
+## P-0002 · El chat de Zaelyn dentro del portal (fase 1)
+
+**Fecha:** 2026-10-29 · motor: Zaelyn DECISIONS #227
+
+**Decisión.** Botón «Hablar con Zaelyn» en toda pantalla con sesión (nunca en
+el ejemplo); en el teléfono ocupa la pantalla entera. Texto, botones y voz
+(grabación con un toque, hasta 2 minutos). El navegador habla con
+`app/api/chat/*` y este servidor reenvía al motor con la cookie como Bearer:
+el token sigue sin llegar al JavaScript. Al llegar una respuesta, la página se
+vuelve a pedir al servidor (`router.refresh()`): lo que se pidió por voz o por
+texto se ve en el tablero con las cuentas del motor, y el portal sigue sin
+calcular ni mutar nada. La conversación visible vive en `sessionStorage`; el
+buzón del motor caduca en un día.
+
+**Alternativa descartada.** Que el navegador hablara directo con el motor:
+obligaba a darle el token al JavaScript de la página y a abrir CORS.

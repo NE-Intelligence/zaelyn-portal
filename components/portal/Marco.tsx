@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { LogoBarra } from '@/components/Logo'
 import { Preferencias } from '@/components/Preferencias'
+import { Chat } from '@/components/portal/Chat'
 import { cookies } from 'next/headers'
 import { COOKIE, soyAdmin } from '@/lib/api'
 import { textos, type Clave } from '@/lib/copy'
@@ -110,6 +111,17 @@ export async function Barra({
             ))}
           </div>
         </nav>
+      )}
+      {/* El chat de Zaelyn (fase 1): en toda pantalla con sesión, nunca en el ejemplo. */}
+      {sesion && !ejemplo && (
+        <Chat t={{
+          abrir: t('chat.abrir'), titulo: t('chat.titulo'), sub: t('chat.sub'), cerrar: t('chat.cerrar'),
+          placeholder: t('chat.placeholder'), enviar: t('chat.enviar'), hablar: t('chat.hablar'),
+          detener: t('chat.detener'), escuchando: t('chat.escuchando'), pensando: t('chat.pensando'),
+          vacio: t('chat.vacio'), sinMicro: t('chat.sinMicro'), caido: t('chat.caido'),
+          demasiados: t('chat.demasiados'), sesion: t('chat.sesion'), verImagen: t('chat.verImagen'),
+          descargar: t('chat.descargar'),
+        }} />
       )}
     </>
   )

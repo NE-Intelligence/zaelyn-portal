@@ -77,3 +77,7 @@ Sin `ZAELYN_API` el portal lo dice y ofrece `/demo`. Las fuentes están
 vendorizadas en `lib/fuentes/` —MuseoModerno, Prompt y JetBrains Mono, las tres
 OFL— porque `next/font/google` las baja en tiempo de compilación y un sitio que
 solo se puede compilar con acceso a Google Fonts no se compila.
+
+## Chat de Zaelyn (fase 1)
+
+`components/portal/Chat.tsx` + `app/api/chat/{mensaje,voz,recibir}`. Ver `docs/DECISIONS.md` P-0002.

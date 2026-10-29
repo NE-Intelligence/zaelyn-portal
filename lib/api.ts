@@ -536,3 +536,38 @@ export async function elPresupuesto(groupId: string): Promise<
     return { ok: false, fallo: 'CAIDO' }
   }
 }
+
+// ── El chat del portal (fase 1, Zaelyn DECISIONS #227) ─────────────────
+//
+// El navegador habla con `app/api/chat/*` y ESTE servidor reenvía con la
+// cookie convertida en Bearer: el token nunca llega al JavaScript de la
+// página, igual que en el resto del portal.
+
+/** Reenvía una petición del chat al motor. Devuelve código y cuerpo tal cual (salvo 5xx). */
+export async function reenviarChat(
+  ruta: '/portal/chat/mensaje' | '/portal/chat/voz' | '/portal/chat/recibir',
+  init: { metodo: 'GET' | 'POST'; cuerpo?: BodyInit; tipo?: string; cabeceras?: Record<string, string>; consulta?: string },
+): Promise<{ status: number; cuerpo: string }> {
+  if (!hayApi()) return { status: 503, cuerpo: JSON.stringify({ error: 'SIN_API' }) }
+  const token = (await cookies()).get(COOKIE)?.value
+  if (!token) return { status: 401, cuerpo: JSON.stringify({ error: 'SIN_SESION' }) }
+  try {
+    const r = await fetch(`${base()}${ruta}${init.consulta ? `?${init.consulta}` : ''}`, {
+      method: init.metodo,
+      headers: {
+        authorization: `Bearer ${token}`,
+        ...(init.tipo ? { 'content-type': init.tipo } : {}),
+        ...(init.cabeceras ?? {}),
+      },
+      ...(init.cuerpo !== undefined ? { body: init.cuerpo } : {}),
+      cache: 'no-store',
+      signal: AbortSignal.timeout(28_000),
+    })
+    // Un 5xx trae detalle del motor, que es para el registro y no para la
+    // pantalla (fase 0).
+    if (r.status >= 500) return { status: 502, cuerpo: JSON.stringify({ error: 'CAIDO' }) }
+    return { status: r.status, cuerpo: r.status === 204 ? '' : await r.text() }
+  } catch {
+    return { status: 502, cuerpo: JSON.stringify({ error: 'CAIDO' }) }
+  }
+}
