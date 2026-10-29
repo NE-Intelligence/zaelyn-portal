@@ -86,11 +86,20 @@ jobs:
           fi
 
           # Migraciones destructivas: solo líneas AGREGADAS en archivos de
-          # migración, sin comentarios SQL.
+          # migración, sin comentarios SQL, y FUERA del cuerpo de una función
+          # (entre `$$` o `$etiqueta$`). Un DELETE dentro de CREATE FUNCTION no
+          # borra nada al aplicar la migración: corre cuando alguien llama a la
+          # función (una purga programada, por ejemplo). Autorizado por JJR
+          # el 29 oct 2026. Un DELETE suelto sigue frenando.
           gh pr diff "$N" -R "$REPO" > cambio.diff
           awk '
-            /^diff --git/ { mig = ($0 ~ /migrations\/.*\.sql/) }
-            mig && /^\+[^+]/ { sub(/--.*/, ""); print }
+            /^diff --git/ { mig = ($0 ~ /migrations\/.*\.sql/); cuerpo = 0; next }
+            mig && /^[+ ]/ && !/^\+\+\+/ {
+              linea = substr($0, 2); sub(/--.*/, "", linea)
+              n = gsub(/\$[A-Za-z_]*\$/, "&", linea)
+              if (!cuerpo && n == 0 && /^\+/) print linea
+              if (n % 2 == 1) cuerpo = !cuerpo
+            }
           ' cambio.diff \
             | grep -inE '\b(drop[[:space:]]+(table|schema|type)|truncate|delete[[:space:]]+from|drop[[:space:]]+column)\b' \
             > destructivo.txt || true
