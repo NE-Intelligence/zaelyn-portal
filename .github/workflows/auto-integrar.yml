@@ -1,0 +1,120 @@
+name: Auto-integrar
+
+# ── Qué hace ─────────────────────────────────────────────────────────────
+#
+# Cuando el CI de un pull request a `main` termina en VERDE, este flujo lo
+# integra solo (squash) y borra la rama. Nadie tiene que apretar «Merge».
+#
+# Estándar NE Producto (docs/DECISIONS.md, NE-0002): las pruebas son la
+# autorización. Un PR que pasa lint, tipos, pruebas y el escaneo de secretos
+# entra; uno que no, se queda con su motivo a la vista.
+#
+# ── Cuándo NO integra ────────────────────────────────────────────────────
+#
+#   - el PR es borrador, o lleva la etiqueta `requiere-jjr`;
+#   - hubo commits nuevos después de la corrida que pasó (se espera a la
+#     siguiente corrida, que vuelve a disparar este flujo);
+#   - el PR trae una migración que BORRA DATOS (DROP TABLE / SCHEMA / TYPE,
+#     DROP COLUMN, TRUNCATE, DELETE FROM). Ésa la decide una persona: se le
+#     pone `requiere-jjr` y un comentario con las líneas que la frenaron.
+#     Recrear funciones, vistas o políticas no borra datos y sí pasa.
+#
+# ── Despliegue ───────────────────────────────────────────────────────────
+#
+# Un merge hecho con GITHUB_TOKEN NO dispara otros flujos por `push` (regla
+# de GitHub para evitar bucles). Por eso, si el repo despliega desde su CI
+# (Fly), aquí se dispara ese CI sobre `main` con workflow_dispatch, que sí
+# está permitido. Los repos de Vercel no lo necesitan: Vercel escucha el
+# push por su propia app.
+#
+# Costo: minutos de GitHub Actions incluidos en el plan. Sin llaves nuevas.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: auto-integrar-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  integrar:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      SHA: ${{ github.event.workflow_run.head_sha }}
+      RAMA: ${{ github.event.workflow_run.head_branch }}
+    steps:
+      - name: Buscar el pull request
+        id: pr
+        run: |
+          N=$(gh api "repos/$REPO/commits/$SHA/pulls" \
+                --jq "[.[] | select(.state==\"open\" and .base.ref==\"main\" and .head.ref==\"$RAMA\")][0].number")
+          if [ -z "$N" ] || [ "$N" = "null" ]; then
+            echo "No hay PR abierto a main para $RAMA@$SHA; nada que hacer."
+            echo "n=" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "n=$N" >> "$GITHUB_OUTPUT"
+          gh pr view "$N" -R "$REPO" --json isDraft,labels,headRefOid,title \
+            > pr.json
+          cat pr.json
+
+      - name: Revisar que se pueda integrar sola
+        id: puerta
+        if: steps.pr.outputs.n != ''
+        run: |
+          N=${{ steps.pr.outputs.n }}
+          if [ "$(jq -r .isDraft pr.json)" = "true" ]; then
+            echo "Borrador: no se integra."; echo "ok=no" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if jq -e '.labels[] | select(.name=="requiere-jjr")' pr.json >/dev/null; then
+            echo "Etiqueta requiere-jjr: lo integra una persona."; echo "ok=no" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "$(jq -r .headRefOid pr.json)" != "$SHA" ]; then
+            echo "Hay commits más nuevos que la corrida verde; se espera a la siguiente."
+            echo "ok=no" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
+          # Migraciones destructivas: solo líneas AGREGADAS en archivos de
+          # migración, sin comentarios SQL.
+          gh pr diff "$N" -R "$REPO" > cambio.diff
+          awk '
+            /^diff --git/ { mig = ($0 ~ /migrations\/.*\.sql/) }
+            mig && /^\+[^+]/ { sub(/--.*/, ""); print }
+          ' cambio.diff \
+            | grep -inE '\b(drop[[:space:]]+(table|schema|type)|truncate|delete[[:space:]]+from|drop[[:space:]]+column)\b' \
+            > destructivo.txt || true
+          if [ -s destructivo.txt ]; then
+            gh label create requiere-jjr -R "$REPO" --color B60205 \
+              --description "Lo integra una persona" 2>/dev/null || true
+            gh pr edit "$N" -R "$REPO" --add-label requiere-jjr
+            {
+              echo "**Auto-integrar se detuvo:** este PR trae una migración destructiva y la decide una persona (Decálogo: preguntar antes de mutar)."
+              echo
+              echo '```sql'
+              head -20 destructivo.txt
+              echo '```'
+              echo
+              echo "Para integrarlo: revisar y hacer merge a mano, o quitar la etiqueta si la línea es segura (p. ej. \`DROP FUNCTION IF EXISTS\` antes de recrearla)."
+            } > comentario.md
+            gh pr comment "$N" -R "$REPO" -F comentario.md
+            echo "ok=no" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          echo "ok=si" >> "$GITHUB_OUTPUT"
+
+      - name: Integrar
+        if: steps.puerta.outputs.ok == 'si'
+        run: |
+          gh pr merge "${{ steps.pr.outputs.n }}" -R "$REPO" --squash --delete-branch \
+            --match-head-commit "$SHA"
+
