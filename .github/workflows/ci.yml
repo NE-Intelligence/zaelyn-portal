@@ -1,0 +1,23 @@
+# zaelyn-portal · CI (Estándar NE Producto): tipos y build en cada PR a main.
+# No hay scripts de lint ni de test en package.json, así que no hay paso para
+# ellos. El build no necesita secretos: sin ZAELYN_API el portal compila y
+# muestra el modo «sin conectar».
+name: CI
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Tipos
+        run: npx tsc --noEmit
+      - name: Build
+        run: npm run build
