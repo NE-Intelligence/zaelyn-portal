@@ -46,3 +46,21 @@ sin Tailwind ni shadcn (CSS propio con tokens, decisión de marca descrita en `R
 - Las migraciones de Supabase solo existen como archivos versionados en el repo que es dueño de la base (`NE-Intelligence/Zaelyn`, `supabase/migrations/`); nunca a mano desde la consola.
 - Nunca se commitean secretos; inventario en `docs/SECRETOS.md`.
 - Cada PR dice **qué** cambia y **por qué** (`.github/PULL_REQUEST_TEMPLATE.md`).
+
+## Varias conversaciones a la vez (NE-0004)
+
+JJR trabaja en varios frentes del mismo repo al mismo tiempo, cada uno en su
+conversación. Para que no se pisen:
+
+- **Decisiones nuevas:** un archivo por decisión en `docs/decisiones/AAAA-MM-DD-tema.md`
+  (plantilla en `docs/decisiones/README.md`). `docs/DECISIONS.md` es archivo
+  histórico y ya no recibe entradas; el CI lo rechaza. Una decisión nueva se
+  cita por el nombre de su archivo, no por un número.
+- **Estado del trabajo:** cada frente escribe SOLO `docs/estado/<frente>.md`
+  (p. ej. `docs/estado/mensajeria.md`). Al arrancar se leen todos los `docs/estado/*.md`.
+- **Migraciones:** la versión es la hora UTC real al crear el archivo
+  (`date -u +%Y%m%d%H%M%S`), nunca una hora redonda ni un consecutivo inventado;
+  el CI rechaza dos con la misma versión.
+- **Antes de abrir el PR** y cuando auto-integrar comente un conflicto:
+  `git merge origin/main` en la rama, resolver conservando los dos lados, subir.
+- Una rama que ya se integró no se vuelve a subir: lo suyo ya está en `main`.

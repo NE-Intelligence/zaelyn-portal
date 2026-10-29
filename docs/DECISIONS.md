@@ -1,5 +1,9 @@
 # zaelyn-portal — decisiones
 
+<!-- archivo-cerrado: NE-0004 -->
+> **Archivo histórico (NE-0004).** Las decisiones nuevas van una por archivo en `docs/decisiones/`. Aquí no se agregan entradas; el CI lo rechaza.
+
+
 Registro de solo agregar: nunca se reescribe una entrada; si una decisión
 cambia, se agrega otra que la supersede.
 
