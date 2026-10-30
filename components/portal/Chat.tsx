@@ -1,7 +1,8 @@
 'use client'
 
 /**
- * Hablarle a Zaelyn sin salir del portal: escrito o en voz.
+ * Hablarle a Zaelyn sin salir del portal: escrito o en voz, en un panel
+ * lateral que se abre desde la barra (decisiones/2026-10-30-panel-y-ventanas).
  *
  * Ref: Zaelyn DECISIONS #227 (canal web), #63 y #98 (la voz es otra forma de
  * teclear), regla del portal (el token nunca llega al navegador).
@@ -56,6 +57,7 @@ type Mensaje =
   | { id: string; de: 'aviso'; text: string }
 
 const CLAVE = 'zaelyn-chat-v1'
+const PANEL = 'zaelyn-panel'
 const MAX_GUARDADOS = 60
 const MAX_VOZ_S = 120
 
@@ -105,14 +107,31 @@ export function Chat({ t }: { t: TextosChat }) {
   const refrescar = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pensandoHasta = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  useEffect(() => { setMensajes(leerGuardados()) }, [])
-  // Desde los mensajes entre personas (#230): al mostrarle algo a Zaelyn, su
-  // respuesta llega aquí, así que el panel se abre solo.
+  useEffect(() => {
+    setMensajes(leerGuardados())
+    // El panel lateral se queda como lo dejaste al cambiar de página.
+    try { if (localStorage.getItem(PANEL) === '1') setAbierto(true) } catch { /* sin almacenamiento */ }
+  }, [])
+  // El botón «✦ Zaelyn» de la barra alterna el panel; los mensajes entre
+  // personas (#230) lo abren solo cuando le muestras algo a Zaelyn.
   useEffect(() => {
     const abrir = () => setAbierto(true)
+    const alternar = () => setAbierto(a => !a)
     window.addEventListener('zaelyn:abrir-chat', abrir)
-    return () => window.removeEventListener('zaelyn:abrir-chat', abrir)
+    window.addEventListener('zaelyn:alternar', alternar)
+    return () => {
+      window.removeEventListener('zaelyn:abrir-chat', abrir)
+      window.removeEventListener('zaelyn:alternar', alternar)
+    }
   }, [])
+  // El estado se anuncia a la página: el contenido se recorre para hacerle
+  // lugar (CSS con `html[data-zpanel]`) y el botón de la barra se marca.
+  useEffect(() => {
+    try { localStorage.setItem(PANEL, abierto ? '1' : '0') } catch { /* sin almacenamiento */ }
+    if (abierto) document.documentElement.dataset.zpanel = 'abierto'
+    else delete document.documentElement.dataset.zpanel
+    window.dispatchEvent(new CustomEvent('zaelyn:panel', { detail: abierto }))
+  }, [abierto])
   // El service worker de avisos (fase 2). Registrarlo no pide permiso de
   // nada: solo deja listo que el teléfono pueda instalar Zaelyn y, si la
   // persona lo activa en su cuenta, recibir avisos.
@@ -259,17 +278,10 @@ export function Chat({ t }: { t: TextosChat }) {
 
   const ultimoConBotones = [...mensajes].reverse().find(m => m.de === 'zaelyn')
 
-  if (!abierto) {
-    return (
-      <button type="button" className="ch-lanzador" onClick={() => setAbierto(true)} aria-label={t.abrir}>
-        <span className="ch-chispa" aria-hidden="true">✦</span>
-        <span className="ch-lanzador-txt">{t.abrir}</span>
-      </button>
-    )
-  }
+  if (!abierto) return null
 
   return (
-    <section className="ch-panel" role="dialog" aria-modal="false" aria-label={t.titulo}>
+    <aside className="ch-panel" id="zaelyn-panel" aria-label={t.titulo}>
       <header className="ch-cab">
         <div>
           <p className="ch-titulo"><span className="ch-chispa" aria-hidden="true">✦</span> {t.titulo}</p>
@@ -336,7 +348,7 @@ export function Chat({ t }: { t: TextosChat }) {
           <button type="submit" className="ch-enviar" disabled={!texto.trim()} aria-label={t.enviar}>➤</button>
         )}
       </form>
-    </section>
+    </aside>
   )
 }
 

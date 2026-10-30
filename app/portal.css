@@ -1298,6 +1298,7 @@ a.pt-plan:hover {
   --area-cuenta: var(--ink-3);
   --area-admin: var(--zaelyn);
   --area-inicio: var(--ink-2);
+  --area-mensajes: var(--brand);
 }
 .pt [data-area='personal'] { --area: var(--area-personal); }
 .pt [data-area='familia'] { --area: var(--area-familia); }
@@ -1305,6 +1306,7 @@ a.pt-plan:hover {
 .pt [data-area='cuenta'] { --area: var(--area-cuenta); }
 .pt [data-area='admin'] { --area: var(--area-admin); }
 .pt [data-area='inicio'] { --area: var(--area-inicio); }
+.pt [data-area='mensajes'] { --area: var(--area-mensajes); }
 .pt-barra[data-area] .pt-marca .pt-etq { color: var(--area); }
 .pt-modo { display: inline-flex; align-items: center; gap: 6px; }
 .pt-modo-punto { width: 18px; height: 18px; border-radius: 50%; background: var(--zaelyn); display: grid; place-items: center; }
@@ -1675,27 +1677,38 @@ a.pt-plan:hover {
 .gn-entrega-estado.mal { color: var(--critica); }
 .gn-entrega-estado.yendo { color: var(--ink-3); }
 
-/* ── El chat de Zaelyn (fase 1) ─────────────────────────────────────────
- * Coral = la voz del agente (sistema de diseño). Flota sobre cualquier
- * vista; en el teléfono ocupa la pantalla entera para que el teclado no
- * tape lo que se escribe. */
-.pt .ch-lanzador {
-  position: fixed; right: 20px; bottom: max(20px, env(safe-area-inset-bottom));
-  z-index: 60; display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 18px; border: 0; border-radius: var(--r-pill);
-  background: var(--zaelyn); color: #fff; box-shadow: var(--sombra-2);
-  font: 500 15px/1 var(--fuente-texto), sans-serif; cursor: pointer;
-}
-.pt .ch-lanzador:hover { filter: brightness(1.06); }
-.pt .ch-lanzador:focus-visible, .pt .ch-panel :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-.pt .ch-chispa { font-size: 14px; }
+/* ── El chat de Zaelyn: panel lateral (decisiones/2026-10-30-panel-y-ventanas)
+ * Coral = la voz del agente (sistema de diseño). Se abre desde «✦ Zaelyn» en
+ * la barra. En computadora empuja el contenido (no lo tapa) para que se vea
+ * el tablero cambiar mientras le hablas; en el teléfono ocupa la pantalla. */
+.pt { --panel-z: 400px; }
 .pt .ch-panel {
-  position: fixed; right: 20px; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 60;
-  width: min(400px, calc(100vw - 40px)); height: min(620px, calc(100dvh - 100px));
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 45;
+  width: var(--panel-z); max-width: 100vw;
   display: flex; flex-direction: column; overflow: hidden;
-  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
-  border-radius: var(--r-lg); box-shadow: var(--sombra-2);
+  background: var(--surface); color: var(--ink);
+  border-left: 1px solid var(--line); box-shadow: var(--sombra-2);
+  animation: ch-entra .22s cubic-bezier(.2,.8,.2,1);
 }
+@keyframes ch-entra { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.pt .ch-panel :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.pt .ch-chispa { font-size: 14px; }
+@media (min-width: 1100px) {
+  :root[data-zpanel='abierto'] body > .pt { padding-right: var(--panel-z); }
+}
+/* el botón de la barra */
+.pt .pt-zaelyn {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 34px;
+  padding: 6px 14px; border-radius: var(--r-pill); cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--zaelyn) 45%, transparent);
+  background: var(--zaelyn-soft); color: var(--zaelyn-ink);
+  font: 600 13.5px/1 var(--fuente-texto), sans-serif;
+  transition: background .15s, color .15s, box-shadow .15s;
+}
+.pt .pt-zaelyn:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--zaelyn) 18%, transparent); }
+.pt .pt-zaelyn[aria-pressed='true'] { background: var(--zaelyn); color: #fff; border-color: var(--zaelyn); }
+.pt .pt-zaelyn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.pt .pt-zaelyn-chispa { font-size: 13px; }
 .pt .ch-cab { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--zaelyn-soft); }
 .pt .ch-titulo { margin: 0; font: 600 16px/1.2 var(--fuente-display), sans-serif; color: var(--zaelyn-ink); }
 .pt .ch-sub { margin: 4px 0 0; font-size: 12px; color: var(--ink-3); }
@@ -1727,15 +1740,15 @@ a.pt-plan:hover {
 .pt .ch-enviar { background: var(--brand); color: var(--on-brand); }
 .pt .ch-enviar:disabled { opacity: .4; cursor: default; }
 @media (max-width: 640px) {
-  .pt .ch-lanzador-txt { display: none; }
-  .pt .ch-lanzador { width: 56px; height: 56px; padding: 0; justify-content: center; font-size: 20px; }
-  .pt .ch-panel { inset: 0; width: 100%; height: 100dvh; border-radius: 0; border: 0; }
+  .pt .ch-panel { width: 100%; border-left: 0; }
   .pt .ch-msg { max-width: 92%; }
+  .pt .pt-zaelyn { padding: 6px 11px; }
+  .pt .pt-zaelyn-txt { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .pt .ch-pensando span, .pt .ch-punto { animation: none; }
+  .pt .ch-pensando span, .pt .ch-punto, .pt .ch-panel { animation: none; }
 }
-@media print { .pt .ch-lanzador, .pt .ch-panel { display: none; } }
+@media print { .pt .ch-panel, .pt .vt { display: none; } }
 
 /* ── Acceso web y cuenta (fase 2) ─────────────────────────────────────── */
 .pt .ac-caja { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 380px; margin-top: 8px; }
@@ -1765,41 +1778,108 @@ a.pt-plan:hover {
 .pt .cw-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .pt .cw-codigo { font-family: var(--fuente-dato), monospace; letter-spacing: 2px; }
 
-/* ── Mensajes entre personas (fase 2.5) ──────────────────────────────── */
+/* ── Mensajes entre personas (fase 2.5; decisiones/2026-10-30-panel-y-ventanas)
+ * La bandeja: lista con círculos de iniciales, último mensaje y no leídos;
+ * en el teléfono, como WhatsApp — la lista a pantalla completa y cada
+ * conversación encima. Zaelyn va fija hasta arriba como un chat más. */
 .pt .ms-lienzo { padding-top: 12px; }
-.pt .ms { display: grid; grid-template-columns: 320px 1fr; height: calc(100dvh - 210px); min-height: 420px; border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; background: var(--surface); }
-.pt .ms-lista { border-right: 1px solid var(--line); overflow-y: auto; display: flex; flex-direction: column; }
-.pt .ms-lista ul { list-style: none; margin: 0; padding: 0; }
-.pt .ms-nueva { display: flex; gap: 6px; padding: 10px; border-bottom: 1px solid var(--line); }
-.pt .ms-nueva input { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: var(--r-md); background: var(--surface); color: var(--ink); }
-.pt .ms-item { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; width: 100%; text-align: left; padding: 10px 12px; border: 0; border-bottom: 1px solid var(--line); background: none; color: var(--ink); cursor: pointer; }
-.pt .ms-item.activo, .pt .ms-item:hover { background: var(--surface-2); }
-.pt .ms-titulo { grid-column: 1 / 2; font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pt .ms-badge { grid-column: 2; grid-row: 1 / span 2; align-self: center; min-width: 20px; padding: 2px 6px; border-radius: var(--r-pill); background: var(--zaelyn); color: #fff; font-size: 12px; text-align: center; }
-.pt .ms-prev { grid-column: 1 / 2; font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pt .ms-conv { display: flex; flex-direction: column; min-width: 0; }
-.pt .ms-vacia { margin: auto; text-align: center; padding: 20px; }
-.pt .ms-cab { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
-.pt .ms-cab b { flex: 1; }
-.pt .ms-atras { display: none; border: 0; background: none; font-size: 20px; cursor: pointer; color: var(--ink); }
-.pt .ms-mensajes { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; background: var(--surface-2); }
-.pt .ms-msg { position: relative; align-self: flex-start; max-width: 78%; padding: 8px 12px; border-radius: var(--r-md); background: var(--surface); border: 1px solid var(--line); font-size: 14px; }
-.pt .ms-msg.mio { align-self: flex-end; background: var(--brand-soft); border-color: transparent; }
-.pt .ms-msg p { margin: 2px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.pt .ms { display: grid; grid-template-columns: 340px 1fr; height: calc(100dvh - 210px); min-height: 440px; border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; background: var(--surface); box-shadow: var(--sombra-1); }
+.pt .ms-lista { border-right: 1px solid var(--line); overflow-y: auto; display: flex; flex-direction: column; background: var(--surface); }
+.pt .ms-lista-cab { position: sticky; top: 0; z-index: 2; display: grid; gap: 10px; padding: 14px 14px 10px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.pt .ms-lista-cab > b { font: 600 18px/1.1 var(--fuente-display), sans-serif; }
+.pt .ms-nueva { display: flex; gap: 6px; }
+.pt .ms-nueva input { flex: 1; min-width: 0; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--r-pill); background: var(--surface-2); color: var(--ink); font-size: 14px; }
+.pt .ms-ul { list-style: none; margin: 0; padding: 4px 0; }
+.pt .ms-item { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 12px; row-gap: 1px; align-items: center; width: 100%; text-align: left; padding: 10px 14px; border: 0; background: none; color: var(--ink); cursor: pointer; }
+.pt .ms-item:hover { background: var(--surface-2); }
+.pt .ms-item.activo { background: var(--brand-soft); }
+.pt .ms-item .ms-avatar { grid-row: 1 / span 2; }
+.pt .ms-titulo { grid-column: 2; font-weight: 600; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt .ms-hora { grid-column: 3; grid-row: 1; font-size: 11.5px; color: var(--ink-3); white-space: nowrap; }
+.pt .ms-item.nuevo .ms-hora { color: var(--zaelyn-ink); font-weight: 600; }
+.pt .ms-prev { grid-column: 2; grid-row: 2; font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pt .ms-item.nuevo .ms-prev { color: var(--ink-2); }
+.pt .ms-item .ms-badge { grid-column: 3; grid-row: 2; justify-self: end; }
+.pt .ms-badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--r-pill); background: var(--zaelyn); color: #fff; font-size: 11.5px; font-weight: 600; display: inline-grid; place-items: center; line-height: 1; }
+.pt .ms-avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; font: 600 14px/1 var(--fuente-texto), sans-serif; letter-spacing: .02em; background: var(--brand-soft); color: var(--brand-ink); }
+.pt .ms-avatar[data-tipo='grupo'] { border-radius: 12px; background: var(--surface-2); color: var(--ink-2); box-shadow: inset 0 0 0 1px var(--line); }
+.pt .ms-avatar-z { background: var(--zaelyn); color: #fff; font-size: 17px; }
+.pt .ms-item-z { border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.pt .ms-item-z .ms-hora { color: var(--zaelyn-ink); font-weight: 600; letter-spacing: .06em; }
+.pt .ms-nota { padding: 10px 14px; }
+.pt .ms-aviso { margin: 0; padding: 6px 14px; font-size: 13px; color: var(--critica); }
+.pt .ms-conv { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--surface-2); }
+.pt .ms-conv-in { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.pt .ms-vacia { margin: auto; text-align: center; padding: 20px; display: grid; gap: 6px; justify-items: center; }
+.pt .ms-vacia p { margin: 0; }
+.pt .ms-vacia-ico { font-size: 34px; opacity: .6; }
+.pt .ms-cab { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.pt .ms-cab .ms-avatar { width: 34px; height: 34px; font-size: 12.5px; }
+.pt .ms-cab b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt .ms-cab-acc { border: 0; background: none; color: var(--ink-3); cursor: pointer; font-size: 13px; text-decoration: underline; }
+.pt .ms-atras { display: none; border: 0; background: none; font-size: 22px; cursor: pointer; color: var(--ink); min-width: 36px; min-height: 36px; }
+.pt .ms-mensajes { flex: 1; min-height: 0; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 6px; background: var(--surface-2); }
+.pt .ms-sin { margin: auto; max-width: 30ch; text-align: center; color: var(--ink-3); font-size: 13px; }
+.pt .ms-msg { position: relative; align-self: flex-start; max-width: 78%; padding: 7px 11px 5px; border-radius: 14px 14px 14px 4px; background: var(--surface); box-shadow: var(--sombra-1); font-size: 14px; }
+.pt .ms-msg.mio { align-self: flex-end; border-radius: 14px 14px 4px 14px; background: var(--brand-soft); box-shadow: none; }
+.pt .ms-msg p { margin: 1px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .pt .ms-autor { font-size: 12px; font-weight: 600; color: var(--brand-ink); }
-.pt .ms-pie { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 4px; font-size: 11px; color: var(--ink-3); }
+.pt .ms-pie { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 2px; font-size: 10.5px; color: var(--ink-3); }
 .pt .ms-z { color: var(--zaelyn-ink); font-weight: 600; }
-.pt .ms-mas { border: 0; background: none; cursor: pointer; color: var(--ink-3); font-size: 16px; min-width: 28px; min-height: 24px; }
+.pt .ms-mas { border: 0; background: none; cursor: pointer; color: var(--ink-3); font-size: 15px; min-width: 24px; min-height: 22px; padding: 0; }
 .pt .ms-menu { position: absolute; right: 6px; bottom: -6px; transform: translateY(100%); z-index: 5; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sombra-2); }
 .pt .ms-menu button { border: 0; background: none; padding: 8px 14px; text-align: left; cursor: pointer; color: var(--ink); font-size: 14px; white-space: nowrap; }
 .pt .ms-menu button:hover { background: var(--surface-2); }
-.pt .ms-foto { display: block; max-width: 260px; max-height: 260px; border-radius: var(--r-sm); margin-bottom: 4px; }
-.pt .ms audio { max-width: 260px; }
+.pt .ms-foto { display: block; max-width: 240px; max-height: 240px; border-radius: 10px; margin-bottom: 4px; }
+.pt .ms-conv-in audio { max-width: 240px; }
+.pt .ms-redactar { background: var(--surface); }
 @media (max-width: 760px) {
-  .pt .ms { grid-template-columns: 1fr; height: calc(100dvh - 180px); }
+  /* Como WhatsApp: la bandeja ocupa todo; la conversación se pone encima. */
+  .pt .ms-lienzo { padding: 0 !important; }
+  .pt .ms { grid-template-columns: 1fr; height: auto; min-height: calc(100dvh - 150px); border: 0; border-radius: 0; box-shadow: none; overflow: visible; }
+  .pt .ms-lista { border-right: 0; overflow: visible; }
   .pt .ms .ms-conv { display: none; }
-  .pt .ms.ms-abierta .ms-lista { display: none; }
-  .pt .ms.ms-abierta .ms-conv { display: flex; }
-  .pt .ms-atras { display: inline-block; }
+  /* la conversación abierta tapa todo, barra incluida, como en WhatsApp */
+  .pt .ms.ms-abierta .ms-conv { display: flex; position: fixed; inset: 0; z-index: 35; padding-bottom: env(safe-area-inset-bottom); }
+  .pt .ms.ms-abierta .ms-cab { padding-top: max(10px, env(safe-area-inset-top)); }
+  .pt .ms-atras { display: inline-grid; place-items: center; }
+  .pt .ms-msg { max-width: 86%; }
+  .pt:has(.ms) .pt-pie { display: none; }
 }
-.pt:has(.ms) .ch-lanzador { bottom: max(96px, env(safe-area-inset-bottom)); }
+
+/* ── Ventanitas de conversación, abajo (como Messenger) ─────────────────
+ * Solo computadora y tablet. Se acomodan a la izquierda del panel de Zaelyn. */
+.pt .vt { position: fixed; right: 16px; bottom: 0; z-index: 40; display: flex; align-items: flex-end; gap: 12px; pointer-events: none; }
+.pt .vt > * { pointer-events: auto; }
+:root[data-zpanel='abierto'] .pt .vt { right: calc(var(--panel-z) + 16px); }
+.pt .vt-barra { display: flex; flex-direction: row; align-items: flex-end; gap: 8px; padding-bottom: 14px; }
+.pt .vt-lanzador-caja { position: relative; }
+.pt .vt-lanzador { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 8px 16px; border-radius: var(--r-pill); border: 1px solid var(--line); background: var(--surface); color: var(--ink); box-shadow: var(--sombra-2); font: 600 14px/1 var(--fuente-texto), sans-serif; cursor: pointer; }
+.pt .vt-lanzador:hover { border-color: var(--line-strong); }
+.pt .vt-lanzador[aria-expanded='true'] { background: var(--brand-soft); color: var(--brand-ink); }
+.pt .vt-lista { position: absolute; right: 0; bottom: calc(100% + 10px); width: 340px; max-height: min(520px, calc(100dvh - 160px)); overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sombra-2); animation: vt-sube .16s ease-out; }
+.pt .vt-lista-cab { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.pt .vt-lista-cab b { font: 600 16px/1 var(--fuente-display), sans-serif; }
+.pt .vt-lista-cab a { font-size: 13px; color: var(--brand-ink); }
+.pt .vt-pestana { display: inline-flex; align-items: center; max-width: 210px; min-height: 42px; border-radius: var(--r-pill); background: var(--surface); border: 1px solid var(--line); box-shadow: var(--sombra-2); }
+.pt .vt-pestana.nuevo { border-color: var(--zaelyn); }
+.pt .vt-pestana-abrir { display: inline-flex; align-items: center; gap: 8px; min-width: 0; padding: 4px 4px 4px 4px; border: 0; background: none; color: var(--ink); cursor: pointer; font: 600 13.5px/1 var(--fuente-texto), sans-serif; }
+.pt .vt-pestana .ms-avatar { width: 32px; height: 32px; font-size: 11.5px; }
+.pt .vt-pestana-txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt .vt-pestana-x { border: 0; background: none; color: var(--ink-3); cursor: pointer; font-size: 18px; padding: 0 10px 0 4px; min-height: 36px; }
+.pt .vt-ventana { width: 330px; height: min(460px, calc(100dvh - 120px)); display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-bottom: 0; border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--sombra-2); overflow: hidden; animation: vt-sube .18s ease-out; }
+.pt .vt-cab { display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 10px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.pt .vt-cab .ms-avatar { width: 30px; height: 30px; font-size: 11px; }
+.pt .vt-titulo { flex: 1; min-width: 0; border: 0; background: none; text-align: left; color: var(--ink); cursor: pointer; font: 600 14px/1.2 var(--fuente-texto), sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 0; }
+.pt .vt-acc { display: inline-grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 50%; background: none; color: var(--ink-2); cursor: pointer; font-size: 17px; text-decoration: none; }
+.pt .vt-acc:hover { background: var(--surface-2); }
+.pt .vt-ventana .ms-mensajes { padding: 10px; }
+.pt .vt-ventana .ms-msg { max-width: 86%; font-size: 13.5px; }
+.pt .vt-ventana .ch-redactar { padding: 8px; gap: 6px; }
+.pt .vt-ventana .ch-micro, .pt .vt-ventana .ch-enviar { width: 34px; height: 34px; font-size: 14px; }
+.pt .vt-ventana .ch-entrada { min-height: 34px; padding: 7px 10px; font-size: 14px; }
+@keyframes vt-sube { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (max-width: 760px) { .pt .vt { display: none; } }
+.pt:has(.vt-barra) .pt-pie { padding-bottom: 72px; }
+@media (prefers-reduced-motion: reduce) { .pt .vt-ventana, .pt .vt-lista { animation: none; } }
+

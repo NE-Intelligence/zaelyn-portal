@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { LogoBarra } from '@/components/Logo'
 import { Preferencias } from '@/components/Preferencias'
 import { Chat } from '@/components/portal/Chat'
+import { BotonZaelyn } from '@/components/portal/BotonZaelyn'
+import { Ventanas } from '@/components/portal/Ventanas'
 import { cookies } from 'next/headers'
 import { COOKIE, soyAdmin } from '@/lib/api'
 import { textos, type Clave } from '@/lib/copy'
@@ -92,6 +94,7 @@ export async function Barra({
             clase="pt"
             et={{ tema: t('nav.tema'), claro: t('nav.tema.claro'), oscuro: t('nav.tema.oscuro'), sistema: t('nav.tema.sistema'), idioma: t('nav.idioma') }}
           />
+          {sesion && !ejemplo && <BotonZaelyn etiqueta={t('chat.abrir')} />}
           {/* Un FORMULARIO y no un enlace: ver `app/salir/route.ts`. */}
           {sesion && (
             <form action="/salir" method="post" style={{ display: 'contents' }}>
@@ -113,7 +116,9 @@ export async function Barra({
           </div>
         </nav>
       )}
-      {/* El chat de Zaelyn (fase 1): en toda pantalla con sesión, nunca en el ejemplo. */}
+      {/* Las conversaciones con personas en ventanitas (no en la bandeja, que ya las muestra). */}
+      {sesion && !ejemplo && a !== 'mensajes' && <Ventanas yo={null} />}
+      {/* El chat de Zaelyn: panel lateral en toda pantalla con sesión, nunca en el ejemplo. */}
       {sesion && !ejemplo && (
         <Chat t={{
           abrir: t('chat.abrir'), titulo: t('chat.titulo'), sub: t('chat.sub'), cerrar: t('chat.cerrar'),
