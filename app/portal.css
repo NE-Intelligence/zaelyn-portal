@@ -1965,3 +1965,24 @@ a.pt-plan:hover {
 .pt .ob-importar { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
 .pt .ob-importar label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
 .pt .ob-problemas { margin: 0; padding-left: 18px; font-size: 13px; color: var(--zaelyn-ink); }
+
+/* Ajustes del grupo (motor: decisiones/2026-10-31-administrar-grupos). */
+.pt .aj { display: flex; flex-direction: column; gap: 14px; max-width: 760px; }
+.pt .aj-seccion { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.pt .aj-seccion h2 { margin: 0 0 6px; font-size: 16px; }
+.pt .aj-peligro { border-color: color-mix(in srgb, var(--critica) 35%, var(--line)); }
+.pt .aj-nota { margin: 0 0 10px; font-size: 13px; color: var(--ink-2); }
+.pt .aj-fila { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.pt .aj-campo { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink-2); flex: 1 1 260px; }
+.pt .aj-campo input, .pt .aj-input { font: inherit; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); width: 100%; max-width: 420px; }
+.pt .aj-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.pt .aj-lista > li { padding: 8px 0; border-top: 1px solid var(--line); }
+.pt .aj-lista > li:first-child { border-top: 0; }
+.pt .aj-quien { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pt .aj-quien b { font-size: 14px; }
+.pt .aj-quien span { font-size: 12.5px; color: var(--ink-3); }
+.pt .aj-confirma { margin: 8px 0 0; padding: 10px 12px; border-radius: 10px; background: color-mix(in srgb, var(--critica) 7%, var(--surface)); border: 1px solid color-mix(in srgb, var(--critica) 35%, var(--line)); display: flex; flex-direction: column; gap: 8px; }
+.pt .aj-confirma p { margin: 0; font-size: 13.5px; color: var(--ink); }
+.pt .aj-acc { display: flex; gap: 8px; flex-wrap: wrap; }
+.pt .ag-lista { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pt .ag-lista li { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13.5px; }

@@ -95,15 +95,15 @@ export function decirError(e: { status: number; error: string; cuerpo: Record<st
     case 'LIMITE': {
       // Un tope de la cuenta PMO (#179): cuánto, qué lo resuelve y dónde.
       const DICE: Record<string, string> = {
-        proyectos: 'proyectos activos', ejecutores: 'Ejecutores', lideres: 'Líderes',
-        informados: 'lugares de Stakeholder o Monitor', creditos: 'créditos de IA de este mes', avisos: 'avisos de WhatsApp',
+        proyectos: 'proyectos activos', ejecutores: 'Ejecutores', lideres: 'Líderes', supervisores: 'Supervisores',
+        informados: 'asientos de Stakeholder o Monitor', creditos: 'créditos de IA de este mes', avisos: 'avisos de WhatsApp',
       }
       const c = e.cuerpo['complemento'] as { nombre?: string; precioUsd?: number } | undefined
       const que = DICE[String(e.cuerpo['que'])] ?? 'lugares'
       const base = `La cuenta ya usa ${String(e.cuerpo['usados'])} de ${String(e.cuerpo['tope'])} ${que}.`
       const precio = c?.nombre ? ` ${c.nombre} cuesta ${Number(c.precioUsd).toFixed(2)} USD al mes.` : ''
       return e.cuerpo['esSponsor']
-        ? `${base}${precio} Agrégalo en «Plan y uso» (menú de tus grupos).`
+        ? `${base}${precio} Agrégalo en «Plan y uso»: /app/plan.`
         : `${base}${precio} Quien paga la cuenta puede agregarlo.`
     }
     case 'SIN_PERMISO': return 'Tu rol en este grupo no alcanza para editar planes. Pídele a quien administra que te haga líder.'

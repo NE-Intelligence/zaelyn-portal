@@ -60,6 +60,7 @@ export default async function Plan({
           {dirige
             ? <><Link className="ed-btn suave chico" href={`/app/g/${grupo}/horas`}>Horas del proyecto</Link>{r.dato.rol !== 'stakeholder' && <Link className="ed-btn suave chico" href={`/app/g/${grupo}/presupuesto`}>Presupuesto</Link>}</>
             : <Link className="ed-btn suave chico" href="/app/horas">Registrar mis horas</Link>}
+          <Link className="ed-btn suave chico" href={`/app/g/${grupo}/ajustes`}>Ajustes del grupo</Link>
         </div>
         {sug.ok && <Sugerencias grupo={grupo} inicial={sug.dato.sugerencias} />}
         <Lienzo v={r.dato} vista={vista} base={`/app/g/${grupo}/${plan}`} leido={leido} en={en}

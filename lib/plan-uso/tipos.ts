@@ -4,13 +4,13 @@
  */
 export type Topes = {
   /** null = sin tope. */
-  proyectosActivos: number | null; ejecutores: number; lideres: number
+  proyectosActivos: number | null; ejecutores: number; lideres: number; supervisores?: number
   monitoresIncluidos: number; informados: number; creditos: number; avisos: number
 }
 
 export type CuentaPmo = {
   ownerId: string; plan: string; grupos: number; proyectosActivos: number
-  ejecutores: number; lideres: number; stakeholders: number; monitores: number
+  ejecutores: number; lideres: number; supervisores?: number; stakeholders: number; monitores: number
   creditos: number; avisos: number
   complementos: Record<string, number>
   sponsors: number; org: { id: string; nombre: string } | null; conPmoPropio: number

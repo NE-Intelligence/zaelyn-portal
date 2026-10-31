@@ -180,6 +180,17 @@ export type EstadoDeObra = {
 }
 export const obrasDelGrupo = (g: string) => leer<{ obras: string[] }>(`/portal/grupo/${encodeURIComponent(g)}/obras`)
 export const laObra = (g: string, p: string) => leer<EstadoDeObra>(`/portal/obra/${encodeURIComponent(g)}/${encodeURIComponent(p)}`)
+/** «Ajustes del grupo» (motor: decisiones/2026-10-31-administrar-grupos). */
+export type AjustesDeGrupo = {
+  grupo: { id: string; nombre: string; clase: string }
+  yo: { rol: string; administro: boolean; soyDueno: boolean; dirijo: boolean }
+  personas: Array<{ id: string; nombre: string; handle: string | null; rol: string; conCuenta: boolean; esDueno: boolean; esYo: boolean; abiertos: number }>
+  planes: Array<{ id: string; nombre: string; tipo: string; abiertos: number }>
+  invitaciones: number
+}
+export type GrupoArchivado = { id: string; nombre: string; archivado: string; hasta: string }
+export const ajustesDelGrupo = (g: string) => leer<AjustesDeGrupo>(`/portal/grupo/${encodeURIComponent(g)}/ajustes`)
+export const gruposArchivados = () => leer<{ archivados: GrupoArchivado[]; dias: number }>('/portal/grupos/archivados')
 export const pmoDelGrupo = (g: string) => leer<PmoEnPortal>(`/portal/grupo/${encodeURIComponent(g)}/pmo`)
 export const reportesDelPlan = (g: string, p: string) => leer<ReporteEnLista[]>(`/portal/reportes/${ids(g, p)}`)
 export const reporteDelPlan = (g: string, p: string, id: string) => leer<DatosDeReporte>(`/portal/reportes/${ids(g, p)}/${encodeURIComponent(id)}`)
@@ -296,6 +307,7 @@ export type AccionEditor =
   | 'presupuesto-tarifa' | 'presupuesto-monto'
   | 'ficha' | 'ficha-logo' | 'reporte-vista' | 'reporte-emitir'
   | 'pmo' | 'sugerencia'
+  | 'grupo-renombrar' | 'grupo-sacar' | 'grupo-archivar' | 'plan-borrar' | 'grupo-recuperar'
   | 'obra-importar' | 'obra-avance' | 'obra-movimiento' | 'obra-validar' | 'obra-estimacion'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
@@ -332,6 +344,11 @@ function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo
     case 'persona': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/persona` } : null
     case 'invitar': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/invitar` } : null
     case 'pmo': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/pmo` } : null
+    case 'grupo-renombrar': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/ajustes/renombrar` } : null
+    case 'grupo-sacar': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/ajustes/sacar` } : null
+    case 'grupo-archivar': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/ajustes/archivar` } : null
+    case 'plan-borrar': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/ajustes/plan-borrar` } : null
+    case 'grupo-recuperar': return { metodo: 'POST', ruta: '/portal/grupos/recuperar' }
     case 'sugerencia': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/sugerencias` } : null
     case 'obra-importar': return g ? { metodo: 'POST', ruta: `/portal/obra/${g}/importar` } : null
     case 'obra-avance': case 'obra-movimiento': case 'obra-validar': case 'obra-estimacion': {
