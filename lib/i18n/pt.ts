@@ -446,7 +446,7 @@ export const pt: Partial<Record<Clave, string>> = {
     'O Kickoff é a Zaelyn completa pelo Telegram, grátis e com limites. Os três níveis pagos adicionam o portal, o WhatsApp e os grupos: Sprint para você, Tribu para sua família e PMO para seus projetos.',
   'pc.gratis': 'Grátis',
   'pc.mes': 'USD por mês',
-  'pc.anio': 'ou 289.88 USD por ano: você paga 10 meses',
+  'pc.anio': 'ou 452.40 USD por ano: você paga 10 meses',
   'pc.popular': 'Para equipes',
   'pc.para.k': 'Para experimentar',
   'pc.para.s': 'Para você',
