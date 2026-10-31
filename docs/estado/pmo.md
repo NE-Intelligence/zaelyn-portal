@@ -9,4 +9,6 @@
 - Hecho (31 oct): «Seguimiento: <modo>» en la página del proyecto. Todos ven
   el modo; quien dirige cambia ahí el modo, el fin de jornada y el modo de
   una persona (el motor revisa el permiso y lo audita).
-- Siguiente: el chat web enriquecido (fase 2 del frente).
+- Hecho (31 oct): «Zaelyn sugiere» en la página del plan — la replaneación
+  que espera respuesta, para quien dirige, con «Sí, ajústalas» / «Dejar así».
+- Siguiente: el chat web enriquecido (tablas, formularios, vista previa).
