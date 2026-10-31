@@ -52,6 +52,8 @@ type CuerpoWeb = {
   archivo?: { nombre: string; mime: string; base64: string }
   /** Dónde se ve en grande (motor: decisiones/2026-10-31-portal-sigue-al-chat). */
   portal?: { ir: string; dice: string }
+  /** La misma respuesta como tabla (motor: decisiones/2026-10-31-tablas-en-el-chat). */
+  tabla?: { columnas: string[]; filas: string[][]; mas?: number }
 }
 /** Solo rutas del portal mismo: el motor no puede mandarnos a otro lado. */
 const irValido = (ir: unknown): ir is string =>
@@ -322,7 +324,7 @@ export function Chat({ t }: { t: TextosChat }) {
         {mensajes.map(m => m.de === 'zaelyn'
           ? (
             <div key={m.id} className="ch-msg ch-zaelyn">
-              <Texto cuerpo={m.cuerpo} />
+              {m.cuerpo.tabla?.filas?.length ? <ConTabla cuerpo={m.cuerpo} /> : <Texto cuerpo={m.cuerpo} />}
               {m.cuerpo.imagen && (
                 <a className="ch-liga" href={m.cuerpo.imagen.url} target="_blank" rel="noopener noreferrer">
                   {t.verImagen}: {m.cuerpo.imagen.titulo}
@@ -402,6 +404,32 @@ function Texto({ cuerpo }: { cuerpo: CuerpoWeb }) {
         return <span key={i}>{trozo}</span>
       })}
     </p>
+  )
+}
+
+/**
+ * El encabezado del texto y la tabla debajo; el texto completo, a un clic
+ * (es el mismo que llega por Telegram).
+ */
+function ConTabla({ cuerpo }: { cuerpo: CuerpoWeb }) {
+  const [comoTexto, setComoTexto] = useState(false)
+  const t = cuerpo.tabla!
+  if (comoTexto) {
+    return <><Texto cuerpo={cuerpo} /><button type="button" className="ch-vertabla" onClick={() => setComoTexto(false)}>Ver como tabla</button></>
+  }
+  const encabezado = cuerpo.text.split(/\n\s*\n/)[0] ?? ''
+  return (
+    <>
+      <Texto cuerpo={{ ...cuerpo, text: encabezado }} />
+      <div className="ch-tabla-caja">
+        <table className="ch-tabla">
+          <thead><tr>{t.columnas.map(c => <th key={c} scope="col">{c}</th>)}</tr></thead>
+          <tbody>{t.filas.map((f, i) => <tr key={i}>{f.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody>
+        </table>
+      </div>
+      {t.mas ? <p className="ch-tabla-mas">y {t.mas} más</p> : null}
+      <button type="button" className="ch-vertabla" onClick={() => setComoTexto(true)}>Ver como texto</button>
+    </>
   )
 }
 
