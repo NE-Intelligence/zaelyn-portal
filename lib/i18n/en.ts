@@ -447,7 +447,7 @@ export const en: Partial<Record<Clave, string>> = {
     'Kickoff is full Zaelyn from Telegram, free and with limits. The three paid tiers add the portal, WhatsApp and groups: Sprint for you, Tribu for your family and PMO for your projects.',
   'pc.gratis': 'Free',
   'pc.mes': 'USD per month',
-  'pc.anio': 'or 289.88 USD per year: you pay 10 months',
+  'pc.anio': 'or 452.40 USD per year: you pay 10 months',
   'pc.popular': 'For teams',
   'pc.para.k': 'To try Zaelyn',
   'pc.para.s': 'For you',

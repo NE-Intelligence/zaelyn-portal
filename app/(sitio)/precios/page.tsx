@@ -143,7 +143,7 @@ export default async function Precios() {
             <article className="st-comp st-comp-paq">
               <h3>{t('pc.paq.t')}</h3>
               <p>{t('pc.paq.p')}</p>
-              <p className="st-precio">36.53 <small>{t('pc.mes')}</small></p>
+              <p className="st-precio">52.78 <small>{t('pc.mes')}</small></p>
             </article>
           </div>
           <p className="st-nota">{t('pz.anual')} {t('pz.org')}</p>

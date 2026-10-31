@@ -456,7 +456,7 @@ const es = {
     'Kickoff es Zaelyn completo desde Telegram, gratis y con límites. Los tres niveles de paga agregan el portal, WhatsApp y los grupos: Sprint para ti, Tribu para tu familia y PMO para tus proyectos.',
   'pc.gratis': 'Gratis',
   'pc.mes': 'USD al mes',
-  'pc.anio': 'o 289.88 USD al año: pagas 10 meses',
+  'pc.anio': 'o 452.40 USD al año: pagas 10 meses',
   'pc.popular': 'Para equipos',
   'pc.para.k': 'Para probar Zaelyn',
   'pc.para.s': 'Para ti',
