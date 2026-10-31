@@ -42,7 +42,7 @@ export const PLANES_PUBLICOS: PlanPublico[] = [
     rasgos: ['pc.t.1', 'pc.t.2', 'pc.t.3', 'pc.t.4', 'pc.t.5', 'pc.t.6'],
   },
   {
-    id: 'pmo', nombre: 'PMO', precio: '28.99', espacio: 'proyectos',
+    id: 'pmo', nombre: 'PMO', precio: '45.24', espacio: 'proyectos',
     para: 'pc.para.p', resumen: 'z4.p', cta: 'pc.cta.p', incluye: 'pc.inc.tp',
     rasgos: ['pc.p.1', 'pc.p.2', 'pc.p.3', 'pc.p.4', 'pc.p.5', 'pc.p.6'],
     destacado: true,
@@ -50,7 +50,8 @@ export const PLANES_PUBLICOS: PlanPublico[] = [
 ]
 
 /** Complementos de PMO publicados (USD al mes con IVA). */
-export const COMPLEMENTOS_PMO: Clave[] = ['pz.comp.1', 'pz.comp.2', 'pz.comp.4', 'pz.comp.5', 'pz.comp.6', 'pc.comp.dec']
+// Por asiento (Zaelyn decisiones/2026-10-31-precios-pmo-por-asiento).
+export const COMPLEMENTOS_PMO: Clave[] = ['pz.comp.2', 'pz.comp.1', 'pz.comp.3', 'pz.comp.4', 'pz.comp.5', 'pz.comp.6', 'pc.comp.dec']
 export const COMPLEMENTOS_TRIBU: Clave[] = ['pc.comp.t1', 'pc.comp.t2']
 
 /**

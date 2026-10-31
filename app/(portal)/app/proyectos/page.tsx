@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { Barra, Pie } from '@/components/portal/Marco'
 import { SinSesion } from '@/components/portal/SinSesion'
-import { misGrupos } from '@/lib/api'
+import { gruposArchivados, misGrupos } from '@/lib/api'
+import { Archivados } from '@/components/portal/Archivados'
 import { ROL_PUEDE, VISTA_NOMBRE } from '@/lib/plan'
 import { nombreDeRol } from '@/lib/plan-uso/tipos'
 import { fecha } from '@/components/portal/atomos'
@@ -17,8 +18,8 @@ export const metadata = { title: 'Proyectos' }
  *
  * Los grupos de familia ya no aparecen aquí: tienen su propia casa.
  */
-export default async function Proyectos() {
-  const [r, lang] = await Promise.all([misGrupos(), idiomaActual()])
+export default async function Proyectos({ searchParams }: { searchParams: Promise<{ archivado?: string }> }) {
+  const [r, lang, arch, q] = await Promise.all([misGrupos(), idiomaActual(), gruposArchivados(), searchParams])
   if (!r.ok) return <SinSesion fallo={r.fallo} />
   const t = textos(lang)
   const trabajo = r.dato.grupos.filter((g) => g.clase === 'work')
@@ -41,6 +42,8 @@ export default async function Proyectos() {
           </div>
         </div>
 
+        {q.archivado && <div className="pu-aviso" style={{ marginBottom: 12 }}>Listo: el grupo quedó archivado. Si te arrepientes, lo recuperas abajo.</div>}
+
         {trabajo.length + otros.length === 0 && (
           <div className="pt-vacio" style={{ maxWidth: 560 }}>
             <b>{t('po.pr.vacio.t')}</b>
@@ -60,6 +63,7 @@ export default async function Proyectos() {
                       {nombreDeRol(g.rol)}
                     </span>
                   )}
+                  <Link href={`/app/g/${g.id}/ajustes`} style={{ marginLeft: g.rol ? 8 : 'auto', fontSize: 12.5 }}>Ajustes</Link>
                 </header>
                 <Link href={`/app/g/${g.id}/editor`} className="ed-entrada">
                   <span>{t('po.pr.editor')}</span>
@@ -108,6 +112,7 @@ export default async function Proyectos() {
             </div>
           </section>
         )}
+        {arch.ok && <Archivados lista={arch.dato.archivados} dias={arch.dato.dias} />}
       </main>
       <Pie />
     </>

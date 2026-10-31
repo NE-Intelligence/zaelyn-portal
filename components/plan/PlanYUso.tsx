@@ -7,7 +7,7 @@
  * chat— y aquí solo se pintan. Comprar va a Stripe; la pantalla no toca
  * dinero.
  */
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { PAGA, type NivelDePaga, type VistaPlan } from '@/lib/plan-uso/tipos'
 import { decirError, escribir } from '@/components/editor/comun'
@@ -44,12 +44,15 @@ function Medidor({ titulo, usados, tope, nota }: { titulo: string; usados: numbe
 const NIVELES: { clave: NivelDePaga; para: string; rasgos: string[] }[] = [
   { clave: 'base', para: 'Para ti', rasgos: ['Portal Personal: tu día cruzado con todos tus grupos', 'Avisos por WhatsApp', '50 recordatorios activos', 'Un año de historial'] },
   { clave: 'family', para: 'Para tu familia', rasgos: ['Todo Sprint, más:', 'Portal de Familia completo', '4 participantes incluidos', 'Traslados, quehaceres con puntos, medallero y fechas'] },
-  { clave: 'pro', para: 'Para tus proyectos', rasgos: ['Todo Sprint, más:', 'Portal de Proyectos y editor con IA', 'Proyectos sin límite, un Líder o PMO, 6 Ejecutores y 2 Monitores', '30 créditos de IA y 100 avisos de WhatsApp al mes'] },
+  { clave: 'pro', para: 'Para tus proyectos', rasgos: ['Todo Sprint, más:', 'Portal de Proyectos y editor con IA', 'Proyectos sin límite, un Líder o PMO y 3 Ejecutores; más asientos de uno en uno', '30 créditos de IA y 100 avisos de WhatsApp al mes'] },
 ]
 
-export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean; inicial?: NivelDePaga | null }) {
+export function PlanYUso({ v, pagado, inicial, comprar: pedido }: { v: VistaPlan; pagado: boolean; inicial?: NivelDePaga | null; comprar?: string | null }) {
   const actuales = v.cuenta?.complementos ?? {}
-  const [cant, setCant] = useState<Record<string, number>>(() => ({ ...actuales }))
+  // Del botón «Comprar …» que manda Zaelyn al topar: ese asiento ya en el carrito.
+  const deVenta = pedido && v.complementos.some(c => c.clave === pedido) ? pedido : null
+  const [cant, setCant] = useState<Record<string, number>>(() => (
+    deVenta ? { ...actuales, [deVenta]: (actuales[deVenta] ?? 0) + 1 } : { ...actuales }))
   const [moneda, setMoneda] = useState<'usd' | 'mxn'>(v.suscripcion?.moneda?.toLowerCase() === 'mxn' ? 'mxn' : 'usd')
   const [periodo, setPeriodo] = useState<'mes' | 'anio'>('mes')
   const [estado, setEstado] = useState<'listo' | 'enviando' | 'hecho'>('listo')
@@ -58,7 +61,7 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
   // Con suscripción viva, el plan es el que se paga; sin ella (prueba o
   // cortesía), todos los niveles se ofrecen para contratar.
   const pagado_ = viva ? (v.plan.clave as NivelDePaga) : null
-  const [elegido, setElegido] = useState<NivelDePaga | null>(inicial ?? (pagado_ === 'pro' ? 'pro' : null))
+  const [elegido, setElegido] = useState<NivelDePaga | null>(inicial ?? (pagado_ === 'pro' || deVenta ? 'pro' : null))
   const esPmo = pagado_ === 'pro'
   const configurandoPmo = elegido === 'pro'
   // El tramo de fundador se aplica al PLAN, no a los complementos (#190).
@@ -101,7 +104,12 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
     setEstado('hecho')
   }
 
+  useEffect(() => {
+    if (deVenta) document.getElementById('pmo')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [deVenta])
+
   const t = v.cuenta?.topes
+  const nombreDeVenta = deVenta ? v.complementos.find(c => c.clave === deVenta)?.nombre : null
   return (
     <div className="pu">
       {viva ? <Suscripcion v={v} /> : (
@@ -129,6 +137,7 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
         <div className="pu-aviso">Tu cuenta la paga <b>{nombreOrg}</b>. Tus límites son los de la organización entera; {v.organizacion?.esAdmin ? <>los complementos se compran en <a href="/app/organizacion">la organización</a>.</> : 'los cambios los hace su administrador.'}</div>
       )}
 
+      {nombreDeVenta && !pagaOrg && <div className="pu-aviso">Agregué un asiento de <b>{nombreDeVenta}</b> al carrito. Revisa el total abajo y {viva ? 'guarda los cambios' : 'contrata'}.</div>}
       {pagado && <div className="pu-aviso">Gracias. El pago se refleja en un minuto; si no ves el cambio, recarga la página.</div>}
       {estado === 'hecho' && <div className="pu-aviso">Listo: tu suscripción se actualizó. Stripe prorratea la diferencia en tu siguiente cobro.</div>}
 
@@ -145,9 +154,10 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
             <Medidor titulo="Proyectos activos" usados={v.cuenta.proyectosActivos} tope={t.proyectosActivos} nota="Un proyecto sin actividades abiertas no cuenta." />
             <Medidor titulo="Ejecutores" usados={v.cuenta.ejecutores} tope={t.ejecutores} />
             <Medidor titulo="Líderes" usados={v.cuenta.lideres} tope={t.lideres} nota="Tú, como Sponsor, no cuentas." />
-            <Medidor titulo="Monitores incluidos" usados={Math.min(v.cuenta.monitores, t.monitoresIncluidos)} tope={t.monitoresIncluidos} />
-            <Medidor titulo="Lugares de Stakeholder o Monitor extra" usados={v.cuenta.informados.usados} tope={v.cuenta.informados.tope}
-              nota={`${v.cuenta.stakeholders} Stakeholder${v.cuenta.stakeholders === 1 ? '' : 's'} · ${Math.max(0, v.cuenta.monitores - t.monitoresIncluidos)} Monitor(es) extra`} />
+            {t.supervisores !== undefined && <Medidor titulo="Supervisores" usados={v.cuenta.supervisores ?? 0} tope={t.supervisores} nota="Del cliente o de tu empresa." />}
+            {t.monitoresIncluidos > 0 && <Medidor titulo="Monitores incluidos" usados={Math.min(v.cuenta.monitores, t.monitoresIncluidos)} tope={t.monitoresIncluidos} />}
+            <Medidor titulo="Asientos de Visibilidad (Stakeholder o Monitor)" usados={v.cuenta.informados.usados} tope={v.cuenta.informados.tope}
+              nota={`${v.cuenta.stakeholders} Stakeholder${v.cuenta.stakeholders === 1 ? '' : 's'} · ${Math.max(0, v.cuenta.monitores - t.monitoresIncluidos)} Monitor(es)`} />
             <Medidor titulo="Créditos IA este mes" usados={v.cuenta.creditos} tope={t.creditos} nota="Armar un plan gasta 1 a 3; reorganizar, 1 o más según el tamaño." />
             <Medidor titulo="Avisos de WhatsApp este mes" usados={v.cuenta.avisos} tope={t.avisos} nota="En Telegram los avisos no tienen tope." />
           </div>
@@ -225,7 +235,7 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
 
       {!pagaOrg && (esPmo || configurandoPmo) && <section className="pu-seccion" id="pmo">
         <h2>{esPmo ? 'Complementos de PMO' : `Arma tu ${pmo.nombre}`}</h2>
-        {!esPmo && <p className="pu-nota">PMO incluye proyectos sin límite, un Líder o PMO, 6 Ejecutores, 2 Monitores, 30 créditos de IA y 100 avisos de WhatsApp. Suma lo que necesites; los complementos no llevan descuento de fundador.</p>}
+        {!esPmo && <p className="pu-nota">PMO incluye proyectos sin límite, un Líder o PMO, 3 Ejecutores, 30 créditos de IA y 100 avisos de WhatsApp. Suma los asientos que necesites: Ejecutores, Líderes, Supervisores y Visibilidad (Stakeholders o Monitores); los complementos no llevan descuento de fundador.</p>}
         <div className="pu-comps">
           {v.complementos.map(c => {
             const n = cant[c.clave] ?? 0

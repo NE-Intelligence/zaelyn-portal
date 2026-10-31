@@ -42,6 +42,7 @@ export default async function Grupo({ params, searchParams }: {
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
+              <Link href={`/app/g/${grupo}/ajustes`} className="ed-btn suave">Ajustes del grupo</Link>
               <Link href={`/app/g/${grupo}/obra/nueva`} className="ed-btn suave">Cargar obra desde Excel</Link>
               <Link href={`/app/g/${grupo}/editor`} className="ed-btn primario">Editor de proyectos</Link>
             </div>

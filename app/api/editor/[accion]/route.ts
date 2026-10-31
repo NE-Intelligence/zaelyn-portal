@@ -25,6 +25,7 @@ const ACCIONES = new Set<string>([
   'ficha', 'ficha-logo', 'reporte-vista', 'reporte-emitir',
   'pmo', 'sugerencia',
   'obra-importar', 'obra-avance', 'obra-movimiento', 'obra-validar', 'obra-estimacion',
+  'grupo-renombrar', 'grupo-sacar', 'grupo-archivar', 'plan-borrar', 'grupo-recuperar',
 ])
 type Accion = AccionEditor
 

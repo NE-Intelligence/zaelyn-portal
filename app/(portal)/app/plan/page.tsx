@@ -16,7 +16,8 @@ export default async function PlanPagina({
     <>
       <Barra area="cuenta" migas={[{ texto: 'Mis grupos', href: '/app' }, { texto: 'Plan y uso' }]} sesion modo="cuenta" />
       <main className="pt-lienzo">
-        <PlanYUso v={r.dato} pagado={q['pagado'] === '1'} inicial={q['plan'] === 'base' || q['plan'] === 'family' || q['plan'] === 'pro' ? q['plan'] : null} />
+        <PlanYUso v={r.dato} pagado={q['pagado'] === '1'} inicial={q['plan'] === 'base' || q['plan'] === 'family' || q['plan'] === 'pro' ? q['plan'] : null}
+          comprar={typeof q['comprar'] === 'string' ? q['comprar'] : null} />
       </main>
       <Pie modo="cuenta" />
     </>

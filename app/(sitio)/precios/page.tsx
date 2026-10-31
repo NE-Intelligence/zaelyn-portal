@@ -157,7 +157,7 @@ export default async function Precios() {
             <p>{t('pc.roles.sub')}</p>
           </div>
           <div className="st-roles">
-            {(['sp', 'li', 'ej', 'st', 'mo'] as const).map((r) => (
+            {(['sp', 'li', 'ej', 'su', 'st', 'mo'] as const).map((r) => (
               <div className="st-rol" key={r}>
                 <h3>{t(`pc.r.${r}`)}</h3>
                 <p>{t(`pc.r.${r}.p`)}</p>
