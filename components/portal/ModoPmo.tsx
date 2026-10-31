@@ -20,13 +20,18 @@ const MODOS: Array<{ k: Modo; t: string; d: string }> = [
 const NOMBRE: Record<Modo, string> = { discreto: 'Discreto', atento: 'Atento', firme: 'Firme' }
 const hora = (h: number) => `${h > 12 ? h - 12 : h}:00 pm`
 
-export function ModoPmo({ grupo, inicial, personas }: {
+export function ModoPmo({ grupo, inicial, personas, abrir = false }: {
   grupo: string
   inicial: PmoEnPortal
   personas: Array<{ id: string; nombre: string }>
+  /** El chat lo pide abierto (`?seguimiento=1`) al hablar del modo. */
+  abrir?: boolean
 }) {
   const [pmo, setPmo] = useState(inicial)
-  const [abierto, setAbierto] = useState(false)
+  const [abierto, setAbierto] = useState(abrir)
+  // Lo que el chat acaba de cambiar llega con la página nueva.
+  useEffect(() => { setPmo(inicial) }, [inicial])
+  useEffect(() => { if (abrir) setAbierto(true) }, [abrir])
   const [aviso, setAviso] = useState<string | null>(null)
   const [ocupado, setOcupado] = useState(false)
   const caja = useRef<HTMLDivElement>(null)

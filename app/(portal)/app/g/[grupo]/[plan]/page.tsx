@@ -50,7 +50,7 @@ export default async function Plan({
       <main className="pt-lienzo">
         <div className="hr-enlace">
           {/* Un motor viejo no tiene la ruta: entonces simplemente no se enseña. */}
-          {pmo.ok && <ModoPmo grupo={grupo} inicial={pmo.dato}
+          {pmo.ok && <ModoPmo grupo={grupo} inicial={pmo.dato} abrir={sp.seguimiento === '1'}
             personas={e.personas.filter(p => p.tieneCuenta).map(p => ({ id: p.id, nombre: p.nombre }))} />}
           {dirige && e.plan && <Reabrir grupo={grupo} plan={e.plan.id} />}
           {dirige

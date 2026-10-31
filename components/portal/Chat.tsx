@@ -50,7 +50,12 @@ type CuerpoWeb = {
   buttons?: Boton[]
   imagen?: { url: string; titulo: string }
   archivo?: { nombre: string; mime: string; base64: string }
+  /** Dónde se ve en grande (motor: decisiones/2026-10-31-portal-sigue-al-chat). */
+  portal?: { ir: string; dice: string }
 }
+/** Solo rutas del portal mismo: el motor no puede mandarnos a otro lado. */
+const irValido = (ir: unknown): ir is string =>
+  typeof ir === 'string' && /^\/app\/[A-Za-z0-9/_?=&.-]*$/.test(ir) && !ir.includes('..')
 type Mensaje =
   | { id: string; de: 'yo'; text: string; voz?: boolean }
   | { id: string; de: 'zaelyn'; cuerpo: CuerpoWeb }
@@ -106,6 +111,11 @@ export function Chat({ t }: { t: TextosChat }) {
   const trozos = useRef<Blob[]>([])
   const refrescar = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pensandoHasta = useRef<ReturnType<typeof setTimeout> | null>(null)
+  /**
+   * Hay una respuesta MÍA en camino: si trae página, el portal va a ella
+   * solo. Un aviso que llega sin que pregunte nada no me mueve de donde estoy.
+   */
+  const esperando = useRef(false)
 
   useEffect(() => {
     setMensajes(leerGuardados())
@@ -167,10 +177,20 @@ export function Chat({ t }: { t: TextosChat }) {
           hasta.current = j.hasta
           setPensando(false)
           setMensajes(ms => [...ms, ...j.mensajes.map(m => ({ id: `z${m.n}`, de: 'zaelyn' as const, cuerpo: m.cuerpo }))])
-          // Lo que se dijo pudo mover el plan: la página se pide otra vez al
-          // servidor, con sus cuentas. Una sola vez aunque lleguen tres.
-          if (refrescar.current) clearTimeout(refrescar.current)
-          refrescar.current = setTimeout(() => router.refresh(), 400)
+          // EL PORTAL SIGUE AL CHAT (portal-sigue-al-chat): si pregunté algo y
+          // la respuesta se ve mejor en una página, la página se abre sola.
+          const destino = [...j.mensajes].reverse().map(m => m.cuerpo.portal?.ir).find(irValido)
+          const aqui = window.location.pathname + window.location.search
+          if (esperando.current && destino && destino !== aqui) {
+            esperando.current = false
+            router.push(destino)
+          } else {
+            // Lo que se dijo pudo mover el plan: la página se pide otra vez
+            // al servidor, con sus cuentas. Una sola vez aunque lleguen tres.
+            if (refrescar.current) clearTimeout(refrescar.current)
+            refrescar.current = setTimeout(() => router.refresh(), 400)
+          }
+          esperando.current = false
         }
       }
     } catch {
@@ -190,6 +210,7 @@ export function Chat({ t }: { t: TextosChat }) {
   }, [abierto, sondear])
 
   const esperarRespuesta = () => {
+    esperando.current = true
     setPensando(true)
     if (pensandoHasta.current) clearTimeout(pensandoHasta.current)
     pensandoHasta.current = setTimeout(() => setPensando(false), 30_000)
@@ -302,6 +323,11 @@ export function Chat({ t }: { t: TextosChat }) {
                 </a>
               )}
               {m.cuerpo.archivo && <Archivo a={m.cuerpo.archivo} etiqueta={t.descargar} />}
+              {irValido(m.cuerpo.portal?.ir) && (
+                <button type="button" className="ch-ir" onClick={() => router.push(m.cuerpo.portal!.ir)}>
+                  {m.cuerpo.portal!.dice} →
+                </button>
+              )}
               {m === ultimoConBotones && m.cuerpo.buttons?.length ? (
                 <div className="ch-botones">
                   {m.cuerpo.buttons.map(b => (

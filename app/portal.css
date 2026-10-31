@@ -1912,3 +1912,10 @@ a.pt-plan:hover {
 .pt .mp-sub { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3, #8a8a8a); }
 .pt .mp-nota { margin: 0; font-size: 12px; }
 @media (max-width: 760px) { .pt .mp-panel { position: fixed; left: 16px; right: 16px; top: auto; bottom: 16px; width: auto; } }
+
+/* El chat lleva a la página que enseña su respuesta (portal-sigue-al-chat). */
+.pt .ch-ir {
+  align-self: flex-start; margin-top: 6px; padding: 4px 10px; border-radius: 999px; font: inherit; font-size: 12.5px;
+  border: 1px solid var(--zaelyn); background: var(--zaelyn-soft); color: var(--zaelyn-ink); cursor: pointer;
+}
+.pt .ch-ir:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }

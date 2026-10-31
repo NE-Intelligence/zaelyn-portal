@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic'
  */
 export default async function Grupo({ params, searchParams }: {
   params: Promise<{ grupo: string }>
-  searchParams: Promise<{ quedarme?: string }>
+  searchParams: Promise<{ quedarme?: string; seguimiento?: string }>
 }) {
   const { grupo } = await params
   const q = await searchParams
@@ -25,7 +25,8 @@ export default async function Grupo({ params, searchParams }: {
   if (!r.ok) return <SinSesion fallo={r.fallo} />
 
   const e = r.dato.estado
-  if (e.planes.length === 1 && !q.quedarme) redirect(`/app/g/${grupo}/${e.planes[0]!.id}`)
+  // `?seguimiento=1` viaja al plan: lo pide el chat para abrir el panel del modo.
+  if (e.planes.length === 1 && !q.quedarme) redirect(`/app/g/${grupo}/${e.planes[0]!.id}${q.seguimiento ? '?seguimiento=1' : ''}`)
 
   return (
     <>
