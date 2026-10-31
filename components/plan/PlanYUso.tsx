@@ -44,7 +44,7 @@ function Medidor({ titulo, usados, tope, nota }: { titulo: string; usados: numbe
 const NIVELES: { clave: NivelDePaga; para: string; rasgos: string[] }[] = [
   { clave: 'base', para: 'Para ti', rasgos: ['Portal Personal: tu día cruzado con todos tus grupos', 'Avisos por WhatsApp', '50 recordatorios activos', 'Un año de historial'] },
   { clave: 'family', para: 'Para tu familia', rasgos: ['Todo Sprint, más:', 'Portal de Familia completo', '4 participantes incluidos', 'Traslados, quehaceres con puntos, medallero y fechas'] },
-  { clave: 'pro', para: 'Para tus proyectos', rasgos: ['Todo Sprint, más:', 'Portal de Proyectos y editor con IA', '3 proyectos, 6 Ejecutores y 2 Monitores', '30 créditos de IA y 100 avisos de WhatsApp al mes'] },
+  { clave: 'pro', para: 'Para tus proyectos', rasgos: ['Todo Sprint, más:', 'Portal de Proyectos y editor con IA', 'Proyectos sin límite, un Líder o PMO, 6 Ejecutores y 2 Monitores', '30 créditos de IA y 100 avisos de WhatsApp al mes'] },
 ]
 
 export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean; inicial?: NivelDePaga | null }) {
@@ -225,7 +225,7 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
 
       {!pagaOrg && (esPmo || configurandoPmo) && <section className="pu-seccion" id="pmo">
         <h2>{esPmo ? 'Complementos de PMO' : `Arma tu ${pmo.nombre}`}</h2>
-        {!esPmo && <p className="pu-nota">PMO incluye 3 proyectos activos, 6 Ejecutores, 2 Monitores, 30 créditos de IA y 100 avisos de WhatsApp. Suma lo que necesites; los complementos no llevan descuento de fundador.</p>}
+        {!esPmo && <p className="pu-nota">PMO incluye proyectos sin límite, un Líder o PMO, 6 Ejecutores, 2 Monitores, 30 créditos de IA y 100 avisos de WhatsApp. Suma lo que necesites; los complementos no llevan descuento de fundador.</p>}
         <div className="pu-comps">
           {v.complementos.map(c => {
             const n = cant[c.clave] ?? 0

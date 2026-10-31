@@ -50,7 +50,7 @@ export const PLANES_PUBLICOS: PlanPublico[] = [
 ]
 
 /** Complementos de PMO publicados (USD al mes con IVA). */
-export const COMPLEMENTOS_PMO: Clave[] = ['pz.comp.1', 'pz.comp.2', 'pz.comp.3', 'pz.comp.4', 'pz.comp.5', 'pz.comp.6', 'pc.comp.dec']
+export const COMPLEMENTOS_PMO: Clave[] = ['pz.comp.1', 'pz.comp.2', 'pz.comp.4', 'pz.comp.5', 'pz.comp.6', 'pc.comp.dec']
 export const COMPLEMENTOS_TRIBU: Clave[] = ['pc.comp.t1', 'pc.comp.t2']
 
 /**
