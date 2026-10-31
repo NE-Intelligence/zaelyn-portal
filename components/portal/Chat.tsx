@@ -56,6 +56,10 @@ type CuerpoWeb = {
 /** Solo rutas del portal mismo: el motor no puede mandarnos a otro lado. */
 const irValido = (ir: unknown): ir is string =>
   typeof ir === 'string' && /^\/app\/[A-Za-z0-9/_?=&.-]*$/.test(ir) && !ir.includes('..')
+function enGrupoDeLaPagina(): { enGrupo?: string } {
+  const m = /^\/app\/g\/([0-9a-f-]{36})(?:\/|$)/i.exec(window.location.pathname)
+  return m ? { enGrupo: m[1]! } : {}
+}
 type Mensaje =
   | { id: string; de: 'yo'; text: string; voz?: boolean }
   | { id: string; de: 'zaelyn'; cuerpo: CuerpoWeb }
@@ -223,7 +227,9 @@ export function Chat({ t }: { t: TextosChat }) {
     try {
       const r = await fetch('/api/chat/mensaje', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ ...carga, id: nuevoId() }),
+        // El proyecto que tienes abierto va con el mensaje: «cómo va» en la
+        // página de Cuprum es «cómo va Cuprum» (motor: portal-sigue-al-chat).
+        body: JSON.stringify({ ...carga, id: nuevoId(), ...enGrupoDeLaPagina() }),
       })
       if (r.status === 202) return esperarRespuesta()
       avisar(r.status === 429 ? t.demasiados : r.status === 401 ? t.sesion : t.caido)
