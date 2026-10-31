@@ -300,10 +300,12 @@ export type VistaLiberar = {
   fechas: { inicia: string | null; termina: string | null }
 }
 
-export const ROLES_DE_PROYECTO = ['integrante', 'lider', 'administrador', 'stakeholder', 'observador'] as const
+export const ROLES_DE_PROYECTO = ['integrante', 'supervisor', 'lider', 'pmo', 'administrador', 'stakeholder', 'observador'] as const
 export const ROL_DICE: Record<string, string> = {
   integrante: 'Ejecuta lo suyo y reporta avance',
   lider: 'Asigna, prioriza, mueve fechas y aprueba',
+  pmo: 'Dirige como el Líder y es el primero al que Zaelyn le escala lo atrasado',
+  supervisor: 'Ejecuta, corrige el avance de otros (el dueño confirma) y recibe lo atrasado',
   administrador: 'Todo, más invitar, roles y la cuenta',
   stakeholder: 'Directivo: pregunta, recibe el resumen ejecutivo y manda comunicados',
   observador: 'Da seguimiento; solo consulta y no interrumpe',

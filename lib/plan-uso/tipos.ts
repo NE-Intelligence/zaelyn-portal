@@ -3,7 +3,8 @@
  * La pantalla no calcula topes: los pinta.
  */
 export type Topes = {
-  proyectosActivos: number; ejecutores: number; lideres: number
+  /** null = sin tope. */
+  proyectosActivos: number | null; ejecutores: number; lideres: number
   monitoresIncluidos: number; informados: number; creditos: number; avisos: number
 }
 
@@ -76,6 +77,7 @@ export type Limite = {
  */
 export const NOMBRE_DE_ROL: Record<string, string> = {
   administrador: 'Sponsor', lider: 'Líder', integrante: 'Ejecutor', observador: 'Monitor', stakeholder: 'Stakeholder',
+  pmo: 'PMO', supervisor: 'Supervisor',
   responsable: 'Guía', miembro: 'Integrante', a_cargo: 'A cargo', apoyo: 'Apoyo',
 }
 export const nombreDeRol = (r: string | null | undefined): string => (r ? NOMBRE_DE_ROL[r] ?? r : 'sin rol')

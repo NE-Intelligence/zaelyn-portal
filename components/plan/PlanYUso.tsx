@@ -17,7 +17,15 @@ import { Historial, Suscripcion } from '@/components/plan/Suscripcion'
 
 const usd = (n: number) => `${n.toFixed(2)} USD`
 
-function Medidor({ titulo, usados, tope, nota }: { titulo: string; usados: number; tope: number; nota?: string }) {
+function Medidor({ titulo, usados, tope, nota }: { titulo: string; usados: number; tope: number | null; nota?: string }) {
+  // Sin tope (los proyectos desde decisiones/2026-10-31-modos-pmo-escalamiento-roles del motor).
+  if (tope === null) {
+    return (
+      <div className="pu-medidor bien">
+        <div className="pu-med-cab"><span>{titulo}</span><b className="mono">{usados}<i> · sin límite</i></b></div>
+      </div>
+    )
+  }
   const pct = tope > 0 ? Math.min(100, Math.round((usados / tope) * 100)) : (usados > 0 ? 100 : 0)
   const estado = tope === 0 && usados === 0 ? 'vacio' : usados >= tope ? 'lleno' : usados / Math.max(1, tope) >= 0.8 ? 'cerca' : 'bien'
   return (
@@ -36,7 +44,7 @@ function Medidor({ titulo, usados, tope, nota }: { titulo: string; usados: numbe
 const NIVELES: { clave: NivelDePaga; para: string; rasgos: string[] }[] = [
   { clave: 'base', para: 'Para ti', rasgos: ['Portal Personal: tu día cruzado con todos tus grupos', 'Avisos por WhatsApp', '50 recordatorios activos', 'Un año de historial'] },
   { clave: 'family', para: 'Para tu familia', rasgos: ['Todo Sprint, más:', 'Portal de Familia completo', '4 participantes incluidos', 'Traslados, quehaceres con puntos, medallero y fechas'] },
-  { clave: 'pro', para: 'Para tus proyectos', rasgos: ['Todo Sprint, más:', 'Portal de Proyectos y editor con IA', '3 proyectos, 6 Ejecutores y 2 Monitores', '30 créditos de IA y 100 avisos de WhatsApp al mes'] },
+  { clave: 'pro', para: 'Para tus proyectos', rasgos: ['Todo Sprint, más:', 'Portal de Proyectos y editor con IA', 'Proyectos sin límite, un Líder o PMO, 6 Ejecutores y 2 Monitores', '30 créditos de IA y 100 avisos de WhatsApp al mes'] },
 ]
 
 export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean; inicial?: NivelDePaga | null }) {
@@ -217,7 +225,7 @@ export function PlanYUso({ v, pagado, inicial }: { v: VistaPlan; pagado: boolean
 
       {!pagaOrg && (esPmo || configurandoPmo) && <section className="pu-seccion" id="pmo">
         <h2>{esPmo ? 'Complementos de PMO' : `Arma tu ${pmo.nombre}`}</h2>
-        {!esPmo && <p className="pu-nota">PMO incluye 3 proyectos activos, 6 Ejecutores, 2 Monitores, 30 créditos de IA y 100 avisos de WhatsApp. Suma lo que necesites; los complementos no llevan descuento de fundador.</p>}
+        {!esPmo && <p className="pu-nota">PMO incluye proyectos sin límite, un Líder o PMO, 6 Ejecutores, 2 Monitores, 30 créditos de IA y 100 avisos de WhatsApp. Suma lo que necesites; los complementos no llevan descuento de fundador.</p>}
         <div className="pu-comps">
           {v.complementos.map(c => {
             const n = cant[c.clave] ?? 0

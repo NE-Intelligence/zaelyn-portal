@@ -35,7 +35,7 @@ export default async function Plan({
   const e = r.dato.estado
   // Solo quien puede mover el plan de los demás lo reorganiza; el motor lo
   // vuelve a comprobar al abrir.
-  const dirige = !!r.dato.rol && !['observador', 'miembro', 'integrante', 'a_cargo'].includes(r.dato.rol)
+  const dirige = !!r.dato.rol && !['observador', 'miembro', 'integrante', 'supervisor', 'a_cargo'].includes(r.dato.rol)
   return (
     <>
       <Barra area="proyectos"

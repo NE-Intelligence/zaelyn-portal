@@ -19,6 +19,14 @@ export const cuando = (iso: string) => {
     : d.toLocaleDateString([], { day: 'numeric', month: 'short' })
 }
 
+/** «Tú: » si lo último lo escribí yo; «@ana: » en un grupo si fue alguien más. */
+export function quienDice(c: ConversacionEnPortal, yo: string | null): string {
+  const u = c.ultimo
+  if (!u) return ''
+  if (u.mio || (yo && u.autor === yo)) return 'Tú: '
+  return c.tipo === 'grupo' && u.autor ? `@${u.autor}: ` : ''
+}
+
 export function ListaConversaciones({
   convs, actual, yo, alAbrir, conZaelyn = true,
 }: {
@@ -46,7 +54,7 @@ export function ListaConversaciones({
             <span className="ms-avatar" data-tipo={c.tipo} aria-hidden="true">{iniciales(c.titulo)}</span>
             <span className="ms-titulo">{c.titulo}</span>
             <span className="ms-hora">{c.ultimo ? cuando(c.ultimo.en) : ''}</span>
-            <span className="ms-prev">{c.ultimo ? `${c.tipo === 'grupo' && c.ultimo.autor && c.ultimo.autor !== yo ? `@${c.ultimo.autor}: ` : ''}${c.ultimo.texto}` : 'Sin mensajes todavía'}</span>
+            <span className="ms-prev">{c.ultimo ? `${quienDice(c, yo)}${c.ultimo.texto}` : 'Sin mensajes todavía'}</span>
             {c.sinLeer > 0 && <span className="ms-badge" aria-label={`${c.sinLeer} sin leer`}>{c.sinLeer}</span>}
           </button>
         </li>
