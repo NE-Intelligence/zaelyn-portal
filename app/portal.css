@@ -1928,3 +1928,12 @@ a.pt-plan:hover {
 .pt .ch-tabla td:first-child { min-width: 140px; }
 .pt .ch-tabla-mas { margin: 4px 0 0; font-size: 12px; color: var(--ink-3); }
 .pt .ch-vertabla { align-self: flex-start; margin-top: 4px; background: none; border: 0; padding: 0; font: inherit; font-size: 12px; color: var(--brand-ink); text-decoration: underline; cursor: pointer; }
+/* Sugerencias de replaneación (motor: decisiones/2026-10-31-replaneacion-sugerida). */
+.pt .sg { border: 1px solid var(--zaelyn); background: var(--zaelyn-soft); border-radius: 12px; padding: 12px 14px; margin: 0 0 14px; }
+.pt .sg-cab { font-weight: 600; color: var(--zaelyn-ink); font-size: 13.5px; display: flex; align-items: center; gap: 6px; }
+.pt .sg-chispa { color: var(--zaelyn); }
+.pt .sg-lista { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pt .sg-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pt .sg-item p { margin: 0; font-size: 13.5px; color: var(--ink); flex: 1 1 320px; }
+.pt .sg-acc { display: flex; gap: 6px; }
+.pt .sg-aviso { margin: 8px 0 0; }

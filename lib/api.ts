@@ -151,6 +151,17 @@ export type PmoEnPortal = {
   porPersona: Array<{ personaId: string; nombre: string; modo: ModoPmo }>
   puedeCambiar: boolean
 }
+/** Replaneación sugerida que espera respuesta (motor: decisiones/2026-10-31-replaneacion-sugerida). */
+export type SugerenciaEnPortal = {
+  id: string
+  tipo: 'mas_tiempo' | 'menos_tiempo' | 'responsable'
+  actividad: string
+  cuantas: number
+  dias: number | null
+  aQuien: string | null
+  creada: string
+}
+export const sugerenciasDelGrupo = (g: string) => leer<{ sugerencias: SugerenciaEnPortal[] }>(`/portal/grupo/${encodeURIComponent(g)}/sugerencias`)
 export const pmoDelGrupo = (g: string) => leer<PmoEnPortal>(`/portal/grupo/${encodeURIComponent(g)}/pmo`)
 export const reportesDelPlan = (g: string, p: string) => leer<ReporteEnLista[]>(`/portal/reportes/${ids(g, p)}`)
 export const reporteDelPlan = (g: string, p: string, id: string) => leer<DatosDeReporte>(`/portal/reportes/${ids(g, p)}/${encodeURIComponent(id)}`)
@@ -266,7 +277,7 @@ export type AccionEditor =
   | 'horas' | 'horas-borrar' | 'horas-enviar' | 'horas-resolver' | 'horas-retirar'
   | 'presupuesto-tarifa' | 'presupuesto-monto'
   | 'ficha' | 'ficha-logo' | 'reporte-vista' | 'reporte-emitir'
-  | 'pmo'
+  | 'pmo' | 'sugerencia'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
 function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
@@ -302,6 +313,7 @@ function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo
     case 'persona': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/persona` } : null
     case 'invitar': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/invitar` } : null
     case 'pmo': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/pmo` } : null
+    case 'sugerencia': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/sugerencias` } : null
   }
 }
 
