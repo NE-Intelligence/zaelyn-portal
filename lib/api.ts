@@ -162,6 +162,24 @@ export type SugerenciaEnPortal = {
   creada: string
 }
 export const sugerenciasDelGrupo = (g: string) => leer<{ sugerencias: SugerenciaEnPortal[] }>(`/portal/grupo/${encodeURIComponent(g)}/sugerencias`)
+/** La obra (motor: decisiones/2026-10-31-obra-es-tipo-de-proyecto). */
+export type PartidaEnObra = {
+  id: string; clave: string; concepto: string; unidad: string; cantidad: number; pu: number; importe: number
+  ejecutado: number; validado: number; avance: number; importeEjecutado: number; actividadId: string | null
+}
+export type MaterialEnObra = {
+  id: string; clave: string; nombre: string; unidad: string; costo: number; entradas: number; salidas: number
+  existencia: number; costoEntradas: number; teorico: number; real: number; desviacion: number | null
+}
+export type EstadoDeObra = {
+  planId: string; plan: string; grupo: string
+  totales: { importe: number; ejecutado: number; validado: number; avance: number; costoMateriales: number; porValidar: number }
+  partidas: PartidaEnObra[]; materiales: MaterialEnObra[]
+  estimaciones: Array<{ id: string; numero: number; desde: string; hasta: string; importe: number; renglones: number }>
+  puedeDirigir: boolean; puedeValidar: boolean
+}
+export const obrasDelGrupo = (g: string) => leer<{ obras: string[] }>(`/portal/grupo/${encodeURIComponent(g)}/obras`)
+export const laObra = (g: string, p: string) => leer<EstadoDeObra>(`/portal/obra/${encodeURIComponent(g)}/${encodeURIComponent(p)}`)
 export const pmoDelGrupo = (g: string) => leer<PmoEnPortal>(`/portal/grupo/${encodeURIComponent(g)}/pmo`)
 export const reportesDelPlan = (g: string, p: string) => leer<ReporteEnLista[]>(`/portal/reportes/${ids(g, p)}`)
 export const reporteDelPlan = (g: string, p: string, id: string) => leer<DatosDeReporte>(`/portal/reportes/${ids(g, p)}/${encodeURIComponent(id)}`)
@@ -278,6 +296,7 @@ export type AccionEditor =
   | 'presupuesto-tarifa' | 'presupuesto-monto'
   | 'ficha' | 'ficha-logo' | 'reporte-vista' | 'reporte-emitir'
   | 'pmo' | 'sugerencia'
+  | 'obra-importar' | 'obra-avance' | 'obra-movimiento' | 'obra-validar' | 'obra-estimacion'
 
 /** A qué ruta de Zaelyn va cada acción. Lista cerrada: no es un proxy abierto. */
 function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo: 'GET' | 'POST'; ruta: string } | null {
@@ -314,6 +333,11 @@ function rutaDe(accion: AccionEditor, cuerpo: Record<string, unknown>): { metodo
     case 'invitar': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/invitar` } : null
     case 'pmo': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/pmo` } : null
     case 'sugerencia': return g ? { metodo: 'POST', ruta: `/portal/grupo/${g}/sugerencias` } : null
+    case 'obra-importar': return g ? { metodo: 'POST', ruta: `/portal/obra/${g}/importar` } : null
+    case 'obra-avance': case 'obra-movimiento': case 'obra-validar': case 'obra-estimacion': {
+      const p = typeof cuerpo['planId'] === 'string' && /^[0-9a-f-]{36}$/i.test(cuerpo['planId']) ? cuerpo['planId'] : ''
+      return g && p ? { metodo: 'POST', ruta: `/portal/obra/${g}/${p}/${accion.slice(5)}` } : null
+    }
   }
 }
 
@@ -474,12 +498,18 @@ export async function descargarHoras(
     | { tipo: 'proyecto'; groupId: string; desde: string; hasta: string }
     | { tipo: 'envio'; id: string; formato: 'pdf' | 'xlsx' }
     | { tipo: 'aprobadas'; groupId: string; desde: string; hasta: string; formato: 'pdf' | 'xlsx' }
-    | { tipo: 'presupuesto'; groupId: string },
+    | { tipo: 'presupuesto'; groupId: string }
+    | { tipo: 'obra-plantilla' }
+    | { tipo: 'obra-estimacion'; groupId: string; planId: string; numero: number },
 ): Promise<Response> {
   if (!hayApi()) return new Response('No disponible', { status: 503 })
   const token = (await cookies()).get(COOKIE)?.value
   if (!token) return new Response('Sin sesión', { status: 401 })
-  const ruta = cual.tipo === 'mias'
+  const ruta = cual.tipo === 'obra-plantilla'
+    ? '/portal/obra/plantilla'
+    : cual.tipo === 'obra-estimacion'
+      ? `/portal/obra/${encodeURIComponent(cual.groupId)}/${encodeURIComponent(cual.planId)}/estimacion/${cual.numero}`
+    : cual.tipo === 'mias'
     ? `/portal/horas/excel?${consulta({ desde: cual.desde, hasta: cual.hasta, groupId: cual.groupId })}`
     : cual.tipo === 'presupuesto'
       ? `/portal/presupuesto/${encodeURIComponent(cual.groupId)}?formato=xlsx`

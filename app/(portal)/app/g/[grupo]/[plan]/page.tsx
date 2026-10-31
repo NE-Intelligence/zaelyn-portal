@@ -3,7 +3,7 @@ import { Barra, Pie } from '@/components/portal/Marco'
 import { Lienzo, esVista } from '@/components/portal/Plan'
 import { SinSesion } from '@/components/portal/SinSesion'
 import { Reabrir } from '@/components/editor/Reabrir'
-import { elPlan, fichaDelPlan, pmoDelGrupo, reportesDelPlan, sugerenciasDelGrupo } from '@/lib/api'
+import { elPlan, fichaDelPlan, obrasDelGrupo, pmoDelGrupo, reportesDelPlan, sugerenciasDelGrupo } from '@/lib/api'
 import { Sugerencias } from '@/components/portal/Sugerencias'
 import { ModoPmo } from '@/components/portal/ModoPmo'
 import { General } from '@/components/portal/General'
@@ -31,7 +31,8 @@ export default async function Plan({
   }
   const leido = new Date().toISOString()
 
-  const [r, pmo, sug] = await Promise.all([elPlan(grupo, plan), pmoDelGrupo(grupo), sugerenciasDelGrupo(grupo)])
+  const [r, pmo, sug, obras] = await Promise.all([elPlan(grupo, plan), pmoDelGrupo(grupo), sugerenciasDelGrupo(grupo), obrasDelGrupo(grupo)])
+  const esObra = obras.ok && obras.dato.obras.includes(plan)
   if (!r.ok) return <SinSesion fallo={r.fallo} />
 
   const e = r.dato.estado
@@ -53,6 +54,8 @@ export default async function Plan({
           {/* Un motor viejo no tiene la ruta: entonces simplemente no se enseña. */}
           {pmo.ok && <ModoPmo grupo={grupo} inicial={pmo.dato} abrir={sp.seguimiento === '1'}
             personas={e.personas.filter(p => p.tieneCuenta).map(p => ({ id: p.id, nombre: p.nombre }))} />}
+          {!esObra && dirige && <Link className="ed-btn suave chico" href={`/app/g/${grupo}/obra/nueva`}>Cargar obra</Link>}
+          {esObra && <Link className="ed-btn primario chico" href={`/app/g/${grupo}/${plan}/obra`}>Obra: presupuesto y materiales</Link>}
           {dirige && e.plan && <Reabrir grupo={grupo} plan={e.plan.id} />}
           {dirige
             ? <><Link className="ed-btn suave chico" href={`/app/g/${grupo}/horas`}>Horas del proyecto</Link>{r.dato.rol !== 'stakeholder' && <Link className="ed-btn suave chico" href={`/app/g/${grupo}/presupuesto`}>Presupuesto</Link>}</>
