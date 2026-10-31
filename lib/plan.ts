@@ -117,6 +117,8 @@ export const ROL_PUEDE: Record<string, string> = {
   a_cargo: 'Puede reportar el avance de lo suyo.',
   apoyo: 'Puede asignar y pedir avance.',
   lider: 'Líder: asigna, prioriza, mueve fechas y aprueba.',
+  pmo: 'PMO: asigna, prioriza y mueve fechas; Zaelyn le escala primero lo atrasado.',
+  supervisor: 'Supervisor: reporta lo suyo, corrige el avance de otros (el dueño confirma) y recibe lo atrasado.',
   responsable: 'Todo lo anterior, más roles y alta de planes.',
   administrador: 'Sponsor: todo lo anterior, más roles, planes y la cuenta.',
 }

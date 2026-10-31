@@ -29,7 +29,15 @@ const ERRORES: Record<string, string> = {
 }
 const decir = (r: { status: number; error: string; cuerpo: Record<string, unknown> }) => ERRORES[r.error] ?? decirError(r)
 
-function Medidor({ titulo, usados, tope }: { titulo: string; usados: number; tope: number }) {
+function Medidor({ titulo, usados, tope }: { titulo: string; usados: number; tope: number | null }) {
+  // Sin tope (los proyectos desde decisiones/2026-10-31-modos-pmo-escalamiento-roles del motor).
+  if (tope === null) {
+    return (
+      <div className="pu-medidor bien">
+        <div className="pu-med-cab"><span>{titulo}</span><b className="mono">{usados}<i> · sin límite</i></b></div>
+      </div>
+    )
+  }
   const pct = tope > 0 ? Math.min(100, Math.round((usados / tope) * 100)) : (usados > 0 ? 100 : 0)
   const estado = tope === 0 && usados === 0 ? 'vacio' : usados >= tope ? 'lleno' : usados / Math.max(1, tope) >= 0.8 ? 'cerca' : 'bien'
   return (

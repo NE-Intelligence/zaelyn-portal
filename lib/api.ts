@@ -669,7 +669,8 @@ export type ConversacionEnPortal = {
   groupId: string | null
   titulo: string
   con: string | null
-  ultimo: { texto: string; autor: string | null; en: string } | null
+  /** `mio` llega del motor desde la fase PMO; en un motor viejo falta. */
+  ultimo: { texto: string; autor: string | null; en: string; mio?: boolean } | null
   sinLeer: number
 }
 export const misConversaciones = () => leer<{ conversaciones: ConversacionEnPortal[] }>('/portal/mensajes')

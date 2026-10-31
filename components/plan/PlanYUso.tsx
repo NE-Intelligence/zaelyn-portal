@@ -17,7 +17,15 @@ import { Historial, Suscripcion } from '@/components/plan/Suscripcion'
 
 const usd = (n: number) => `${n.toFixed(2)} USD`
 
-function Medidor({ titulo, usados, tope, nota }: { titulo: string; usados: number; tope: number; nota?: string }) {
+function Medidor({ titulo, usados, tope, nota }: { titulo: string; usados: number; tope: number | null; nota?: string }) {
+  // Sin tope (los proyectos desde decisiones/2026-10-31-modos-pmo-escalamiento-roles del motor).
+  if (tope === null) {
+    return (
+      <div className="pu-medidor bien">
+        <div className="pu-med-cab"><span>{titulo}</span><b className="mono">{usados}<i> · sin límite</i></b></div>
+      </div>
+    )
+  }
   const pct = tope > 0 ? Math.min(100, Math.round((usados / tope) * 100)) : (usados > 0 ? 100 : 0)
   const estado = tope === 0 && usados === 0 ? 'vacio' : usados >= tope ? 'lleno' : usados / Math.max(1, tope) >= 0.8 ? 'cerca' : 'bien'
   return (
