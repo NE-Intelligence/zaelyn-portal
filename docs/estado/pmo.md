@@ -12,3 +12,7 @@
 - Hecho (31 oct): «Zaelyn sugiere» en la página del plan — la replaneación
   que espera respuesta, para quien dirige, con «Sí, ajústalas» / «Dejar así».
 - Siguiente: el chat web enriquecido (tablas, formularios, vista previa).
+- Hecho (31 oct): la obra en el portal — «Cargar obra desde Excel» (plantilla
+  en /app/obra/plantilla), y en cada obra la página /app/g/<g>/<p>/obra con
+  Presupuesto (5,000 partidas paginadas y búsqueda), Materiales (almacén,
+  teórico contra real) y Estimaciones (con su Excel).

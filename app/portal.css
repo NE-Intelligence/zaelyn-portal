@@ -1937,3 +1937,31 @@ a.pt-plan:hover {
 .pt .sg-item p { margin: 0; font-size: 13.5px; color: var(--ink); flex: 1 1 320px; }
 .pt .sg-acc { display: flex; gap: 6px; }
 .pt .sg-aviso { margin: 8px 0 0; }
+
+/* La obra (motor: decisiones/2026-10-31-obra-es-tipo-de-proyecto). */
+.pt .ob-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 0 0 14px; }
+.pt .ob-kpis > div { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.pt .ob-kpis span { font-size: 12px; color: var(--ink-3); }
+.pt .ob-kpis b { font-size: 18px; }
+.pt .ob-kpis i { font-style: normal; font-size: 12.5px; color: var(--ink-2); }
+.pt .ob-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 0 0 12px; overflow-x: auto; }
+.pt .ob-tabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; font: inherit; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
+.pt .ob-tabs button.on { color: var(--ink); border-bottom-color: var(--brand); font-weight: 600; }
+.pt .ob-forma { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 0 0 12px; }
+.pt .ob-forma input, .pt .ob-forma select, .pt .ob-barra input, .pt .ob-importar input { font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: inherit; }
+.pt .ob-forma input { width: 150px; }
+.pt .ob-barra { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; }
+.pt .ob-barra input { width: min(360px, 100%); }
+.pt .ob-tabla-caja { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.pt .ob-tabla { border-collapse: collapse; width: 100%; font-size: 13px; }
+.pt .ob-tabla th { text-align: left; font-weight: 600; color: var(--ink-2); padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; background: var(--surface-2); }
+.pt .ob-tabla td { padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.pt .ob-tabla .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.pt .ob-tabla .mono { font-family: var(--font-mono, ui-monospace, monospace); font-size: 12px; }
+.pt .ob-mal { color: var(--zaelyn-ink); font-weight: 600; }
+.pt .ob-pct { display: inline-block; min-width: 56px; padding: 1px 6px; border-radius: 6px; background: linear-gradient(90deg, var(--brand-soft) var(--p), transparent var(--p)); }
+.pt .ob-paginas { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; font-size: 13px; }
+.pt .ob-aviso { margin: 0 0 10px; font-size: 13px; color: var(--ink-2); }
+.pt .ob-importar { display: flex; flex-direction: column; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.pt .ob-importar label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.pt .ob-problemas { margin: 0; padding-left: 18px; font-size: 13px; color: var(--zaelyn-ink); }

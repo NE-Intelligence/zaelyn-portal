@@ -24,6 +24,7 @@ const ACCIONES = new Set<string>([
   'horas', 'horas-borrar', 'horas-enviar', 'horas-resolver', 'horas-retirar', 'presupuesto-tarifa', 'presupuesto-monto',
   'ficha', 'ficha-logo', 'reporte-vista', 'reporte-emitir',
   'pmo', 'sugerencia',
+  'obra-importar', 'obra-avance', 'obra-movimiento', 'obra-validar', 'obra-estimacion',
 ])
 type Accion = AccionEditor
 
