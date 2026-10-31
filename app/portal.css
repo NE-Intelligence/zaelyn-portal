@@ -1883,3 +1883,32 @@ a.pt-plan:hover {
 .pt:has(.vt-barra) .pt-pie { padding-bottom: 72px; }
 @media (prefers-reduced-motion: reduce) { .pt .vt-ventana, .pt .vt-lista { animation: none; } }
 
+
+/* ── Modo del PMO (motor: decisiones/2026-10-31-modos-pmo-escalamiento-roles) ── */
+.pt .mp { position: relative; display: inline-flex; }
+.pt .mp-boton { display: inline-flex; align-items: center; gap: 6px; }
+.pt .mp-punto { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; background: var(--ink-3); }
+.pt .mp-punto[data-modo='atento'] { background: var(--st-revision); }
+.pt .mp-punto[data-modo='firme'] { background: var(--zaelyn); }
+.pt .mp-panel {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; width: min(360px, calc(100vw - 32px));
+  background: var(--surface, #fff); border: 1px solid var(--line, #e3e3e3); border-radius: 12px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / .14); padding: 14px; display: flex; flex-direction: column; gap: 10px; text-align: left;
+}
+.pt .mp-titulo { font-size: 14px; }
+.pt .mp-modos { display: flex; flex-direction: column; gap: 6px; }
+.pt .mp-modo {
+  display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 8px 10px; border-radius: 10px;
+  border: 1px solid var(--line, #e3e3e3); background: var(--surface-2, #f6f6f6); color: inherit; cursor: pointer; font: inherit;
+}
+.pt .mp-modo:disabled { cursor: default; opacity: .85; }
+.pt .mp-modo.on { border-color: var(--brand); background: var(--brand-soft); }
+.pt .mp-modo:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.pt .mp-modo-t { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13.5px; }
+.pt .mp-modo-d { font-size: 12.5px; color: var(--ink-2, #555); line-height: 1.35; }
+.pt .mp-fila { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; }
+.pt .mp-fila select { font: inherit; padding: 3px 6px; border-radius: 8px; border: 1px solid var(--line, #e3e3e3); background: var(--surface, #fff); color: inherit; }
+.pt .mp-personas { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--line, #e3e3e3); padding-top: 8px; }
+.pt .mp-sub { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-3, #8a8a8a); }
+.pt .mp-nota { margin: 0; font-size: 12px; }
+@media (max-width: 760px) { .pt .mp-panel { position: fixed; left: 16px; right: 16px; top: auto; bottom: 16px; width: auto; } }

@@ -23,6 +23,7 @@ const ACCIONES = new Set<string>([
   'excel', 'revisar',
   'horas', 'horas-borrar', 'horas-enviar', 'horas-resolver', 'horas-retirar', 'presupuesto-tarifa', 'presupuesto-monto',
   'ficha', 'ficha-logo', 'reporte-vista', 'reporte-emitir',
+  'pmo',
 ])
 type Accion = AccionEditor
 

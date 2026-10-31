@@ -3,7 +3,8 @@ import { Barra, Pie } from '@/components/portal/Marco'
 import { Lienzo, esVista } from '@/components/portal/Plan'
 import { SinSesion } from '@/components/portal/SinSesion'
 import { Reabrir } from '@/components/editor/Reabrir'
-import { elPlan, fichaDelPlan, reportesDelPlan } from '@/lib/api'
+import { elPlan, fichaDelPlan, pmoDelGrupo, reportesDelPlan } from '@/lib/api'
+import { ModoPmo } from '@/components/portal/ModoPmo'
 import { General } from '@/components/portal/General'
 import { filasDelArbol } from '@/lib/arbol'
 
@@ -29,7 +30,7 @@ export default async function Plan({
   }
   const leido = new Date().toISOString()
 
-  const r = await elPlan(grupo, plan)
+  const [r, pmo] = await Promise.all([elPlan(grupo, plan), pmoDelGrupo(grupo)])
   if (!r.ok) return <SinSesion fallo={r.fallo} />
 
   const e = r.dato.estado
@@ -48,6 +49,9 @@ export default async function Plan({
       />
       <main className="pt-lienzo">
         <div className="hr-enlace">
+          {/* Un motor viejo no tiene la ruta: entonces simplemente no se enseña. */}
+          {pmo.ok && <ModoPmo grupo={grupo} inicial={pmo.dato}
+            personas={e.personas.filter(p => p.tieneCuenta).map(p => ({ id: p.id, nombre: p.nombre }))} />}
           {dirige && e.plan && <Reabrir grupo={grupo} plan={e.plan.id} />}
           {dirige
             ? <><Link className="ed-btn suave chico" href={`/app/g/${grupo}/horas`}>Horas del proyecto</Link>{r.dato.rol !== 'stakeholder' && <Link className="ed-btn suave chico" href={`/app/g/${grupo}/presupuesto`}>Presupuesto</Link>}</>

@@ -6,6 +6,7 @@
 - Hecho aquí: los roles PMO y Supervisor con su nombre y lo que pueden hacer
   (equipo, editor al liberar, página del plan); «Plan y uso» y la
   organización muestran los proyectos «sin límite».
-- Siguiente: ver y cambiar el modo del PMO (Discreto / Atento / Firme) y el
-  fin de jornada desde la página del proyecto; hoy se cambia por el chat
-  («modo atento en Cuprum»).
+- Hecho (31 oct): «Seguimiento: <modo>» en la página del proyecto. Todos ven
+  el modo; quien dirige cambia ahí el modo, el fin de jornada y el modo de
+  una persona (el motor revisa el permiso y lo audita).
+- Siguiente: el chat web enriquecido (fase 2 del frente).
