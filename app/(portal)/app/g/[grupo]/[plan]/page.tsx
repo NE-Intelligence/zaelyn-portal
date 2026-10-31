@@ -3,7 +3,8 @@ import { Barra, Pie } from '@/components/portal/Marco'
 import { Lienzo, esVista } from '@/components/portal/Plan'
 import { SinSesion } from '@/components/portal/SinSesion'
 import { Reabrir } from '@/components/editor/Reabrir'
-import { elPlan, fichaDelPlan, pmoDelGrupo, reportesDelPlan } from '@/lib/api'
+import { elPlan, fichaDelPlan, pmoDelGrupo, reportesDelPlan, sugerenciasDelGrupo } from '@/lib/api'
+import { Sugerencias } from '@/components/portal/Sugerencias'
 import { ModoPmo } from '@/components/portal/ModoPmo'
 import { General } from '@/components/portal/General'
 import { filasDelArbol } from '@/lib/arbol'
@@ -30,7 +31,7 @@ export default async function Plan({
   }
   const leido = new Date().toISOString()
 
-  const [r, pmo] = await Promise.all([elPlan(grupo, plan), pmoDelGrupo(grupo)])
+  const [r, pmo, sug] = await Promise.all([elPlan(grupo, plan), pmoDelGrupo(grupo), sugerenciasDelGrupo(grupo)])
   if (!r.ok) return <SinSesion fallo={r.fallo} />
 
   const e = r.dato.estado
@@ -57,6 +58,7 @@ export default async function Plan({
             ? <><Link className="ed-btn suave chico" href={`/app/g/${grupo}/horas`}>Horas del proyecto</Link>{r.dato.rol !== 'stakeholder' && <Link className="ed-btn suave chico" href={`/app/g/${grupo}/presupuesto`}>Presupuesto</Link>}</>
             : <Link className="ed-btn suave chico" href="/app/horas">Registrar mis horas</Link>}
         </div>
+        {sug.ok && <Sugerencias grupo={grupo} inicial={sug.dato.sugerencias} />}
         <Lienzo v={r.dato} vista={vista} base={`/app/g/${grupo}/${plan}`} leido={leido} en={en}
           general={vista === 'general' && e.plan ? await seccionGeneral(grupo, e.plan.id, `/app/g/${grupo}/${plan}`, r.dato) : null} />
       </main>

@@ -1919,3 +1919,13 @@ a.pt-plan:hover {
   border: 1px solid var(--zaelyn); background: var(--zaelyn-soft); color: var(--zaelyn-ink); cursor: pointer;
 }
 .pt .ch-ir:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Sugerencias de replaneación (motor: decisiones/2026-10-31-replaneacion-sugerida). */
+.pt .sg { border: 1px solid var(--zaelyn); background: var(--zaelyn-soft); border-radius: 12px; padding: 12px 14px; margin: 0 0 14px; }
+.pt .sg-cab { font-weight: 600; color: var(--zaelyn-ink); font-size: 13.5px; display: flex; align-items: center; gap: 6px; }
+.pt .sg-chispa { color: var(--zaelyn); }
+.pt .sg-lista { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.pt .sg-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pt .sg-item p { margin: 0; font-size: 13.5px; color: var(--ink); flex: 1 1 320px; }
+.pt .sg-acc { display: flex; gap: 6px; }
+.pt .sg-aviso { margin: 8px 0 0; }
