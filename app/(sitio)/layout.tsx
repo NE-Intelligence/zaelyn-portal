@@ -1,6 +1,7 @@
 import { Encabezado, PieSitio } from '@/components/sitio/Marco'
 import { idiomaActual, temaActual } from '@/lib/preferencias'
 import '../sitio.css'
+import '../zaelyn.css'
 
 /**
  * El marco del sitio público. Día y noche (#186): los tokens de `.st`

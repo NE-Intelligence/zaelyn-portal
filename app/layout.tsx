@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { display, texto, dato } from '@/lib/fuentes'
+import { display } from '@/lib/fuentes'
 import { LANG_HTML, idiomaActual, temaActual } from '@/lib/preferencias'
 import './globals.css'
 
@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 
 export const viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F6F6FA' },
-    { media: '(prefers-color-scheme: dark)', color: '#07070C' },
+    { media: '(prefers-color-scheme: light)', color: '#000000' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -35,7 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang={LANG_HTML[lang]}
       data-tema={tema === 'sistema' ? undefined : tema}
-      className={`${display.variable} ${texto.variable} ${dato.variable}`}
+      className={display.variable}
     >
       <body>{children}</body>
     </html>

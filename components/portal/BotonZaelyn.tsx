@@ -17,7 +17,7 @@ export function BotonZaelyn({ etiqueta }: { etiqueta: string }) {
   return (
     <button
       type="button"
-      className="pt-zaelyn"
+      className="pt-boton-zaelyn"
       aria-pressed={abierto}
       aria-controls="zaelyn-panel"
       title={etiqueta}

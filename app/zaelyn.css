@@ -1,0 +1,875 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Sistema de diseño Zaelyn v2 · una sola fuente para la app y el portal
+   decisiones/2026-11-10-rediseno-del-portal
+
+   La familia de la app (app.zaelyn.ai): blanco, gris y negro, una sola
+   tipografía (la del sistema), superficies suaves y el color reservado para
+   el módulo y el estado. El degradado morado→cian solo vive en el logotipo y
+   en el orbe de Zaelyn: nunca como estado de interfaz.
+
+   Este archivo es la ÚNICA fuente de valores. Los registros `.pt` (portal) y
+   `.st` (sitio) reciben aquí sus tokens; las hojas viejas solo los usan.
+   Tailwind v4 lee estos mismos tokens con `@theme` y se carga SIN su reset
+   (preflight) para no pisar las pantallas que todavía usan sus hojas.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@source '../components';
+@source '../app';
+
+/* ── 1. Tokens base (claro) ─────────────────────────────────────────────── */
+:root {
+  --z-font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --z-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
+
+  --z-bg: #fbfbfc;
+  --z-surface: #ffffff;
+  --z-surface-2: #f5f5f7;
+  --z-sunken: #f0f0f2;
+  --z-bubble: #f0f0f2;
+  --z-line: #e5e5ea;
+  --z-line-strong: #c7c7cc;
+  --z-ink: #1d1d1f;
+  --z-ink-2: #5f5f64;
+  --z-ink-3: #6e6e73;
+  --z-pri: #1d1d1f;
+  --z-on-pri: #ffffff;
+  --z-sel: #ececf0;
+  --z-track: #e5e5ea;
+
+  /* Módulos: el punto de color de cada espacio (igual que la app) */
+  --z-proyectos: #1f4fbf;
+  --z-proyectos-soft: #e3ecff;
+  --z-familia: #6a3fbf;
+  --z-familia-soft: #f0e6ff;
+  --z-personal: #a2462a;
+  --z-personal-soft: #fbe9e2;
+  --z-super: #2e6b3c;
+  --z-super-soft: #e2f5e6;
+  --z-agenda: #8a5a00;
+  --z-agenda-soft: #fbf0d9;
+
+  /* La voz de Zaelyn: del orbe, discreta */
+  --z-zaelyn: #5b47d6;
+  --z-zaelyn-soft: #f1eefe;
+  --z-zaelyn-ink: #4a37c0;
+  --z-orbe: radial-gradient(circle at 35% 30%, #ffffff 0%, #efe9ff 22%, #cdbdff 52%, #9fe3ee 100%);
+
+  /* Estados: píldora suave + punto + palabra */
+  --z-pend-bg: #f0f0f2;
+  --z-pend-ink: #48484d;
+  --z-pend: #8e8e93;
+  --z-curso-bg: #fdf1d8;
+  --z-curso-ink: #7a4f00;
+  --z-curso: #d99a1a;
+  --z-rev-bg: #efe9ff;
+  --z-rev-ink: #5236b8;
+  --z-rev: #8c6be0;
+  --z-hecha-bg: #dff3e4;
+  --z-hecha-ink: #1e6b3a;
+  --z-hecha: #34a853;
+  --z-det-bg: #fde8e7;
+  --z-det-ink: #ad2219;
+  --z-det: #e5484d;
+
+  --z-sombra-1: 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.035);
+  --z-sombra-2: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 20px rgba(0, 0, 0, 0.06);
+  --z-sombra-3: 0 2px 6px rgba(0, 0, 0, 0.05), 0 18px 48px rgba(0, 0, 0, 0.10);
+
+  --z-r-xs: 6px;
+  --z-r-sm: 10px;
+  --z-r-md: 14px;
+  --z-r-lg: 20px;
+  --z-r-xl: 26px;
+
+  --z-barra: #000000;
+  --z-barra-ink: #f5f5f7;
+  --z-barra-ink-2: #a1a1a6;
+  --z-barra-line: #1c1c1e;
+}
+
+/* ── 2. Tokens noche ────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='claro']) {
+    --z-bg: #000000;
+    --z-surface: #1c1c1e;
+    --z-surface-2: #242426;
+    --z-sunken: #0d0d0e;
+    --z-bubble: #1c1c1e;
+    --z-line: #2c2c2e;
+    --z-line-strong: #48484a;
+    --z-ink: #f5f5f7;
+    --z-ink-2: #aeaeb2;
+    --z-ink-3: #a1a1a6;
+    --z-pri: #f5f5f7;
+    --z-on-pri: #000000;
+    --z-sel: #3a3a3c;
+    --z-track: #3a3a3c;
+    --z-proyectos: #a9c4ff;
+    --z-proyectos-soft: #1b2a4a;
+    --z-familia: #d2bfff;
+    --z-familia-soft: #2e2245;
+    --z-personal: #ffb59c;
+    --z-personal-soft: #3d2117;
+    --z-super: #a9e3b7;
+    --z-super-soft: #1d3324;
+    --z-agenda: #f3c86b;
+    --z-agenda-soft: #35290f;
+    --z-zaelyn: #c4b5ff;
+    --z-zaelyn-soft: #241d3d;
+    --z-zaelyn-ink: #d6caff;
+    --z-pend-bg: #2c2c2e;
+    --z-pend-ink: #d1d1d6;
+    --z-pend: #8e8e93;
+    --z-curso-bg: #3a2c0e;
+    --z-curso-ink: #ffd27a;
+    --z-curso: #f2b13a;
+    --z-rev-bg: #2a2045;
+    --z-rev-ink: #d0bfff;
+    --z-rev: #a585ff;
+    --z-hecha-bg: #16351f;
+    --z-hecha-ink: #9be3b0;
+    --z-hecha: #4cc46e;
+    --z-det-bg: #451b1d;
+    --z-det-ink: #ffaaa6;
+    --z-det: #ff6961;
+    --z-sombra-1: 0 0 0 1px rgba(255, 255, 255, 0.06);
+    --z-sombra-2: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 24px rgba(0, 0, 0, 0.5);
+    --z-sombra-3: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 20px 60px rgba(0, 0, 0, 0.6);
+    --z-barra-line: #1c1c1e;
+  }
+}
+:root[data-tema='oscuro'] {
+  --z-bg: #000000;
+  --z-surface: #1c1c1e;
+  --z-surface-2: #242426;
+  --z-sunken: #0d0d0e;
+  --z-bubble: #1c1c1e;
+  --z-line: #2c2c2e;
+  --z-line-strong: #48484a;
+  --z-ink: #f5f5f7;
+  --z-ink-2: #aeaeb2;
+  --z-ink-3: #a1a1a6;
+  --z-pri: #f5f5f7;
+  --z-on-pri: #000000;
+  --z-sel: #3a3a3c;
+  --z-track: #3a3a3c;
+  --z-proyectos: #a9c4ff;
+  --z-proyectos-soft: #1b2a4a;
+  --z-familia: #d2bfff;
+  --z-familia-soft: #2e2245;
+  --z-personal: #ffb59c;
+  --z-personal-soft: #3d2117;
+  --z-super: #a9e3b7;
+  --z-super-soft: #1d3324;
+  --z-agenda: #f3c86b;
+  --z-agenda-soft: #35290f;
+  --z-zaelyn: #c4b5ff;
+  --z-zaelyn-soft: #241d3d;
+  --z-zaelyn-ink: #d6caff;
+  --z-pend-bg: #2c2c2e;
+  --z-pend-ink: #d1d1d6;
+  --z-pend: #8e8e93;
+  --z-curso-bg: #3a2c0e;
+  --z-curso-ink: #ffd27a;
+  --z-curso: #f2b13a;
+  --z-rev-bg: #2a2045;
+  --z-rev-ink: #d0bfff;
+  --z-rev: #a585ff;
+  --z-hecha-bg: #16351f;
+  --z-hecha-ink: #9be3b0;
+  --z-hecha: #4cc46e;
+  --z-det-bg: #451b1d;
+  --z-det-ink: #ffaaa6;
+  --z-det: #ff6961;
+  --z-sombra-1: 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --z-sombra-2: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 24px rgba(0, 0, 0, 0.5);
+  --z-sombra-3: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* ── 3. Tailwind lee los mismos tokens ──────────────────────────────────── */
+@theme inline {
+  --font-sans: var(--z-font);
+  --font-mono: var(--z-mono);
+  --color-fondo: var(--z-bg);
+  --color-superficie: var(--z-surface);
+  --color-superficie-2: var(--z-surface-2);
+  --color-hundido: var(--z-sunken);
+  --color-burbuja: var(--z-bubble);
+  --color-linea: var(--z-line);
+  --color-linea-fuerte: var(--z-line-strong);
+  --color-tinta: var(--z-ink);
+  --color-tinta-2: var(--z-ink-2);
+  --color-tinta-3: var(--z-ink-3);
+  --color-pri: var(--z-pri);
+  --color-sobre-pri: var(--z-on-pri);
+  --color-sel: var(--z-sel);
+  --color-pista: var(--z-track);
+  --color-proyectos: var(--z-proyectos);
+  --color-proyectos-suave: var(--z-proyectos-soft);
+  --color-familia: var(--z-familia);
+  --color-familia-suave: var(--z-familia-soft);
+  --color-personal: var(--z-personal);
+  --color-personal-suave: var(--z-personal-soft);
+  --color-zaelyn: var(--z-zaelyn);
+  --color-zaelyn-suave: var(--z-zaelyn-soft);
+  --color-zaelyn-tinta: var(--z-zaelyn-ink);
+  --color-pend: var(--z-pend);
+  --color-pend-bg: var(--z-pend-bg);
+  --color-pend-tinta: var(--z-pend-ink);
+  --color-curso: var(--z-curso);
+  --color-curso-bg: var(--z-curso-bg);
+  --color-curso-tinta: var(--z-curso-ink);
+  --color-rev: var(--z-rev);
+  --color-rev-bg: var(--z-rev-bg);
+  --color-rev-tinta: var(--z-rev-ink);
+  --color-hecha: var(--z-hecha);
+  --color-hecha-bg: var(--z-hecha-bg);
+  --color-hecha-tinta: var(--z-hecha-ink);
+  --color-det: var(--z-det);
+  --color-det-bg: var(--z-det-bg);
+  --color-det-tinta: var(--z-det-ink);
+  --radius-xs: var(--z-r-xs);
+  --radius-sm: var(--z-r-sm);
+  --radius-md: var(--z-r-md);
+  --radius-lg: var(--z-r-lg);
+  --radius-xl: var(--z-r-xl);
+  --shadow-z1: var(--z-sombra-1);
+  --shadow-z2: var(--z-sombra-2);
+  --shadow-z3: var(--z-sombra-3);
+}
+
+/* ── 4. Cuerpo y marca ──────────────────────────────────────────────────── */
+:root {
+  --fondo-cuerpo: var(--z-bg);
+  /* Se resuelve en <html>, antes de que .pt/.st cambien --fuente-display:
+     el nombre «zælyn» sigue en MuseoModerno y la interfaz en la del sistema. */
+  --z-marca: var(--fuente-display), 'Trebuchet MS', sans-serif;
+}
+.logo .logo-dia {
+  font-family: var(--z-marca);
+}
+body {
+  font-family: var(--z-font);
+  letter-spacing: -0.01em;
+}
+.logo .ae {
+  background: linear-gradient(100deg, #9b5cf0, #2ea8d8);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+/* El orbe: el momento de marca de Zaelyn, el mismo de la app */
+.z-orbe {
+  display: inline-block;
+  flex: none;
+  border-radius: 999px;
+  background: var(--z-orbe);
+  box-shadow: 0 10px 30px rgba(140, 120, 230, 0.28), inset 0 -6px 14px rgba(255, 255, 255, 0.55);
+}
+.z-orbe.respira {
+  animation: z-respira 4.8s ease-in-out infinite;
+}
+@keyframes z-respira {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.035); }
+}
+
+/* ═══ 5. Portal (.pt): los tokens viejos apuntan al sistema ═══════════════ */
+.pt,
+:root:not([data-tema='claro']) .pt,
+:root[data-tema='oscuro'] .pt {
+  --bg: var(--z-bg);
+  --surface: var(--z-surface);
+  --surface-2: var(--z-surface-2);
+  --sunken: var(--z-sunken);
+  --line: var(--z-line);
+  --line-strong: var(--z-line-strong);
+  --ink: var(--z-ink);
+  --ink-2: var(--z-ink-2);
+  --ink-3: var(--z-ink-3);
+  --brand: var(--z-proyectos);
+  --on-brand: var(--z-on-pri);
+  --brand-soft: var(--z-proyectos-soft);
+  --brand-ink: var(--z-proyectos);
+  --zaelyn: var(--z-zaelyn);
+  --zaelyn-soft: var(--z-zaelyn-soft);
+  --zaelyn-ink: var(--z-zaelyn-ink);
+  --focus: var(--z-ink);
+  --st-pendiente-bg: var(--z-pend-bg);
+  --st-pendiente-ink: var(--z-pend-ink);
+  --st-pendiente: var(--z-pend);
+  --st-curso-bg: var(--z-curso-bg);
+  --st-curso-ink: var(--z-curso-ink);
+  --st-curso: var(--z-curso);
+  --st-revision-bg: var(--z-rev-bg);
+  --st-revision-ink: var(--z-rev-ink);
+  --st-revision: var(--z-rev);
+  --st-hecha-bg: var(--z-hecha-bg);
+  --st-hecha-ink: var(--z-hecha-ink);
+  --st-hecha: var(--z-hecha);
+  --st-detenida-bg: var(--z-det-bg);
+  --st-detenida-ink: var(--z-det-ink);
+  --st-detenida: var(--z-det);
+  --prio-critica: var(--z-det-ink);
+  --prio-alta: var(--z-curso-ink);
+  --prio-media: var(--z-proyectos);
+  --prio-baja: var(--z-ink-3);
+  --critica: var(--z-det-ink);
+  --critica-soft: var(--z-det-bg);
+  --grp-1: var(--z-proyectos);
+  --grp-2: #0f7b7b;
+  --grp-3: var(--z-familia);
+  --grp-4: var(--z-personal);
+  --grp-5: #b0306e;
+  --grp-6: var(--z-super);
+  --on-grp: #ffffff;
+  --sombra-1: var(--z-sombra-1);
+  --sombra-2: var(--z-sombra-2);
+  --r-xs: var(--z-r-xs);
+  --r-sm: var(--z-r-sm);
+  --r-md: var(--z-r-md);
+  --r-lg: var(--z-r-lg);
+  --barra-h: 56px;
+  --fila-h: 42px;
+  --gantt-h: 38px;
+  --fuente-display: var(--z-font);
+  --fuente-texto: var(--z-font);
+  --fuente-dato: var(--z-mono);
+  --area-personal: var(--z-personal);
+  --area-familia: var(--z-familia);
+  --area-proyectos: var(--z-proyectos);
+  --area-mensajes: var(--z-zaelyn);
+  --area-admin: var(--z-ink-2);
+}
+.pt {
+  font-family: var(--z-font);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+.pt :where(h1, h2, h3) {
+  font-weight: 600;
+  letter-spacing: -0.022em;
+}
+.pt-overline {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.pt-mono {
+  letter-spacing: 0;
+}
+
+/* Barra superior: negra siempre (el logotipo solo vive sobre negro) */
+.pt-barra {
+  background: var(--z-barra);
+  color: var(--z-barra-ink);
+  border-bottom: 1px solid var(--z-barra-line);
+}
+.pt-barra .pt-migas,
+.pt-barra .pt-migas a {
+  color: var(--z-barra-ink-2);
+}
+.pt-barra .pt-migas span[style] {
+  color: var(--z-barra-ink) !important;
+}
+.pt-barra .pt-migas a:hover {
+  color: var(--z-barra-ink);
+}
+.pt-barra .pt-overline,
+.pt-barra .pt-salir {
+  color: var(--z-barra-ink-2);
+}
+.pt-barra .pt-tema,
+.pt-barra .pt-idiomas {
+  color: var(--z-barra-ink-2);
+  box-shadow: inset 0 0 0 1px #2c2c2e;
+}
+.pt-barra .pt-idiomas button {
+  color: var(--z-barra-ink-2);
+}
+.pt-barra .pt-idiomas button.ahora {
+  background: #2c2c2e;
+  color: var(--z-barra-ink);
+}
+.pt-barra .pt-modo-punto {
+  background: var(--z-orbe);
+}
+.pt-barra .pt-modo-punto svg {
+  fill: #4a37c0;
+}
+.pt-barra :where(a, button):focus-visible {
+  outline-color: #f5f5f7;
+}
+
+/* Pestañas de área: una tira tranquila con el punto del módulo */
+.pt-pestanas {
+  background: color-mix(in srgb, var(--z-bg) 88%, transparent);
+  backdrop-filter: saturate(1.6) blur(18px);
+  -webkit-backdrop-filter: saturate(1.6) blur(18px);
+  border-bottom: 1px solid var(--line);
+}
+.pt-pestanas a {
+  border-bottom: 0;
+  margin-block: 7px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  color: var(--ink-2);
+}
+.pt-pestanas a:hover {
+  background: var(--z-surface-2);
+}
+.pt-pestanas a[aria-current='page'] {
+  background: var(--z-sel);
+  color: var(--ink);
+  font-weight: 600;
+}
+.pt-pestanas a i {
+  opacity: 1;
+}
+
+/* Vistas del plan: control segmentado como en iOS */
+.pt-cabeza nav.pt-pestanas {
+  position: static;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: var(--z-surface-2);
+  border: 0;
+  border-radius: 999px;
+  padding: 4px;
+  gap: 2px;
+  width: max-content;
+  max-width: 100%;
+}
+.pt-cabeza nav.pt-pestanas a {
+  margin: 0;
+  padding: 7px 16px;
+  font-size: 13.5px;
+}
+.pt-cabeza nav.pt-pestanas a[aria-current='page'] {
+  background: var(--z-surface);
+  color: var(--ink);
+  box-shadow: var(--z-sombra-1);
+}
+
+/* Lienzo y encabezado: más aire */
+.pt-lienzo {
+  padding-block: 28px 72px;
+  gap: 24px;
+}
+.pt-cabeza h1 {
+  font-size: clamp(24px, 3.6vw, 34px);
+  letter-spacing: -0.03em;
+}
+.pt-cabeza .meta {
+  font-size: 13.5px;
+  color: var(--ink-2);
+}
+
+/* Tarjetas y KPI: superficies sin borde, esquinas amplias */
+.pt-tarjeta,
+.pt-kpi,
+.pt-persona,
+.pt-plan,
+.pt-area,
+.pt-grupo {
+  border-radius: var(--z-r-lg);
+  box-shadow: var(--z-sombra-1);
+  background: var(--z-surface);
+}
+.pt-tarjeta {
+  padding: 22px 24px;
+}
+.pt-tarjeta > header h2 {
+  font-size: 17px;
+  letter-spacing: -0.02em;
+}
+.pt-kpi {
+  padding: 18px 20px;
+  gap: 4px;
+}
+.pt-kpi .n {
+  font-size: 34px;
+  line-height: 1.05;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  color: var(--ink);
+}
+.pt-kpi.alerta .n,
+.pt-kpi.aviso .n {
+  color: var(--ink);
+}
+.pt-kpi.alerta .pt-overline::before,
+.pt-kpi.aviso .pt-overline::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: 1px;
+  background: var(--z-det);
+}
+.pt-kpi.aviso .pt-overline::before {
+  background: var(--z-curso);
+}
+
+/* Avance: la pista fina con la marca de «esperado hoy» */
+.pt-avance .pista {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--z-track);
+}
+.pt-avance .real {
+  border-radius: 999px;
+}
+.pt-avance .esperado {
+  background: var(--z-ink-2);
+  width: 2px;
+  border-radius: 2px;
+}
+
+/* Píldoras y salud */
+.pt-pill,
+.pt-salud {
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+/* La voz de Zaelyn: burbuja gris con el orbe, como en la app */
+.pt-zaelyn {
+  background: var(--z-surface);
+  box-shadow: var(--z-sombra-1);
+  border: 0;
+  border-radius: var(--z-r-lg);
+}
+.pt-zaelyn .chispa {
+  background: var(--z-orbe);
+  box-shadow: 0 4px 14px rgba(140, 120, 230, 0.25);
+}
+.pt-zaelyn .chispa svg {
+  fill: #4a37c0;
+  color: #4a37c0;
+}
+
+/* Tablas: renglones aireados, cabecera discreta */
+.pt-tabla th {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: transparent;
+}
+.pt-tabla-caja {
+  border-radius: var(--z-r-lg);
+  box-shadow: var(--z-sombra-1);
+  border: 0;
+  overflow: hidden;
+}
+
+/* Botones del portal */
+.pt-boton,
+.pt-area-boton {
+  border-radius: 999px;
+  background: var(--z-pri);
+  color: var(--z-on-pri);
+  font-weight: 600;
+}
+.pt-area-boton.suave {
+  background: var(--z-surface-2);
+  color: var(--ink);
+}
+.pt-aviso {
+  background: var(--z-zaelyn-soft);
+  color: var(--z-zaelyn-ink);
+  border-bottom: 0;
+}
+
+/* ═══ 6. Sitio (.st): la misma familia, día y noche ═══════════════════════ */
+.st,
+:root[data-tema='claro'] .st,
+:root:not([data-tema='oscuro']) .st {
+  --noche: var(--z-bg);
+  --noche-2: var(--z-surface);
+  --noche-3: var(--z-surface-2);
+  --linea: var(--z-line);
+  --linea-2: var(--z-line-strong);
+  --tinta: var(--z-ink);
+  --tinta-2: var(--z-ink-2);
+  --tinta-3: var(--z-ink-3);
+  --violeta: var(--z-zaelyn-ink);
+  --cian: var(--z-proyectos);
+  --brasa: var(--z-agenda);
+  --barra-fondo: rgba(0, 0, 0, 0.86);
+  --sobre-marca: var(--z-on-pri);
+  --burbuja-yo: #d9e8ff;
+  --burbuja-yo-linea: transparent;
+  --fuente-display: var(--z-font);
+  --fuente-texto: var(--z-font);
+  --fuente-dato: var(--z-mono);
+  --ancho: 1120px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='claro']) .st {
+    --burbuja-yo: #1d3a63;
+    color-scheme: dark;
+  }
+}
+:root[data-tema='oscuro'] .st {
+  --burbuja-yo: #1d3a63;
+  color-scheme: dark;
+}
+.st {
+  font-family: var(--z-font);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.st :where(h1, h2, h3) {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.st-rotulo {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tinta-2);
+}
+/* La barra del sitio también es negra: es donde vive el logotipo */
+.st-barra {
+  background: var(--barra-fondo);
+  border-bottom: 1px solid #1c1c1e;
+  color: #f5f5f7;
+}
+.st-barra .st-menu {
+  color: #a1a1a6;
+}
+.st-barra .st-menu a:hover {
+  color: #f5f5f7;
+}
+.st-barra .st-idiomas {
+  box-shadow: inset 0 0 0 1px #2c2c2e;
+}
+.st-barra .st-idiomas a,
+.st-barra .st-idiomas span {
+  color: #a1a1a6;
+}
+.st-barra .st-idiomas .st-ahora {
+  background: #2c2c2e;
+  color: #f5f5f7;
+}
+.st-barra .st-btn-2 {
+  color: #f5f5f7;
+  box-shadow: inset 0 0 0 1px #3a3a3c;
+}
+.st-barra .st-hamb {
+  color: #f5f5f7;
+}
+.st-barra :where(a, button):focus-visible {
+  outline-color: #f5f5f7;
+}
+.st-cinta {
+  background: #000;
+  color: #a1a1a6;
+  border-bottom: 1px solid #1c1c1e;
+}
+.st-cinta b {
+  color: #f3c86b;
+}
+.st-cinta b::before {
+  background: #f3c86b;
+}
+
+/* Botones: negro sólido y contorno sutil (el degradado ya no es botón) */
+.st-btn {
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  padding: 0.82rem 1.35rem;
+}
+.st-btn-1 {
+  background: var(--z-pri);
+  color: var(--z-on-pri);
+}
+.st-btn-1:hover {
+  box-shadow: 0 10px 28px -12px rgba(0, 0, 0, 0.45);
+}
+.st-btn-2 {
+  background: var(--z-surface);
+  box-shadow: inset 0 0 0 1px var(--linea);
+}
+:where(a, button, [tabindex]):focus-visible {
+  outline-color: var(--z-ink);
+}
+
+/* Hero: el orbe en lugar del campo animado */
+.st-hero {
+  border-bottom: 0;
+}
+.st-hero::after {
+  display: none;
+}
+.st-hero h1 {
+  font-weight: 600;
+  letter-spacing: -0.04em;
+}
+.st-hero h1 em {
+  background: none;
+  color: var(--tinta-2);
+}
+.st-orbe-hero {
+  position: absolute;
+  left: 50%;
+  top: clamp(-260px, -18vw, -120px);
+  width: clamp(420px, 62vw, 820px);
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: var(--z-orbe);
+  opacity: 0.38;
+  filter: blur(40px);
+  pointer-events: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='claro']) .st-orbe-hero {
+    opacity: 0.16;
+  }
+}
+:root[data-tema='oscuro'] .st-orbe-hero {
+  opacity: 0.16;
+}
+
+/* Tarjetas del sitio: superficies limpias */
+.st-producto,
+.st-plan,
+.st-prueba {
+  background: var(--z-surface);
+  box-shadow: var(--z-sombra-1);
+  border-radius: var(--z-r-xl);
+}
+.st-producto:hover {
+  box-shadow: var(--z-sombra-2);
+}
+.st-producto::before {
+  display: none;
+}
+.st-producto .st-ico {
+  color: var(--tinta);
+}
+.st-producto .st-lema {
+  color: var(--tinta-2);
+}
+.st-plan-pmo {
+  box-shadow: inset 0 0 0 1.5px var(--z-ink), var(--z-sombra-1);
+}
+.st-burbuja {
+  background: var(--z-bubble);
+  box-shadow: none;
+  border-radius: 22px;
+}
+.st-turno.yo .st-burbuja {
+  color: var(--z-ink);
+}
+.st-burbuja b {
+  color: var(--tinta);
+  font-weight: 600;
+}
+.st-chispa {
+  background: var(--z-orbe);
+}
+.st-chispa svg {
+  color: #4a37c0;
+  fill: #4a37c0;
+}
+.st-leyes {
+  background: var(--z-surface-2);
+  border-block: 0;
+}
+.st-ley .st-rom,
+.st-paso .st-n {
+  color: var(--tinta-2);
+}
+.st-piep {
+  background: var(--z-surface-2);
+  border-top: 0;
+}
+
+/* ═══ 7. Ritmo (Gantt, árbol, lectura): colores del sistema ═══════════════ */
+.pt .rt-hecho { --rt: var(--z-hecha); }
+.pt .rt-bien { --rt: var(--z-proyectos); }
+.pt .rt-riesgo { --rt: var(--z-curso); }
+.pt .rt-atrasado { --rt: var(--z-det); }
+.pt .rt-futuro { --rt: var(--z-line-strong); }
+.pt-lectura li.bien i { background: var(--z-hecha); }
+.pt-lectura li.atencion i { background: var(--z-curso); }
+.pt-lectura li.falta i { background: var(--z-line-strong); }
+.pt-gantt2 .fila .p.rt-atrasado,
+.pt-arbol-fila .pct.rt-atrasado { color: var(--z-det-ink); }
+.pt-gantt2 .fila.enc,
+.pt-gantt2 .meses,
+.pt-gantt .enc,
+.pt-gantt .mes {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: var(--z-surface);
+}
+.pt-gantt2 .fila.t-fase,
+.pt-gantt2 .pista.t-fase { background: var(--z-surface-2); }
+.pt-gantt2 .barra {
+  height: 14px;
+  top: 11px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rt) 20%, var(--z-surface));
+}
+.pt-gantt2 .barra > i { border-radius: 999px; }
+.pt-gantt2 .barra.critica { box-shadow: 0 0 0 1.5px var(--z-det); }
+.pt-gantt2 .barra > em { font-weight: 600; }
+.pt-gantt2 .resumen { background: color-mix(in srgb, var(--z-ink) 14%, var(--z-surface)); border-radius: 999px; }
+.pt-gantt2 .resumen > i { border-radius: 999px; }
+.pt-gantt2 .hoy { width: 1.5px; }
+.pt-gantt2 .hoy::after { content: 'Hoy'; }
+.pt-gantt2 .leyenda i { border-radius: 999px; }
+.pt-gantt2 .fila .p { font-weight: 600; }
+
+/* Botones dentro de las barras negras */
+.pt-barra .pt-boton,
+.st-barra .st-btn-1 {
+  background: #f5f5f7;
+  color: #000;
+}
+.st-barra .st-btn-2 {
+  background: transparent;
+  color: #f5f5f7;
+  box-shadow: inset 0 0 0 1px #3a3a3c;
+}
+.st-orbe-hero {
+  top: clamp(-160px, -10vw, -60px);
+  width: clamp(360px, 46vw, 640px);
+  opacity: 0.32;
+  filter: blur(48px);
+}
+
+/* La barra negra del portal fija sus tokens a la noche del sistema */
+.pt .pt-barra {
+  --surface: #000000;
+  --surface-2: #1c1c1e;
+  --sunken: #2c2c2e;
+  --line: #2c2c2e;
+  --line-strong: #48484a;
+  --ink: #f5f5f7;
+  --ink-2: #a1a1a6;
+  --ink-3: #a1a1a6;
+  --brand: #f5f5f7;
+  --brand-ink: #f5f5f7;
+  --on-brand: #000000;
+  --zaelyn: #c4b5ff;
+  background: #000;
+  border-bottom-color: #1c1c1e;
+}
