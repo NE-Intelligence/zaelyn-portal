@@ -61,16 +61,33 @@ detalle de actividad con dependencias y la frase de cambio.
 - Dueño: `[FALTA]` legales, Vercel Hobby (no permite uso comercial y el portal
   ya cobra), secretos viejos en Vercel, correo de contacto.
 
-## Siguiente: rediseño (decisiones/2026-11-10-rediseno-del-portal)
+## Rediseño (decisiones/2026-11-10-rediseno-del-portal) — al 10 nov 2026
 
-Familia visual de la app · Tailwind v4 + shadcn · todo a la vez · Zaelyn como
-la app embebida con riel de conversaciones.
+Familia visual de la app · Tailwind v4 · todo a la vez · Zaelyn al lado en un riel.
 
-| Fase | Entrega | Punto de control |
+| Fase | Estado |
+|---|---|
+| R0 línea base | Hecho. Lighthouse local de main antes de tocar nada (PR #22) |
+| R1 sistema de diseño | Hecho en código: `app/zaelyn.css` es la única fuente de tokens (claro y noche) para portal y sitio. **Falta** pasarlo al artifact «Design System» de Claude Design (el viejo «Zaelyn Proyectos» queda obsoleto) |
+| R2 Tailwind + marco | Hecho (#22): Tailwind v4 sin preflight, barras negras, tipografía del sistema, orbe en el hero |
+| R3 pantallas | Toda pantalla toma el sistema nuevo por tokens (#22). Nuevas, ya hechas en Tailwind: Kanban, Calendario del proyecto, filtro por persona, panel de detalle con dependencias y frases de cambio, barra «Pregúntale a Zaelyn» |
+| R4 Zaelyn al lado | Hecho del lado del portal: riel con el orbe y las conversaciones, Alt+1…9, columna de 400 px; las ventanitas se retiraron. La app embebida se enciende con `ZAELYN_APP_URL` cuando la app tenga el modo `?embebido=1` (specs/portal-con-app-embebida.md) |
+| R5 limpieza | Parcial: README, CLAUDE.md, TASTE_SKILL y Lighthouse al día. Siguen vivas las 7 hojas viejas (ya solo con tokens); se retiran pantalla por pantalla al pasar cada una a Tailwind |
+
+### Rendimiento (Lighthouse local, móvil)
+
+| Página | Antes | Después |
 |---|---|---|
-| R0 | Línea base Lighthouse (móvil y escritorio) y lista de lo que no se rompe | — |
-| R1 | Sistema de diseño único app + portal en Claude Design: tokens, registro denso, 20 componentes, maquetas de Resumen, Gantt, Kanban, sitio y el riel | JJR aprueba el aspecto |
-| R2 | Tailwind v4 + shadcn con los tokens; marco común (barra negra, navegación, riel) | Preview |
-| R3 | Migración de pantallas: sitio, Proyectos y sus vistas nuevas, PMO, obra, horas, editor, Familia, Personal, cuenta, admin | Preview por área |
-| R4 | Zaelyn embebida (depende de la app: modo `embebido`) y retiro de las ventanitas | JJR en compu y teléfono |
-| R5 | Limpieza: fuera las 7 hojas viejas, README, TASTE_SKILL, Lighthouse antes/después | Cierre |
+| Portada | 61 · TBT 1,950 ms · 439 KB | 97 · 50 ms · 283 KB |
+| /proyectos | 62 | 98 |
+| /precios | 63 | 97 |
+| /demo | 90 | 97 |
+| /demo Gantt | 89 | 96 |
+
+### Pendiente
+
+- Core: «Ver como» por rol necesita que el motor diga qué ve cada rol; hoy hay «ver por persona», que solo filtra.
+- Core: que las respuestas de Zaelyn usen `portal.ir` con `?v=&p=&a=` para mover la pantalla (el portal ya lo entiende).
+- App: modo `embebido` y los avisos por `postMessage`; luego poner `ZAELYN_APP_URL` en Vercel.
+- Portal: pasar al artifact de Claude Design el sistema v2; migrar a Tailwind, una por una, las pantallas que aún usan hojas viejas (editor, obra, horas, Familia, Personal, cuenta, admin) y borrar cada hoja al vaciarse.
+- Dueño: los `[FALTA]` legales, el plan de Vercel (Hobby no permite uso comercial), los secretos viejos en Vercel y el correo de contacto.
