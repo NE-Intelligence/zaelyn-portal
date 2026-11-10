@@ -1,5 +1,5 @@
 import { Barra, Pie } from '@/components/portal/Marco'
-import { Lienzo, esVista } from '@/components/portal/Plan'
+import { Lienzo, esVista, filtrosDe } from '@/components/portal/Plan'
 import { DEMO } from '@/lib/demo'
 
 /**
@@ -14,7 +14,8 @@ export default async function Demo({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const vista = esVista((await searchParams).v)
+  const sp = await searchParams
+  const vista = esVista(sp.v)
   return (
     <>
       <Barra area="proyectos"
@@ -22,7 +23,7 @@ export default async function Demo({
         ejemplo
       />
       <main className="pt-lienzo">
-        <Lienzo v={DEMO} vista={vista} base="/demo" leido={new Date().toISOString()} />
+        <Lienzo v={DEMO} vista={vista} base="/demo" leido={new Date().toISOString()} f={filtrosDe(sp)} />
       </main>
       <Pie />
     </>

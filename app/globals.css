@@ -1,6 +1,9 @@
 /* Reset mínimo y las variables de fuente. Los dos registros —el sitio, oscuro
    siempre, y el portal, claro y oscuro— traen sus propios tokens y no se
    pisan: cada uno vive bajo su clase. */
+/* En la capa base (rediseño, Tailwind v4): las utilidades de Tailwind ganan
+   sobre este reset, y las hojas de cada registro siguen ganando sobre ambos. */
+@layer base {
 *,
 *::before,
 *::after {
@@ -81,4 +84,6 @@ a {
 .logo-barra {
   display: block;
   max-width: 100%;
+}
+
 }

@@ -20,14 +20,14 @@ Estándar NE Producto (`docs/DECISIONS.md`, NE-0001). Esto se verifica antes de 
 ### Stack real detectado
 
 - Next.js **16.4.3** con App Router (`app/(sitio)`, `app/(portal)`, `app/admin`, `app/api`), React 19, TypeScript estricto.
-- Estilos: CSS propio con tokens (`app/sitio.css`, `app/portal.css`…), **sin Tailwind ni shadcn**.
+- Estilos: **Tailwind v4** (`@tailwindcss/postcss`) leyendo los tokens de `app/zaelyn.css`, la única fuente de valores (decisiones/2026-11-10-rediseno-del-portal). Las hojas viejas (`portal.css`, `sitio.css`…) siguen vivas y solo usan esos tokens; se retiran pantalla por pantalla. Tailwind se carga sin preflight. shadcn/ui se agrega por componente cuando una pantalla lo necesite.
 - Reportes: `@react-pdf/renderer` (PDF) y `pptxgenjs` (PowerPoint).
 - Sin base de datos, sin Supabase Auth: la identidad es la cuenta de Telegram/WhatsApp; se entra con un pase de un solo uso emitido por Zaelyn.
 - Node: `engines >=20`; `@types/node ^20`.
 - `proxy.ts` (antes «middleware»): mismo origen en todo lo que no es lectura y CSP con nonce por petición.
 
 **Desviaciones del estándar NE DevIA** (Node 20, Next.js 14+ App Router, cliente Supabase sin ORM, Tailwind + shadcn, Supabase Auth, Fly/Vercel, Anthropic):
-sin Tailwind ni shadcn (CSS propio con tokens, decisión de marca descrita en `README.md`); sin Supabase ni Supabase Auth (por diseño: el portal solo lee de la API de Zaelyn); sin llamadas a Anthropic (las hace Zaelyn).
+sin Supabase ni Supabase Auth (por diseño: el portal solo lee de la API de Zaelyn); sin llamadas a Anthropic (las hace Zaelyn).
 
 ### Comandos (de `package.json`)
 

@@ -873,3 +873,210 @@ body {
   background: #000;
   border-bottom-color: #1c1c1e;
 }
+
+/* El nombre de una actividad abre su detalle */
+.pt .pt-abre { color: inherit; text-decoration: none; }
+.pt .pt-abre:hover { text-decoration: underline; text-decoration-color: var(--z-line-strong); text-underline-offset: 3px; }
+
+/* ═══ 8. El riel: Zaelyn y las conversaciones al lado (Riel.tsx) ══════════ */
+.pt {
+  --riel: 64px;
+}
+.pt .rl,
+.pt .rl-columna {
+  display: none;
+}
+@media (min-width: 900px) {
+  .pt .rl {
+    position: fixed;
+    top: var(--barra-h);
+    right: 0;
+    bottom: 0;
+    z-index: 18;
+    width: var(--riel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 0;
+    background: var(--z-bg);
+    border-left: 1px solid var(--z-line);
+  }
+  /* La barra negra sigue a todo lo ancho; lo demás le deja lugar al riel. */
+  :root[data-riel] body > .pt > :not(.pt-barra, .pt-aviso, .rl, .rl-columna, .ch-panel) {
+    margin-right: var(--riel);
+  }
+  :root[data-riel] .pt .ch-panel {
+    right: var(--riel);
+    top: var(--barra-h);
+    border-radius: 0;
+  }
+  .pt .pt-boton-zaelyn {
+    display: none;
+  }
+  :root[data-riel] .pt .pt-barra {
+    padding-right: calc(var(--riel) + 16px);
+  }
+}
+@media (min-width: 1100px) {
+  :root[data-riel][data-zpanel='abierto'] body > .pt,
+  :root[data-riel][data-zconv='abierta'] body > .pt {
+    padding-right: 0;
+  }
+  :root[data-riel][data-zpanel='abierto'] body > .pt > :not(.pt-barra, .pt-aviso, .rl, .rl-columna, .ch-panel),
+  :root[data-riel][data-zconv='abierta'] body > .pt > :not(.pt-barra, .pt-aviso, .rl, .rl-columna, .ch-panel) {
+    margin-right: calc(var(--riel) + var(--panel-z, 400px));
+  }
+}
+.pt .rl-z,
+.pt .rl-p {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  background: transparent;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.pt .rl-z .z-orbe {
+  width: 40px;
+  height: 40px;
+}
+.pt .rl-z[aria-pressed='true'] .z-orbe {
+  box-shadow: 0 0 0 3px var(--z-bg), 0 0 0 5px var(--z-zaelyn);
+}
+.pt .rl-z:hover {
+  transform: scale(1.04);
+}
+.pt .rl-sep {
+  width: 24px;
+  height: 1px;
+  background: var(--z-line);
+}
+.pt .rl-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  overflow-y: auto;
+}
+.pt .rl-p {
+  background: var(--z-surface-2);
+  color: var(--z-ink);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--z-sombra-1);
+}
+.pt .rl-p[data-tipo='grupo'] {
+  border-radius: 14px;
+}
+.pt .rl-p:hover {
+  background: var(--z-sel);
+}
+.pt .rl-p[aria-pressed='true'] {
+  background: var(--z-pri);
+  color: var(--z-on-pri);
+}
+.pt .rl-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--z-det);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  box-shadow: 0 0 0 2px var(--z-bg);
+}
+.pt .rl-mas {
+  margin-top: auto;
+  font-size: 12px;
+  color: var(--z-ink-2);
+  text-decoration: none;
+  padding: 6px 8px;
+  border-radius: 999px;
+}
+.pt .rl-mas:hover {
+  background: var(--z-surface-2);
+  color: var(--z-ink);
+}
+.pt .rl-columna {
+  position: fixed;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  inset: 0;
+  background: var(--z-bg);
+  animation: ch-entra 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@media (min-width: 900px) {
+  .pt .rl-columna {
+    inset: var(--barra-h) var(--riel) 0 auto;
+    width: var(--panel-z, 400px);
+    border-left: 1px solid var(--z-line);
+    box-shadow: var(--z-sombra-2);
+  }
+}
+.pt .rl-cab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--z-line);
+}
+.pt .rl-cab-orbe {
+  width: 28px;
+  height: 28px;
+}
+.pt .rl-cab-t {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pt .rl-acc {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--z-surface-2);
+  color: var(--z-ink);
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+.pt .rl-marco {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: var(--z-bg);
+}
+.pt .rl-columna > :last-child:not(.rl-cab) {
+  flex: 1;
+  min-height: 0;
+}
+@media print {
+  .pt .rl,
+  .pt .rl-columna {
+    display: none;
+  }
+}
+
+/* El panel propio de Zaelyn (mientras la app no esté embebida): la burbuja de la app */
+.pt .ch-panel {
+  background: var(--z-bg);
+}

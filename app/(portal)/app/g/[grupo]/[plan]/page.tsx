@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Barra, Pie } from '@/components/portal/Marco'
-import { Lienzo, esVista } from '@/components/portal/Plan'
+import { Lienzo, esVista, filtrosDe } from '@/components/portal/Plan'
 import { SinSesion } from '@/components/portal/SinSesion'
 import { Reabrir } from '@/components/editor/Reabrir'
 import { elPlan, fichaDelPlan, obrasDelGrupo, pmoDelGrupo, reportesDelPlan, sugerenciasDelGrupo } from '@/lib/api'
@@ -63,7 +63,7 @@ export default async function Plan({
           <Link className="ed-btn suave chico" href={`/app/g/${grupo}/ajustes`}>Ajustes del grupo</Link>
         </div>
         {sug.ok && <Sugerencias grupo={grupo} inicial={sug.dato.sugerencias} />}
-        <Lienzo v={r.dato} vista={vista} base={`/app/g/${grupo}/${plan}`} leido={leido} en={en}
+        <Lienzo v={r.dato} vista={vista} base={`/app/g/${grupo}/${plan}`} leido={leido} en={en} f={filtrosDe(sp)} conSesion
           general={vista === 'general' && e.plan ? await seccionGeneral(grupo, e.plan.id, `/app/g/${grupo}/${plan}`, r.dato) : null} />
       </main>
       <Pie />

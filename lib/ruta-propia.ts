@@ -41,7 +41,23 @@ export function mismoOrigen(origin: string | null, fetchSite: string | null, pro
  * componentes usan `style={…}` de React, que el navegador trata como estilo
  * en línea y un nonce no cubre. Un estilo inyectado no ejecuta nada.
  */
-export function politicaDeContenido(nonce: string, desarrollo: boolean): string {
+/**
+ * El origen de la app de conversación (app.zaelyn.ai) cuando el portal la
+ * lleva embebida en su columna derecha (decisiones/2026-11-10-rediseno-del-portal).
+ * Solo un origen https limpio; cualquier otra cosa se ignora y no se embebe nada.
+ */
+export function origenDeLaApp(valor: string | undefined | null): string | null {
+  if (!valor) return null
+  try {
+    const u = new URL(valor)
+    if (u.protocol !== 'https:' || u.username || u.password) return null
+    return u.origin
+  } catch {
+    return null
+  }
+}
+
+export function politicaDeContenido(nonce: string, desarrollo: boolean, app: string | null = null): string {
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${desarrollo ? " 'unsafe-eval'" : ''}`,
@@ -52,6 +68,7 @@ export function politicaDeContenido(nonce: string, desarrollo: boolean): string 
     "connect-src 'self'",
     "worker-src 'self'",
     "manifest-src 'self'",
+    `frame-src 'self'${app ? ` ${app}` : ''}`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

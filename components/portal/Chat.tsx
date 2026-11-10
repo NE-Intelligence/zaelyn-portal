@@ -135,7 +135,11 @@ export function Chat({ t }: { t: TextosChat }) {
     const alternar = () => setAbierto(a => !a)
     window.addEventListener('zaelyn:abrir-chat', abrir)
     window.addEventListener('zaelyn:alternar', alternar)
+    // El riel cierra a Zaelyn cuando se abre una conversación con alguien.
+    const cerrar = () => setAbierto(false)
+    window.addEventListener('zaelyn:cerrar-chat', cerrar)
     return () => {
+      window.removeEventListener('zaelyn:cerrar-chat', cerrar)
       window.removeEventListener('zaelyn:abrir-chat', abrir)
       window.removeEventListener('zaelyn:alternar', alternar)
     }
@@ -246,6 +250,24 @@ export function Chat({ t }: { t: TextosChat }) {
   }
 
   const tocarBoton = (b: Boton) => { void mandar({ boton: b.data }, b.label) }
+
+  // «Pregúntale a Zaelyn» desde la pantalla y las frases del detalle
+  // (vistas2.tsx): abren el panel y mandan el texto como si se escribiera
+  // aquí. Si la respuesta trae página, el portal se mueve solo (`esperando`).
+  const mandarRef = useRef(mandar)
+  mandarRef.current = mandar
+  useEffect(() => {
+    const oir = (e: Event) => {
+      const { texto: q, contexto } = (e as CustomEvent<{ texto: string; contexto?: string }>).detail ?? { texto: '' }
+      const limpio = (q ?? '').trim()
+      if (!limpio) return
+      setAbierto(true)
+      const conLugar = contexto && !limpio.toLowerCase().includes(contexto.toLowerCase()) ? `en ${contexto} ${limpio}` : limpio
+      void mandarRef.current({ text: conLugar }, limpio)
+    }
+    window.addEventListener('zaelyn:preguntar', oir)
+    return () => window.removeEventListener('zaelyn:preguntar', oir)
+  }, [])
 
   // ── voz ─────────────────────────────────────────────────────────────
   const empezarVoz = async () => {
