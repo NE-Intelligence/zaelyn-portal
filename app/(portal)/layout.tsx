@@ -4,6 +4,7 @@ import '../editor.css'
 import '../familia.css'
 import '../persona.css'
 import '../horas.css'
+import '../zaelyn.css'
 
 export const metadata: Metadata = { title: 'Proyectos' }
 

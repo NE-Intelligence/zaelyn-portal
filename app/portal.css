@@ -1697,7 +1697,7 @@ a.pt-plan:hover {
   :root[data-zpanel='abierto'] body > .pt { padding-right: var(--panel-z); }
 }
 /* el botón de la barra */
-.pt .pt-zaelyn {
+.pt .pt-boton-zaelyn {
   display: inline-flex; align-items: center; gap: 6px; min-height: 34px;
   padding: 6px 14px; border-radius: var(--r-pill); cursor: pointer;
   border: 1px solid color-mix(in srgb, var(--zaelyn) 45%, transparent);
@@ -1705,9 +1705,9 @@ a.pt-plan:hover {
   font: 600 13.5px/1 var(--fuente-texto), sans-serif;
   transition: background .15s, color .15s, box-shadow .15s;
 }
-.pt .pt-zaelyn:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--zaelyn) 18%, transparent); }
-.pt .pt-zaelyn[aria-pressed='true'] { background: var(--zaelyn); color: #fff; border-color: var(--zaelyn); }
-.pt .pt-zaelyn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.pt .pt-boton-zaelyn:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--zaelyn) 18%, transparent); }
+.pt .pt-boton-zaelyn[aria-pressed='true'] { background: var(--zaelyn); color: #fff; border-color: var(--zaelyn); }
+.pt .pt-boton-zaelyn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .pt .pt-zaelyn-chispa { font-size: 13px; }
 .pt .ch-cab { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--zaelyn-soft); }
 .pt .ch-titulo { margin: 0; font: 600 16px/1.2 var(--fuente-display), sans-serif; color: var(--zaelyn-ink); }
@@ -1742,7 +1742,7 @@ a.pt-plan:hover {
 @media (max-width: 640px) {
   .pt .ch-panel { width: 100%; border-left: 0; }
   .pt .ch-msg { max-width: 92%; }
-  .pt .pt-zaelyn { padding: 6px 11px; }
+  .pt .pt-boton-zaelyn { padding: 6px 11px; }
   .pt .pt-zaelyn-txt { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
