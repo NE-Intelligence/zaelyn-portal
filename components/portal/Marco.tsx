@@ -3,7 +3,8 @@ import { LogoBarra } from '@/components/Logo'
 import { Preferencias } from '@/components/Preferencias'
 import { Chat } from '@/components/portal/Chat'
 import { BotonZaelyn } from '@/components/portal/BotonZaelyn'
-import { Ventanas } from '@/components/portal/Ventanas'
+import { Riel } from '@/components/portal/Riel'
+import { origenDeLaApp } from '@/lib/ruta-propia'
 import { cookies } from 'next/headers'
 import { COOKIE, soyAdmin } from '@/lib/api'
 import { textos, type Clave } from '@/lib/copy'
@@ -49,6 +50,7 @@ export async function Barra({
 }) {
   const [lang, tema, admin] = await Promise.all([idiomaActual(), temaActual(), sesion ? soyAdmin() : Promise.resolve(false)])
   const t = textos(lang)
+  const app = origenDeLaApp(process.env.ZAELYN_APP_URL)
   const a: Area | undefined = area
   const pestanas: Area[] = ejemplo ? ['personal', 'familia', 'proyectos'] : sesion ? ['inicio', 'personal', 'familia', 'proyectos', 'mensajes', 'cuenta'] : []
   if (admin) pestanas.push('admin')
@@ -116,10 +118,11 @@ export async function Barra({
           </div>
         </nav>
       )}
-      {/* Las conversaciones con personas en ventanitas (no en la bandeja, que ya las muestra). */}
-      {sesion && !ejemplo && a !== 'mensajes' && <Ventanas yo={null} />}
+      {/* Zaelyn y las conversaciones en el riel derecho (decisiones/2026-11-10-rediseno-del-portal).
+          Con ZAELYN_APP_URL la columna es la app embebida; sin ella, el chat propio. */}
+      {sesion && !ejemplo && <Riel app={app} />}
       {/* El chat de Zaelyn: panel lateral en toda pantalla con sesión, nunca en el ejemplo. */}
-      {sesion && !ejemplo && (
+      {sesion && !ejemplo && !app && (
         <Chat t={{
           abrir: t('chat.abrir'), titulo: t('chat.titulo'), sub: t('chat.sub'), cerrar: t('chat.cerrar'),
           placeholder: t('chat.placeholder'), enviar: t('chat.enviar'), hablar: t('chat.hablar'),

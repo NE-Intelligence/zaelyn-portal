@@ -1,20 +1,22 @@
 # zaelyn-portal
 
-El sitio de **zaelyn.ai** y el portal de proyectos. Next 16 + React 19, sin
-Tailwind: dos hojas de estilo con tokens propios.
+El sitio de **zaelyn.ai** y el portal de proyectos. Next 16 + React 19 y
+Tailwind v4. Todos los valores de diseño (color, radios, sombras, tipografía)
+viven en `app/zaelyn.css`, el sistema de diseño v2: la misma familia visual
+que la app de conversación (decisiones/2026-11-10-rediseno-del-portal).
 
 ## Los dos registros
 
-Son dos marcas dentro de la misma página, y no se pisan porque cada una vive
-bajo su clase:
+Dos registros de la misma marca, cada uno bajo su clase, con los mismos tokens:
 
-- **El sitio** (`app/(sitio)/`, `app/sitio.css`, prefijo `.st-`) va oscuro
-  siempre. El logotipo es blanco sobre negro y no existe otra versión, así que
-  el sitio se diseñó alrededor de eso en vez de pelearse con ello.
-- **El portal** (`app/(portal)/`, `app/portal.css`, prefijo `.pt-`) va claro y
-  oscuro, con el sistema de diseño: cobalto `#2f55f4` y coral `#c2410c`. El
-  degradado morado→cian de la marca aparece una vez, en el logotipo, y nunca
-  como estado de una interfaz.
+- **El sitio** (`app/(sitio)/`, prefijo `.st-`) y **el portal** (`app/(portal)/`,
+  prefijo `.pt-`) van en día y en noche, con la tipografía del sistema, como la
+  app: blanco, gris y negro, y el color solo para el módulo y el estado.
+- La barra superior es **negra siempre**: ahí vive el logotipo, que solo va
+  sobre negro. En el resto, el nombre se compone en tipografía con la æ en
+  degradado.
+- El degradado morado→cian aparece en el logotipo y en el orbe de Zaelyn, y
+  nunca como estado de una interfaz.
 
 ## Las rutas
 
@@ -22,10 +24,16 @@ bajo su clase:
 |---|---|
 | `/` | La portada. Proyectos, familia y personal. |
 | `/proyectos`, `/familia`, `/personal` | Las tres áreas. |
-| `/demo` | El portal completo con datos inventados, y lo dice. |
-| `/entrar?pase=…` | Canjea el pase por una sesión. No es una página: pone una cookie y redirige. |
+| `/precios`, `/nosotros`, `/legal`, `/empezar` | Precios, quiénes somos, avisos legales y arranque. |
+| `/demo`, `/demo/familia`, `/demo/personal` | Los portales completos con datos inventados, y lo dicen. |
+| `/entrar` | La puerta web (passkey, correo o Telegram). Con `?pase=` canjea por POST. |
 | `/app` | Los grupos de la persona. Exige sesión. |
-| `/app/g/<grupo>/<plan>?v=<vista>` | El plan, en una de seis vistas. |
+| `/app/g/<grupo>/<plan>?v=<vista>` | El plan: Resumen, Tablero, Kanban, Gantt, Calendario, Ruta crítica, Equipo, Bitácora, General. |
+| `…?p=<persona>&a=<actividad>&m=<AAAA-MM>` | Ver por persona, abrir el detalle de una actividad, cambiar de mes. Zaelyn puede mandar aquí con `portal.ir`. |
+| `/app/g/<grupo>/<plan>/obra`, `/app/g/<grupo>/horas`, `/presupuesto`, `/ajustes`, `/editor` | Obra, horas, presupuesto, ajustes del grupo y editor de planes. |
+| `/app/f/<grupo>`, `/app/personal` | Familia y Personal. |
+| `/app/mensajes`, `/app/cuenta`, `/app/plan`, `/app/organizacion` | Mensajes, cuenta, plan y organización. |
+| `/admin` | Administración (solo el dueño). |
 | `/salir` | Entrega el token. **Solo POST**. |
 
 ## Cómo entra alguien
@@ -81,3 +89,11 @@ solo se puede compilar con acceso a Google Fonts no se compila.
 ## Chat de Zaelyn (fase 1)
 
 `components/portal/Chat.tsx` + `app/api/chat/{mensaje,voz,recibir}`. Ver `docs/DECISIONS.md` P-0002.
+
+## Zaelyn al lado (el riel)
+
+Con sesión, el borde derecho lleva el riel: el orbe de Zaelyn arriba y las
+conversaciones apiladas (Alt+1 Zaelyn, Alt+2…9 cada conversación). Abre una
+columna de 400 px que empuja el contenido. Con `ZAELYN_APP_URL` esa columna es
+la app de conversación embebida en modo `?embebido=1`; sin ella, el chat y la
+conversación propios del portal. Ver `components/portal/Riel.tsx`.

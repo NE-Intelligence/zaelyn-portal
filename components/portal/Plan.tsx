@@ -12,6 +12,18 @@ import { Avance } from './atomos'
 import { Bitacora, Equipo, Gantt, Resumen, Ruta, Tablero } from './vistas'
 import { ROL_PUEDE, VISTA_NOMBRE, type VistaDePlan, type Vista } from '@/lib/plan'
 import { nombreDeRol } from '@/lib/plan-uso/tipos'
+import { Calendario, Detalle, FiltroPersona, Kanban, dePersona, type Filtros } from './vistas2'
+import { BarraPregunta } from './Pregunta'
+
+/** Lee los filtros de la dirección; un valor raro se ignora, no se adivina. */
+export function filtrosDe(sp: Record<string, string | string[] | undefined>): Filtros {
+  const uno = (x: string | string[] | undefined) => (Array.isArray(x) ? x[0] : x) ?? null
+  const limpio = (x: string | null) => (x && /^[\w:.-]{1,80}$/.test(x) ? x : null)
+  return { p: limpio(uno(sp.p)), a: limpio(uno(sp.a)), m: limpio(uno(sp.m)) }
+}
+
+/** Las vistas que se pueden ver por persona: las que solo reacomodan renglones. */
+const POR_PERSONA: Vista[] = ['tablero', 'kanban', 'calendario']
 
 export const VISTAS = Object.keys(VISTA_NOMBRE) as Vista[]
 
@@ -30,7 +42,7 @@ function frescura(iso: string, ahora = Date.now()): string {
 }
 
 export function Lienzo({
-  v, vista, base, leido, en, general,
+  v, vista, base, leido, en, general, f = {}, conSesion = false,
 }: {
   v: VistaDePlan
   vista: Vista
@@ -42,6 +54,10 @@ export function Lienzo({
   en?: Array<string | null> | null
   /** La sección General (#202), solo cuando se pide y hay un plan. */
   general?: ReactNode
+  /** Persona, actividad abierta y mes, de la dirección (vistas2.tsx). */
+  f?: Filtros
+  /** Con sesión aparece la barra para preguntarle a Zaelyn. */
+  conSesion?: boolean
 }) {
   const e = v.estado
   const nombre = e.plan?.nombre ?? e.grupo.nombre
@@ -82,13 +98,24 @@ export function Lienzo({
         </nav>
       </div>
 
+      {conSesion && (
+        <BarraPregunta
+          contexto={nombre}
+          ejemplos={['¿Qué está atrasado?', '¿Qué le toca a cada quien esta semana?', '¿Qué manda sobre la fecha final?']}
+        />
+      )}
+      {POR_PERSONA.includes(vista) && <FiltroPersona v={v} base={base} vista={vista} f={f} />}
+
       {vista === 'resumen' && <Resumen v={v} base={base} />}
-      {vista === 'tablero' && <Tablero v={v} en={en ?? null} base={base} />}
+      {vista === 'tablero' && <Tablero v={f.p ? { ...v, estado: { ...e, renglones: dePersona(e.renglones, f.p) } } : v} en={en ?? null} base={base} />}
+      {vista === 'kanban' && <Kanban v={v} base={base} f={f} />}
+      {vista === 'calendario' && <Calendario v={v} base={base} f={f} />}
       {vista === 'gantt' && <Gantt v={v} />}
       {vista === 'ruta' && <Ruta v={v} />}
       {vista === 'equipo' && <Equipo v={v} />}
       {vista === 'bitacora' && <Bitacora v={v} />}
       {vista === 'general' && general}
+      <Detalle v={v} base={base} vista={vista} f={f} conSesion={conSesion} />
     </>
   )
 }

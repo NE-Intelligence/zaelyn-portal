@@ -39,3 +39,16 @@ test('contrato: lo roto se nombra campo por campo', () => {
   const f = faltasDePlan(casi)
   assert.ok(f.includes('estado.renglones: se esperaba array, llegó undefined'))
 })
+
+import { origenDeLaApp, politicaDeContenido } from '../lib/ruta-propia.ts'
+
+test('app embebida: solo un origen https limpio entra a frame-src', () => {
+  assert.equal(origenDeLaApp('https://app.zaelyn.ai/'), 'https://app.zaelyn.ai')
+  assert.equal(origenDeLaApp('https://app.zaelyn.ai/zaelyn?x=1'), 'https://app.zaelyn.ai')
+  for (const malo of [undefined, '', 'http://app.zaelyn.ai', 'javascript:alert(1)', 'https://u:p@app.zaelyn.ai', 'no es url']) {
+    assert.equal(origenDeLaApp(malo), null, `dejó pasar ${JSON.stringify(malo)}`)
+  }
+  assert.match(politicaDeContenido('n', false), /frame-src 'self';/)
+  assert.match(politicaDeContenido('n', false, 'https://app.zaelyn.ai'), /frame-src 'self' https:\/\/app\.zaelyn\.ai;/)
+  assert.match(politicaDeContenido('n', false, 'https://app.zaelyn.ai'), /frame-ancestors 'none'/)
+})

@@ -339,7 +339,7 @@ export function Tablero({ v, en, base }: { v: VistaDePlan; en?: Tramo | null; ba
                         <div className="nombre">
                           {r.clave && <span className="pt-mono" style={{ color: 'var(--ink-3)' }}>{r.clave}</span>}
                           <span className="txt">
-                            {r.texto}
+                            <Link href={`${base}?v=tablero&a=${r.id}`} scroll={false} className="pt-abre">{r.texto}</Link>
                             {r.hito && <span className="pt-bandera" style={{ marginLeft: 6 }}>Hito</span>}
                             {r.soporte && <span className="pt-bandera" style={{ marginLeft: 6 }} title="Soporte post go-live: pesa poco en el avance">Soporte</span>}
                             {r.manda && <span className="pt-bandera" style={{ marginLeft: 6 }}>Sin margen</span>}

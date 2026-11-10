@@ -5,13 +5,21 @@ import type { NextConfig } from 'next'
  * política de contenido (CSP) NO está aquí: lleva un nonce por petición y la
  * pone `proxy.ts`.
  */
+/** La app de conversación embebida (Riel.tsx) también usa el micrófono. */
+const APP = (() => {
+  try {
+    const u = new URL(process.env.ZAELYN_APP_URL ?? '')
+    return u.protocol === 'https:' ? u.origin : null
+  } catch { return null }
+})()
+
 const SEGURIDAD = [
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   { key: 'X-Frame-Options', value: 'DENY' },
   // El micrófono es del propio sitio (la voz del chat, fase 1); nada más.
-  { key: 'Permissions-Policy', value: 'microphone=(self), camera=(), geolocation=(), payment=()' },
+  { key: 'Permissions-Policy', value: `microphone=(self${APP ? ` "${APP}"` : ''}), camera=(), geolocation=(), payment=()` },
 ]
 
 const nextConfig: NextConfig = {

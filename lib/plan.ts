@@ -38,7 +38,7 @@ export type Senal =
   | 'atrasado' | 'vencido' | 'bloqueado' | 'sin_dueno' | 'eterno'
   | 'estancado' | 'sin_declarar' | 'salto' | 'retroceso'
 
-export type Vista = 'resumen' | 'tablero' | 'gantt' | 'ruta' | 'equipo' | 'bitacora' | 'general'
+export type Vista = 'resumen' | 'tablero' | 'kanban' | 'gantt' | 'calendario' | 'ruta' | 'equipo' | 'bitacora' | 'general'
 
 export const ESTATUS_NOMBRE: Record<Estatus, string> = {
   abierto: 'Sin iniciar',
@@ -126,7 +126,9 @@ export const ROL_PUEDE: Record<string, string> = {
 export const VISTA_NOMBRE: Record<Vista, string> = {
   resumen: 'Resumen',
   tablero: 'Tablero',
+  kanban: 'Kanban',
   gantt: 'Gantt',
+  calendario: 'Calendario',
   ruta: 'Ruta crítica',
   equipo: 'Equipo',
   bitacora: 'Bitácora',

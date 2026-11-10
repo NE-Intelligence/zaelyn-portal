@@ -22,7 +22,7 @@
  *    ahí no hay cookie de otra persona que robar, así que se deja pasar.
  */
 import { NextResponse, type NextRequest } from 'next/server'
-import { mismoOrigen, politicaDeContenido } from '@/lib/ruta-propia'
+import { mismoOrigen, origenDeLaApp, politicaDeContenido } from '@/lib/ruta-propia'
 
 const LECTURA = new Set(['GET', 'HEAD', 'OPTIONS'])
 
@@ -35,7 +35,7 @@ export function proxy(req: NextRequest) {
   // La política de contenido, con un nonce nuevo en cada petición. Todas las
   // páginas de este sitio ya son dinámicas, así que el nonce no cuesta nada.
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64')
-  const csp = politicaDeContenido(nonce, process.env.NODE_ENV === 'development')
+  const csp = politicaDeContenido(nonce, process.env.NODE_ENV === 'development', origenDeLaApp(process.env.ZAELYN_APP_URL))
   const cabeceras = new Headers(req.headers)
   cabeceras.set('x-nonce', nonce)
   cabeceras.set('Content-Security-Policy', csp)
