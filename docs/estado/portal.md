@@ -61,9 +61,16 @@ detalle de actividad con dependencias y la frase de cambio.
 - Dueño: `[FALTA]` legales, Vercel Hobby (no permite uso comercial y el portal
   ya cobra), secretos viejos en Vercel, correo de contacto.
 
-## Siguiente
+## Siguiente: rediseño (decisiones/2026-11-10-rediseno-del-portal)
 
-Rediseño del portal (8 nov 2026: al dueño no le gustó el aspecto actual; le falta
-elegancia). Fase 0 de `ne-diseno`: línea base de Lighthouse y lista de lo que no
-se puede romper, antes de tocar estilos. Las vistas que faltan nacen ya en el
-diseño nuevo, no en el actual.
+Familia visual de la app · Tailwind v4 + shadcn · todo a la vez · Zaelyn como
+la app embebida con riel de conversaciones.
+
+| Fase | Entrega | Punto de control |
+|---|---|---|
+| R0 | Línea base Lighthouse (móvil y escritorio) y lista de lo que no se rompe | — |
+| R1 | Sistema de diseño único app + portal en Claude Design: tokens, registro denso, 20 componentes, maquetas de Resumen, Gantt, Kanban, sitio y el riel | JJR aprueba el aspecto |
+| R2 | Tailwind v4 + shadcn con los tokens; marco común (barra negra, navegación, riel) | Preview |
+| R3 | Migración de pantallas: sitio, Proyectos y sus vistas nuevas, PMO, obra, horas, editor, Familia, Personal, cuenta, admin | Preview por área |
+| R4 | Zaelyn embebida (depende de la app: modo `embebido`) y retiro de las ventanitas | JJR en compu y teléfono |
+| R5 | Limpieza: fuera las 7 hojas viejas, README, TASTE_SKILL, Lighthouse antes/después | Cierre |
