@@ -112,4 +112,4 @@ paletas pastel (conversación de la app).
 
 ## Inicio de ejecución (decisiones/2026-11-11-inicio-de-ejecucion) — 11 nov 2026
 
-`/app` ahora es la lista de todo lo que hay que hacer (Lista / Tarjetas / Semana, filtro por espacio) con agenda, casa, fechas, hábitos, proyectos y apps al lado. Tocar una cosa la abre con Zaelyn. Falta en el Core: marcar estatus directo, orden propio, listas y pendientes de las apps. Falta en Vercel: `ZAELYN_APP_URL=https://app.zaelyn.ai` para que la columna sea la app.
+`/app` ahora es la lista de todo lo que hay que hacer (Lista / Tarjetas / Semana, filtro por espacio) con agenda, casa, fechas, hábitos, proyectos y apps al lado. Tocar una cosa la abre con Zaelyn. Falta en el Core: marcar estatus directo, orden propio, listas y pendientes de las apps. `ZAELYN_APP_URL=https://app.zaelyn.ai` quedó en Vercel (producción y previews) el 11 nov: la columna de Zaelyn es la app embebida.
