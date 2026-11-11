@@ -1,20 +1,20 @@
 import { Barra } from '@/components/portal/Marco'
 import { SinSesion } from '@/components/portal/SinSesion'
-import { misGrupos, yoMismo } from '@/lib/api'
-import { lugarDe, type EntradaDelDia } from '@/lib/persona'
-import { Inicio as Vista } from '@/components/portal/Inicio'
-import { cuentaWeb } from '@/lib/api'
+import { cuentaWeb, laAgenda, laFamilia, losModulos, misGrupos, yoMismo } from '@/lib/api'
+import { Ejecucion } from '@/components/portal/Ejecucion'
+import { appsDe, avisosDe, casaDe, desdeAgenda, desdePersona, fechasDe, proyectosDe } from '@/lib/ejecucion'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Inicio' }
 
 /**
- * `/app` — el Inicio de la persona (decisiones/2026-11-10-landings-y-portal).
+ * `/app` — el Inicio como vista de ejecución (decisiones/2026-11-11-inicio-de-ejecucion).
  *
- * Una pantalla tranquila: el saludo, lo primero que Zaelyn ve hoy, una tarjeta
- * por solución con UNA sola cifra y la lista de hoy. Las cifras son las que el
- * motor ya contó (`/portal/persona`, `/portal/grupos`): aquí no se mide nada,
- * ni se pinta un porcentaje que no venga medido.
+ * Todo lo que la persona tiene que hacer, venga de Personal, Familia,
+ * Proyectos o una app, en una lista priorizada, en tarjetas o en la semana;
+ * al lado, la agenda, la casa, las fechas, los hábitos, los proyectos y las
+ * apps. Lee lo que el motor ya midió: `/portal/agenda` (la misma de la app),
+ * `/portal/persona`, `/portal/familia/<g>`, `/portal/grupos` y `/portal/modulos`.
  */
 const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
@@ -30,43 +30,54 @@ function hoyLargo(iso: string): string {
   const t = `${DIAS[f.getUTCDay()]} ${d} de ${MESES[m - 1]}`
   return t[0]!.toUpperCase() + t.slice(1)
 }
-const hora = (e: EntradaDelDia): string => ('hhmm' in e && e.hhmm ? e.hhmm : 'Hoy')
+const enZona = (tz: string | null) => {
+  try { return new Intl.DateTimeFormat('en-CA', { timeZone: tz ?? 'America/Mexico_City' }).format(new Date()) } catch { return new Date().toISOString().slice(0, 10) }
+}
+const sumar = (iso: string, n: number) => {
+  const [a, m, d] = iso.split('-').map(Number) as [number, number, number]
+  return new Date(Date.UTC(a, m - 1, d + n)).toISOString().slice(0, 10)
+}
 
 export default async function Inicio() {
-  const [r, yo, cuenta] = await Promise.all([misGrupos(), yoMismo(1), cuentaWeb()])
+  const [r, yo, cuenta, mods] = await Promise.all([misGrupos(), yoMismo(1), cuentaWeb(), losModulos()])
   if (!r.ok) return <SinSesion fallo={r.fallo} />
 
   const grupos = r.dato.grupos
+  const tz = yo.ok ? yo.dato.tz : null
+  const hoy = yo.ok ? yo.dato.hoy.slice(0, 10) : enZona(tz)
   const familias = grupos.filter(g => g.clase === 'family')
-  const proyectos = grupos.filter(g => g.clase !== 'family')
-  const planes = proyectos.flatMap(g => g.planes.map(p => ({ ...p, grupo: g.id })))
-  const hoy = yo.ok ? yo.dato.dias[0]?.entradas ?? [] : []
+  const [agenda, ...casas] = await Promise.all([laAgenda(hoy, sumar(hoy, 13)), ...familias.slice(0, 3).map(g => laFamilia(g.id))])
+
+  const cosas = agenda.ok ? desdeAgenda(agenda.dato) : []
+  const ya = new Set(cosas.map(c => c.clave.split(':').slice(0, 2).join(':')))
+  if (yo.ok) cosas.push(...desdePersona(yo.dato, ya))
+  const fams = casas.flatMap((c, i) => (c.ok ? [{ f: c.dato, href: `/app/f/${familias[i]!.id}` }] : []))
   const foco = yo.ok ? yo.dato.foco[0] : undefined
   const handle = cuenta.ok ? cuenta.dato.handle : null
 
   return (
     <>
       <Barra area="inicio" sesion />
-      <Vista d={{
-        fecha: yo.ok ? hoyLargo(yo.dato.hoy) : '',
-        saludo: saludo(yo.ok ? yo.dato.tz : null),
+      <Ejecucion d={{
+        hoy,
+        fecha: hoyLargo(hoy),
+        saludo: saludo(tz),
         quien: handle ? handle.replace(/^@/, '') : null,
         foco: foco ? { texto: foco.texto, porque: foco.porque || null } : null,
-        personal: yo.ok ? {
-          hoy: hoy.length,
-          vencidas: yo.dato.compromisos.pendientes.filter(p => p.vencida).length,
-          choques: yo.dato.alertas.filter(a => a.tipo === 'choque').length,
-        } : null,
-        familia: familias.length === 0 ? null
-          : familias.length === 1 ? { nombre: familias[0]!.nombre, href: `/app/f/${familias[0]!.id}` }
-            : { cuantas: familias.length, href: '/app/familia' },
-        pmo: planes.length ? {
-          proyectos: planes.length,
-          vencidas: planes.reduce((n, p) => n + p.vencidos, 0),
-          href: planes.length === 1 ? `/app/g/${planes[0]!.grupo}/${planes[0]!.id}` : '/app/proyectos',
-        } : null,
-        hoy: hoy.map(e => ({ hora: hora(e), texto: e.texto, lugar: lugarDe(e) })),
-        hrefs: { personal: '/app/personal', apps: '/app/apps' },
+        avisos: yo.ok ? avisosDe(yo.dato) : [],
+        cosas,
+        casa: fams.map(x => casaDe(x.f, x.href)),
+        fechas: fechasDe(fams.map(x => x.f)),
+        habitos: yo.ok ? yo.dato.habitos.map(h => ({ nombre: h.nombre, hoy: h.hoy, meta: h.meta, unidad: h.unidad, racha: h.racha })) : [],
+        proyectos: proyectosDe(grupos),
+        apps: mods.ok ? appsDe(mods.dato.modulos) : [],
+        hrefs: { personal: '/app/personal', familia: '/app/familia', proyectos: '/app/proyectos', apps: '/app/apps', calendario: '/app/personal?v=calendario' },
+        faltan: [
+          ...(agenda.ok ? [] : ['la agenda (el motor no contestó)']),
+          'tu propio orden de prioridades',
+          'listas',
+          'lo pendiente dentro de las apps',
+        ],
       }} />
     </>
   )

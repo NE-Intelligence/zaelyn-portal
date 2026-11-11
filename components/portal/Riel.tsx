@@ -88,7 +88,23 @@ export function Riel({ app }: { app: string | null }) {
       { tipo: 'portal:contexto', ruta: window.location.pathname, grupo: grupo ?? null, plan: plan ?? null, vista: q.get('v'), resaltar: q.get('a') },
       app,
     )
+    apariencia()
   }, [app])
+  // La app embebida se pinta como el portal: misma luz y misma paleta
+  // (decisiones/2026-11-11-inicio-de-ejecucion). Se manda al cargar y cada vez
+  // que la persona cambia algo en «Apariencia».
+  const apariencia = useCallback(() => {
+    if (!app || !marco.current?.contentWindow) return
+    const h = document.documentElement
+    const oscuro = h.dataset.tema === 'oscuro' || (h.dataset.tema !== 'claro' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    marco.current.contentWindow.postMessage({ tipo: 'portal:apariencia', tema: oscuro ? 'oscuro' : 'claro', paleta: h.dataset.paleta ?? 'lavanda' }, app)
+  }, [app])
+  useEffect(() => {
+    if (!app) return
+    const mo = new MutationObserver(() => apariencia())
+    mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-tema', 'data-paleta'] })
+    return () => mo.disconnect()
+  }, [app, apariencia])
 
   // ── abrir y cerrar ──────────────────────────────────────────────────────
   const alternarZaelyn = useCallback(() => {
@@ -100,8 +116,26 @@ export function Riel({ app }: { app: string | null }) {
   useEffect(() => {
     if (!app) return
     const oir = () => setAbierta(a => (a === 'zaelyn' ? null : 'zaelyn'))
+    const abrir = () => setAbierta('zaelyn')
+    // Sin el panel propio, «Pregúntale a Zaelyn» va directo al motor y la
+    // respuesta llega a la app embebida por su buzón.
+    const preguntar = (e: Event) => {
+      const { texto } = (e as CustomEvent<{ texto?: string }>).detail ?? {}
+      if (!texto) return
+      setAbierta('zaelyn')
+      void fetch('/api/chat/mensaje', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ text: texto, id: crypto.randomUUID() }),
+      }).catch(() => { /* la columna ya está abierta: se puede volver a escribir ahí */ })
+    }
+    window.addEventListener('zaelyn:preguntar', preguntar)
     window.addEventListener('zaelyn:alternar', oir)
-    return () => window.removeEventListener('zaelyn:alternar', oir)
+    window.addEventListener('zaelyn:abrir-chat', abrir)
+    return () => {
+      window.removeEventListener('zaelyn:alternar', oir)
+      window.removeEventListener('zaelyn:abrir-chat', abrir)
+      window.removeEventListener('zaelyn:preguntar', preguntar)
+    }
   }, [app])
   const abrirConv = useCallback((id: string) => {
     if (!app && zaelyn) window.dispatchEvent(new Event('zaelyn:cerrar-chat'))
