@@ -1161,3 +1161,9 @@ body {
 .st-barra .st-menu a[aria-current='page']::after {
   background: #f5f5f7;
 }
+
+/* Las páginas nuevas del sitio van en Tailwind: donde un enlace trae su color
+   como utilidad, el `a { color: inherit }` viejo de .st se hace a un lado. */
+.st a[class*='text-'] {
+  color: revert-layer;
+}
