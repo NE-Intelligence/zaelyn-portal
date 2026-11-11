@@ -3,7 +3,8 @@ import { Barra } from '@/components/portal/Marco'
 import { Preferencias } from '@/components/Preferencias'
 import { soyAdmin } from '@/lib/api'
 import { textos } from '@/lib/copy'
-import { idiomaActual, temaActual } from '@/lib/preferencias'
+import { cristalActual, idiomaActual, temaActual } from '@/lib/preferencias'
+import { Apariencia } from '@/components/cristal/Apariencia'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Configuración' }
@@ -17,7 +18,7 @@ export const metadata = { title: 'Configuración' }
  * platicando con Zaelyn; aquí solo tema e idioma, que son del navegador.
  */
 export default async function Configuracion() {
-  const [lang, tema, admin] = await Promise.all([idiomaActual(), temaActual(), soyAdmin()])
+  const [lang, tema, admin, cristal] = await Promise.all([idiomaActual(), temaActual(), soyAdmin(), cristalActual()])
   const t = textos(lang)
   const fila = 'flex items-center justify-between gap-4 border-b border-linea px-6 py-4 text-[16px] text-tinta no-underline last:border-0'
   return (
@@ -28,8 +29,9 @@ export default async function Configuracion() {
 
         <section className="flex flex-col gap-3">
           <h2 className="text-[15px] font-medium text-tinta-3">Apariencia e idioma</h2>
-          <div className="flex items-center justify-between gap-4 rounded-[22px] bg-superficie px-6 py-4 shadow-z1">
-            <span className="text-[16px]">Tema e idioma</span>
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-[22px] bg-superficie px-6 py-4 shadow-z1">
+            <span className="min-w-[11rem] flex-1 text-[16px]">Tema, paleta, vidrio e idioma</span>
+            <Apariencia inicial={cristal} compacto />
             <Preferencias
               lang={lang}
               tema={tema}

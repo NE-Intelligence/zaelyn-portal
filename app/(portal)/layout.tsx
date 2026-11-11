@@ -5,6 +5,9 @@ import '../familia.css'
 import '../persona.css'
 import '../horas.css'
 import '../zaelyn.css'
+import '../cristal.css'
+import { Fondo3D } from '@/components/cristal/Fondo3D'
+import { Flotar } from '@/components/cristal/Flotar'
 
 export const metadata: Metadata = { title: 'Proyectos' }
 
@@ -22,5 +25,13 @@ export const metadata: Metadata = { title: 'Proyectos' }
  * techo sin cambiarles la URL.
  */
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
-  return <div className="pt">{children}</div>
+  // Cristal (decisiones/2026-11-11-cristal): el cuerpo 3D al fondo y la
+  // inclinación de las tarjetas viven una sola vez, para todo el portal.
+  return (
+    <div className="pt">
+      <Fondo3D />
+      <Flotar />
+      {children}
+    </div>
+  )
 }

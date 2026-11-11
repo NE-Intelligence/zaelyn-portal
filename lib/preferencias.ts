@@ -37,3 +37,9 @@ export async function temaActual(): Promise<Tema> {
 /** El `lang` de HTML y el locale de Open Graph por idioma. */
 export const LANG_HTML: Record<Idioma, string> = { es: 'es-MX', en: 'en', pt: 'pt-BR' }
 export const LOCALE_OG: Record<Idioma, string> = { es: 'es_MX', en: 'en_US', pt: 'pt_BR' }
+
+/** La apariencia Cristal (lib/cristal.ts), también desde su cookie. */
+export async function cristalActual() {
+  const { COOKIE_CRISTAL, leerCookie } = await import('./cristal')
+  return leerCookie((await cookies()).get(COOKIE_CRISTAL)?.value)
+}

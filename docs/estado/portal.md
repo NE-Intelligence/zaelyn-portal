@@ -98,3 +98,14 @@ Familia visual de la app · Tailwind v4 · todo a la vez · Zaelyn al lado en un
 - Hecho: el portal con barra lateral (Inicio · Personal · Familia · PMO · Apps · Configuración · Cuenta · Admin) y pestañas abajo en el teléfono; Inicio de la persona; PMO con sus proyectos en renglones; el plan con tres vistas a la mano y «Más»; Apps y Configuración nuevas; Zaelyn como el orbe flotante con las conversaciones sin leer arriba de él. Los ejemplos (/demo…) ya usan gente nueva (Subestación Mirador, Familia Arce, Mariana).
 - Siguiente: los dashboards mínimos de Personal y Familia y pasar a Tailwind las pantallas que siguen con hojas viejas (editor, obra, horas, cuenta, admin).
 - Falta: inglés y portugués de las landings nuevas; qué se le puede pedir a Zaelyn sobre Kore y TCGBusters (dueño).
+
+## Cristal (decisiones/2026-11-11-cristal) — 11 nov 2026
+
+Capa visual nueva del portal: vidrio pastel editable por persona (paleta, vidrio,
+día/noche, movimiento) desde «Apariencia», tipografía editorial (Instrument Serif
++ Inter), aura que respira, tarjetas que flotan y un cuerpo 3D de vidrio al
+fondo. Pantalla nueva de Inicio (`/app`, ejemplo en `/demo/inicio`).
+
+Sigue: rediseñar el contenido de cada pantalla (dashboards de Personal y Familia,
+PMO), pasar las pantallas viejas a Tailwind y que la app adopte las mismas
+paletas pastel (conversación de la app).

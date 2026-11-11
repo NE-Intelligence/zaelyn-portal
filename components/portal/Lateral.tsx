@@ -14,6 +14,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Logo } from '@/components/Logo'
+import { Apariencia } from '@/components/cristal/Apariencia'
+import type { Cristal } from '@/lib/cristal'
 
 type Item = { href: string; texto: string; punto?: string; icono?: 'inicio' | 'apps'; activa: (r: string) => boolean }
 
@@ -24,10 +26,11 @@ const ICONO = {
 
 const empieza = (...xs: string[]) => (r: string) => xs.some(x => r === x || r.startsWith(x + '/'))
 
-export function Lateral({ admin, ejemplo, quien }: { admin: boolean; ejemplo: boolean; quien: string | null }) {
+export function Lateral({ admin, ejemplo, quien, cristal }: { admin: boolean; ejemplo: boolean; quien: string | null; cristal: Cristal }) {
   const ruta = usePathname()
   const principales: Item[] = ejemplo
     ? [
+      { href: '/demo/inicio', texto: 'Inicio', icono: 'inicio', activa: empieza('/demo/inicio') },
       { href: '/demo/personal', texto: 'Personal', punto: 'var(--z-personal)', activa: empieza('/demo/personal') },
       { href: '/demo/familia', texto: 'Familia', punto: 'var(--z-familia)', activa: empieza('/demo/familia') },
       { href: '/demo', texto: 'PMO', punto: 'var(--z-proyectos)', activa: r => r === '/demo' },
@@ -79,6 +82,7 @@ export function Lateral({ admin, ejemplo, quien }: { admin: boolean; ejemplo: bo
           </>
         )}
         <div className="mt-auto flex flex-col gap-2 px-1.5">
+          <Apariencia inicial={cristal} />
           {ejemplo
             ? <Link href="/app" className="inline-flex h-11 items-center justify-center rounded-full bg-pri text-[15px] font-semibold text-sobre-pri no-underline">Entrar</Link>
             : (

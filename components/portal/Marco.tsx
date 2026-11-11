@@ -8,6 +8,7 @@ import { origenDeLaApp } from '@/lib/ruta-propia'
 import { cookies } from 'next/headers'
 import { COOKIE, cuentaWeb, soyAdmin } from '@/lib/api'
 import { Lateral } from '@/components/portal/Lateral'
+import { cristalActual } from '@/lib/preferencias'
 import { textos, type Clave } from '@/lib/copy'
 import { idiomaActual, temaActual } from '@/lib/preferencias'
 
@@ -67,7 +68,10 @@ export async function Barra({
   // van; quedan la barra lateral (o las pestañas abajo en el teléfono) y el
   // orbe de Zaelyn. Sin sesión se queda la barra negra con «Entrar».
   if (sesion || ejemplo) {
-    const quien = sesion && !ejemplo ? await cuentaWeb().then(c => (c.ok ? c.dato.handle : null)).catch(() => null) : null
+    const [quien, cristal] = await Promise.all([
+      sesion && !ejemplo ? cuentaWeb().then(c => (c.ok ? c.dato.handle : null)).catch(() => null) : Promise.resolve(null),
+      cristalActual(),
+    ])
     return (
       <>
         {ejemplo && (
@@ -76,7 +80,7 @@ export async function Barra({
             <span>{aviso ?? t('po.ejemplo.p')}</span>
           </div>
         )}
-        <Lateral admin={admin} ejemplo={ejemplo} quien={quien ? `@${quien.replace(/^@/, '')}` : null} />
+        <Lateral admin={admin} ejemplo={ejemplo} cristal={cristal} quien={quien ? `@${quien.replace(/^@/, '')}` : null} />
         {sesion && !ejemplo && <Riel app={app} />}
         {sesion && !ejemplo && !app && (
           <Chat t={{
