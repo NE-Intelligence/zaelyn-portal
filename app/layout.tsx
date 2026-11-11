@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
-import { display } from '@/lib/fuentes'
-import { LANG_HTML, idiomaActual, temaActual } from '@/lib/preferencias'
+import { display, inter, serif } from '@/lib/fuentes'
+import { LANG_HTML, cristalActual, idiomaActual, temaActual } from '@/lib/preferencias'
+import { variables } from '@/lib/cristal'
+import type { CSSProperties } from 'react'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -30,12 +32,16 @@ export const viewport = {
  * cookie de tema no se pone `data-tema` y manda el sistema operativo.
  */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [lang, tema] = await Promise.all([idiomaActual(), temaActual()])
+  const [lang, tema, cr] = await Promise.all([idiomaActual(), temaActual(), cristalActual()])
   return (
     <html
       lang={LANG_HTML[lang]}
       data-tema={tema === 'sistema' ? undefined : tema}
-      className={display.variable}
+      data-paleta={cr.paleta}
+      data-flotar={cr.flotar ? undefined : 'no'}
+      data-fondo3d={cr.fondo3d ? undefined : 'no'}
+      style={variables(cr.material) as CSSProperties}
+      className={`${display.variable} ${inter.variable} ${serif.variable}`}
     >
       <body>{children}</body>
     </html>

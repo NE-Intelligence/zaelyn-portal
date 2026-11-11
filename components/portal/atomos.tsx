@@ -188,7 +188,8 @@ export function Kpi({
   tono?: 'alerta' | 'aviso'
 }) {
   return (
-    <div className={`pt-kpi${tono ? ` ${tono}` : ''}`}>
+    <div className={`pt-kpi cr-tarjeta${tono ? ` ${tono}` : ''}`}>
+      <span className="cr-brillo" aria-hidden="true" />
       <div className="pt-overline">{etiqueta}</div>
       <div className="n">
         {valor}

@@ -1,0 +1,397 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Cristal · la piel del portal (decisiones/2026-11-11-cristal)
+
+   Vidrio sobre un fondo pastel que respira, con una pieza 3D sutil detrás
+   (Fondo3D.tsx). Todo es editable por quien mira (Apariencia.tsx): paleta,
+   día/noche y el material del vidrio. Las variables del material llegan en
+   <html style> desde la cookie `zc`:
+     --cr-blur  desenfoque · --cr-op opacidad · --cr-sat saturación
+     --cr-tinte tinte      · --cr-borde luz del borde
+   Movimiento: html[data-flotar='no'] lo apaga, y `prefers-reduced-motion`
+   también, siempre.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@property --cr-ang {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+:root {
+  --cr-blur: 24px;
+  --cr-op: 0.42;
+  --cr-sat: 1.35;
+  --cr-tinte: #ffffff;
+  --cr-borde: 0.7;
+  /* superficie del vidrio y tinta, de día */
+  --cr-sup: #ffffff;
+  --cr-base: #f7f6fb;
+  --cr-sombra: 24 22 48;
+}
+
+/* ── Paletas pastel (día) ────────────────────────────────────────────── */
+:root,
+:root[data-paleta='lavanda'] {
+  --cr-m1: #e6dcff; --cr-m2: #d5f2f6; --cr-m3: #fbe3f1; --cr-m4: #eef0ff;
+  --cr-a1: #b9a6ff; --cr-a2: #8fdcea; --cr-a3: #f4b6d8;
+  --cr-acento: #5b47d6;
+  --cr-3d-1: #cdbdff; --cr-3d-2: #9fe3ee; --cr-3d-3: #f6c6e4;
+}
+:root[data-paleta='salvia'] {
+  --cr-m1: #d9efe2; --cr-m2: #eef5d6; --cr-m3: #d6edf0; --cr-m4: #f3f6ee;
+  --cr-a1: #93cfae; --cr-a2: #cfe39a; --cr-a3: #8ccbd6;
+  --cr-acento: #2e6b4f;
+  --cr-3d-1: #b5e0c6; --cr-3d-2: #e3efb8; --cr-3d-3: #a6d9e2;
+}
+:root[data-paleta='arena'] {
+  --cr-m1: #f8e8d6; --cr-m2: #fbdcd0; --cr-m3: #efe9da; --cr-m4: #fbf6ef;
+  --cr-a1: #e9bf93; --cr-a2: #f1a990; --cr-a3: #d9cba6;
+  --cr-acento: #8a4b22;
+  --cr-3d-1: #f3d2b0; --cr-3d-2: #f6bfae; --cr-3d-3: #e6dcc0;
+}
+:root[data-paleta='cielo'] {
+  --cr-m1: #dbe8ff; --cr-m2: #d8f5f8; --cr-m3: #e6e0ff; --cr-m4: #f1f6ff;
+  --cr-a1: #94b9ff; --cr-a2: #92e0ec; --cr-a3: #bcaaff;
+  --cr-acento: #1f4fbf;
+  --cr-3d-1: #b4ceff; --cr-3d-2: #a8ecf3; --cr-3d-3: #cfc3ff;
+}
+:root[data-paleta='rosa'] {
+  --cr-m1: #fde0ec; --cr-m2: #ffe7da; --cr-m3: #efe1ff; --cr-m4: #fff3f6;
+  --cr-a1: #f3a6c6; --cr-a2: #ffc0a3; --cr-a3: #cdb0ff;
+  --cr-acento: #a8326b;
+  --cr-3d-1: #f6bcd5; --cr-3d-2: #ffcfb8; --cr-3d-3: #d9c2ff;
+}
+
+/* ── Noche: la misma paleta, apagada sobre tinta profunda ────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='claro']) {
+    --cr-sup: #1b1b24;
+    --cr-base: #08080d;
+    --cr-sombra: 0 0 0;
+    --cr-aura-k: 0.55;
+  }
+}
+:root[data-tema='oscuro'] {
+  --cr-sup: #1b1b24;
+  --cr-base: #08080d;
+  --cr-sombra: 0 0 0;
+  --cr-aura-k: 0.55;
+}
+
+/* ═══ El fondo ═════════════════════════════════════════════════════════ */
+.pt {
+  --fuente-ui-z: var(--fuente-ui, var(--z-font));
+  font-family: var(--fuente-ui-z);
+  font-feature-settings: 'cv11', 'ss01';
+  background: transparent;
+  /* Superficies del sistema: vidrio en lugar de blanco sólido */
+  --z-surface: color-mix(in srgb, var(--cr-sup) calc(var(--cr-op) * 100% + 22%), transparent);
+  --z-surface-2: color-mix(in srgb, var(--cr-sup) calc(var(--cr-op) * 60%), transparent);
+  --z-bg: color-mix(in srgb, var(--cr-base) 92%, transparent);
+  --z-sombra-1: 0 1px 0 color-mix(in srgb, #fff calc(var(--cr-borde) * 70%), transparent) inset,
+    0 0 0 1px color-mix(in srgb, #fff calc(var(--cr-borde) * 30%), transparent) inset,
+    0 18px 50px -28px rgb(var(--cr-sombra) / 0.28);
+  --z-sombra-2: 0 1px 0 color-mix(in srgb, #fff calc(var(--cr-borde) * 80%), transparent) inset,
+    0 0 0 1px color-mix(in srgb, #fff calc(var(--cr-borde) * 36%), transparent) inset,
+    0 30px 70px -30px rgb(var(--cr-sombra) / 0.36);
+}
+body:has(> .pt) {
+  background: var(--cr-base);
+}
+.pt::before {
+  content: '';
+  position: fixed;
+  inset: -20vmax;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(40vmax 34vmax at 12% 8%, var(--cr-m1), transparent 70%),
+    radial-gradient(38vmax 32vmax at 92% 14%, var(--cr-m2), transparent 70%),
+    radial-gradient(44vmax 36vmax at 78% 96%, var(--cr-m3), transparent 72%),
+    radial-gradient(36vmax 30vmax at 8% 92%, var(--cr-m4), transparent 70%),
+    var(--cr-base);
+  animation: cr-deriva 38s ease-in-out infinite alternate;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='claro']) .pt::before {
+    opacity: 0.32;
+  }
+}
+:root[data-tema='oscuro'] .pt::before {
+  opacity: 0.32;
+}
+@keyframes cr-deriva {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-2vmax, 1.5vmax, 0) scale(1.04); }
+  100% { transform: translate3d(1.5vmax, -1vmax, 0) scale(1.02); }
+}
+/* Grano fino: el detalle que quita lo «plano» */
+.pt::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* ═══ El vidrio ═════════════════════════════════════════════════════════ */
+.cr-vidrio,
+.pt .pt-lateral,
+.pt .pt-pestanas-abajo,
+.pt .shadow-z1,
+.pt .shadow-z2,
+.pt .pt-tarjeta,
+.pt .pt-kpi,
+.pt .pt-tabla-caja,
+.pt .pt-zaelyn {
+  background-color: color-mix(in srgb, var(--cr-sup) calc(var(--cr-op) * 100%), transparent);
+  background-image: linear-gradient(135deg,
+      color-mix(in srgb, var(--cr-tinte) 14%, transparent),
+      color-mix(in srgb, var(--cr-tinte) 4%, transparent));
+  -webkit-backdrop-filter: blur(var(--cr-blur)) saturate(var(--cr-sat));
+  backdrop-filter: blur(var(--cr-blur)) saturate(var(--cr-sat));
+  box-shadow: var(--z-sombra-1);
+}
+.pt .pt-lateral {
+  border-right: 0;
+  margin: 14px;
+  inset: 0 auto 0 0;
+  height: calc(100dvh - 28px);
+  border-radius: 28px;
+  width: 232px;
+}
+@media (min-width: 1024px) {
+  .pt:has(> .pt-lateral) {
+    padding-left: 260px;
+  }
+}
+
+/* ═══ Tipografía editorial ══════════════════════════════════════════════ */
+.cr-titulo,
+.pt main h1 {
+  font-family: var(--fuente-serif), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+.pt main h1 {
+  font-size: clamp(38px, 4.2vw, 56px);
+  line-height: 1.02;
+}
+.cr-cifra {
+  font-family: var(--fuente-serif), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+}
+.cr-cursiva {
+  font-family: var(--fuente-serif), Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ═══ La tarjeta: vidrio, aura que respira, flota y se inclina ═════════ */
+.cr-flota {
+  animation: cr-flota 9s ease-in-out infinite;
+  animation-delay: var(--cr-d, 0s);
+  will-change: transform;
+}
+@keyframes cr-flota {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -7px, 0); }
+}
+.cr-tarjeta {
+  --rx: 0deg;
+  --ry: 0deg;
+  --lx: 50%;
+  --ly: 30%;
+  position: relative;
+  isolation: isolate;
+  border-radius: 28px;
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateZ(0);
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s;
+  box-shadow: var(--z-sombra-1);
+  transform-style: preserve-3d;
+}
+.cr-tarjeta:hover {
+  transition: transform 0.12s linear, box-shadow 0.4s;
+  box-shadow: var(--z-sombra-2);
+}
+/* el contorno: un aura de color que gira despacio y respira */
+.cr-tarjeta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.3px;
+  background: conic-gradient(from var(--cr-ang), var(--cr-a1), var(--cr-a2), var(--cr-a3), var(--cr-a1));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: cr-gira 16s linear infinite, cr-respira 6s ease-in-out infinite;
+  animation-delay: 0s, var(--cr-d, 0s);
+}
+/* el halo de afuera, muy suave */
+.cr-tarjeta::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(from var(--cr-ang), var(--cr-a1), var(--cr-a2), var(--cr-a3), var(--cr-a1));
+  filter: blur(26px);
+  opacity: 0.16;
+  pointer-events: none;
+  animation: cr-gira 16s linear infinite, cr-halo 6s ease-in-out infinite;
+  animation-delay: 0s, var(--cr-d, 0s);
+}
+.cr-tarjeta:hover::before {
+  opacity: 0.9;
+}
+.cr-tarjeta:hover::after {
+  opacity: 0.3;
+}
+/* el brillo que sigue al puntero */
+.cr-tarjeta > .cr-brillo {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(420px circle at var(--lx) var(--ly), color-mix(in srgb, #fff calc(var(--cr-borde) * 32%), transparent), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.cr-tarjeta:hover > .cr-brillo {
+  opacity: 1;
+}
+@keyframes cr-gira {
+  to { --cr-ang: 360deg; }
+}
+@keyframes cr-respira {
+  0%, 100% { opacity: calc(0.38 * var(--cr-aura-k, 1)); }
+  50% { opacity: calc(0.75 * var(--cr-aura-k, 1)); }
+}
+@keyframes cr-halo {
+  0%, 100% { opacity: 0.1; transform: scale(0.99); }
+  50% { opacity: 0.24; transform: scale(1.01); }
+}
+
+/* ═══ Controles finos ═══════════════════════════════════════════════════ */
+.cr-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  color: var(--z-ink);
+  background: color-mix(in srgb, var(--cr-sup) calc(var(--cr-op) * 70%), transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--z-ink) 10%, transparent);
+}
+.cr-chip[aria-pressed='true'] {
+  background: var(--z-pri);
+  color: var(--z-on-pri);
+  box-shadow: none;
+}
+.cr-rango {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 22px;
+  background: transparent;
+}
+.cr-rango::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--cr-a1), var(--cr-a2), var(--cr-a3));
+}
+.cr-rango::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--cr-a1), var(--cr-a2), var(--cr-a3));
+}
+.cr-rango::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -7px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 0 0 4px color-mix(in srgb, var(--cr-a1) 30%, transparent);
+}
+.cr-rango::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 0 0 4px color-mix(in srgb, var(--cr-a1) 30%, transparent);
+}
+.cr-rango:focus-visible {
+  outline: 2px solid var(--z-ink);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+/* ═══ El lienzo 3D ══════════════════════════════════════════════════════ */
+.cr-3d {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(2px);
+  transition: opacity 1.6s ease;
+}
+.cr-3d.listo {
+  opacity: 1;
+}
+:root[data-fondo3d='no'] .cr-3d {
+  display: none;
+}
+
+/* ═══ Sin movimiento, cuando se pide ════════════════════════════════════ */
+:root[data-flotar='no'] .cr-flota,
+:root[data-flotar='no'] .cr-tarjeta::before,
+:root[data-flotar='no'] .cr-tarjeta::after,
+:root[data-flotar='no'] .pt::before {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-flota,
+  .cr-tarjeta::before,
+  .cr-tarjeta::after,
+  .pt::before {
+    animation: none;
+  }
+  .cr-tarjeta {
+    transform: none !important;
+  }
+}
+
+/* De noche el aura baja la voz */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='claro']) .cr-tarjeta::before { opacity: 0.32; }
+}
+:root[data-tema='oscuro'] .cr-tarjeta::before { opacity: 0.32; }
+
+/* El panel de Apariencia vive fuera de .pt (para que su vidrio desenfoque
+   la página entera): trae su letra y un vidrio más denso para leerse. */
+.cr-panel {
+  font-family: var(--fuente-ui), var(--z-font);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  background-color: color-mix(in srgb, var(--cr-sup) calc(var(--cr-op) * 100% + 38%), transparent) !important;
+  -webkit-backdrop-filter: blur(calc(var(--cr-blur) + 16px)) saturate(var(--cr-sat)) !important;
+  backdrop-filter: blur(calc(var(--cr-blur) + 16px)) saturate(var(--cr-sat)) !important;
+}

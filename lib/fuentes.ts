@@ -22,3 +22,25 @@ export const display = localFont({
   display: 'swap',
   fallback: ['Trebuchet MS', 'sans-serif'],
 })
+
+/**
+ * Cristal (decisiones/2026-11-11-cristal): Inter variable para la interfaz y
+ * Instrument Serif para los titulares y las cifras grandes —el toque editorial
+ * que hace que se vea caro—. Las dos OFL, con su licencia al lado.
+ */
+export const inter = localFont({
+  src: [{ path: './fuentes/inter-latin-wght-normal.woff2', weight: '100 900', style: 'normal' }],
+  variable: '--fuente-ui',
+  display: 'swap',
+  fallback: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+})
+
+export const serif = localFont({
+  src: [
+    { path: './fuentes/instrument-serif-latin-400-normal.woff2', weight: '400', style: 'normal' },
+    { path: './fuentes/instrument-serif-latin-400-italic.woff2', weight: '400', style: 'italic' },
+  ],
+  variable: '--fuente-serif',
+  display: 'swap',
+  fallback: ['Georgia', 'serif'],
+})
