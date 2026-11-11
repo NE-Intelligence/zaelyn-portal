@@ -91,3 +91,9 @@ Familia visual de la app · Tailwind v4 · todo a la vez · Zaelyn al lado en un
 - App: modo `embebido` y los avisos por `postMessage`; luego poner `ZAELYN_APP_URL` en Vercel.
 - Portal: migrar a Tailwind, una por una, las pantallas que aún usan hojas viejas (editor, obra, horas, Familia, Personal, cuenta, admin) y borrar cada hoja al vaciarse.
 - Dueño: los `[FALTA]` legales, el plan de Vercel (Hobby no permite uso comercial), los secretos viejos en Vercel y el correo de contacto.
+
+## Desde cero (decisiones/2026-11-10-landings-y-portal)
+
+- Hecho: las cuatro landings nuevas (`/`, `/personal`, `/familia`, `/pmo`) con la plantilla única.
+- Siguiente: el portal con barra lateral e Inicio de la persona; luego el dashboard de cada sección y el teléfono.
+- Falta: inglés y portugués de las landings nuevas; qué se le puede pedir a Zaelyn sobre Kore y TCGBusters (dueño).
