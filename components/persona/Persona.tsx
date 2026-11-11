@@ -2,7 +2,7 @@
  * El lienzo de Zaelyn Personal: tú, a través de todos tus grupos.
  *
  * Lo usan dos, igual que el plan y la familia: `/app/personal` con la persona
- * real y `/demo/personal` con Sofía, que no existe. Ninguna vista suma ni
+ * real y `/demo/personal` con Mariana, que no existe. Ninguna vista suma ni
  * mide: el foco, los choques, las rachas y lo vencido llegan hechos de
  * `estadoDePersona`. Aquí solo se decide cómo se pinta.
  */
@@ -46,7 +46,7 @@ export function LienzoPersona({
   vista: VistaPersona
   base: string
   leido: string
-  /** Cómo se llama quien mira; en el ejemplo, Sofía. */
+  /** Cómo se llama quien mira; en el ejemplo, Mariana. */
   nombre?: string
 }) {
   const href = (v: VistaPersona) => (v === 'hoy' ? base : `${base}?v=${v}`)

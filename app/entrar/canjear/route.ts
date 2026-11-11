@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 
   /**
    * El destino lo decidió Zaelyn al emitir el pase: si la persona pidió «el
-   * portal de Andes», cae en Andes y no en la lista a buscarlo otra vez. Se
+   * portal de Mirador», cae en Mirador y no en la lista a buscarlo otra vez. Se
    * comprueba que sea una ruta de ESTE sitio — un destino manipulado sería
    * una redirección abierta.
    */

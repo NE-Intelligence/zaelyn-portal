@@ -212,7 +212,7 @@ export function Horas({ v, periodo, ancla }: { v: VistaHoras; periodo: Periodo; 
           {error && <div className="ed-error">{error}</div>}
           {aviso && <div className="hr-ok">{aviso}</div>}
           <button className="ed-btn primario ancho" disabled={guardando} onClick={guardar}>{guardando ? 'Guardando…' : 'Registrar horas'}</button>
-          <p className="gris hr-chat">También desde el chat: «trabajé 3 horas en la migración», «ayer 2 h de guardia en Andes», «inicia el cronómetro de la cotización».</p>
+          <p className="gris hr-chat">También desde el chat: «trabajé 3 horas en la migración», «ayer 2 h de guardia en Mirador», «inicia el cronómetro de la cotización».</p>
         </section>
       </div>
 

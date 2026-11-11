@@ -6,7 +6,8 @@ import { BotonZaelyn } from '@/components/portal/BotonZaelyn'
 import { Riel } from '@/components/portal/Riel'
 import { origenDeLaApp } from '@/lib/ruta-propia'
 import { cookies } from 'next/headers'
-import { COOKIE, soyAdmin } from '@/lib/api'
+import { COOKIE, cuentaWeb, soyAdmin } from '@/lib/api'
+import { Lateral } from '@/components/portal/Lateral'
 import { textos, type Clave } from '@/lib/copy'
 import { idiomaActual, temaActual } from '@/lib/preferencias'
 
@@ -60,6 +61,36 @@ export async function Barra({
   const resto = migas.filter((m) => m.texto !== 'Mis grupos' && m.texto !== 'Ejemplo' && !nombreArea.includes(m.texto))
   const cadena = a && a !== 'inicio' ? [{ texto: t(CASA[a].k), href: resto.length ? href(a) : undefined }, ...resto] : resto
   const modoTxt = modo === 'editor' ? t('po.modo.editor') : modo === 'cuenta' ? t('po.modo.cuenta') : modo === 'admin' ? t('po.modo.admin') : modo === 'horas' ? t('po.modo.horas') : t('po.modo.lectura')
+
+  // EL PORTAL CON BARRA LATERAL (decisiones/2026-11-10-landings-y-portal):
+  // con sesión o en el ejemplo, la barra de arriba y las pestañas de área se
+  // van; quedan la barra lateral (o las pestañas abajo en el teléfono) y el
+  // orbe de Zaelyn. Sin sesión se queda la barra negra con «Entrar».
+  if (sesion || ejemplo) {
+    const quien = sesion && !ejemplo ? await cuentaWeb().then(c => (c.ok ? c.dato.handle : null)).catch(() => null) : null
+    return (
+      <>
+        {ejemplo && (
+          <div className="pt-aviso">
+            <b>{t('po.ejemplo')}</b>
+            <span>{aviso ?? t('po.ejemplo.p')}</span>
+          </div>
+        )}
+        <Lateral admin={admin} ejemplo={ejemplo} quien={quien ? `@${quien.replace(/^@/, '')}` : null} />
+        {sesion && !ejemplo && <Riel app={app} />}
+        {sesion && !ejemplo && !app && (
+          <Chat t={{
+            abrir: t('chat.abrir'), titulo: t('chat.titulo'), sub: t('chat.sub'), cerrar: t('chat.cerrar'),
+            placeholder: t('chat.placeholder'), enviar: t('chat.enviar'), hablar: t('chat.hablar'),
+            detener: t('chat.detener'), escuchando: t('chat.escuchando'), pensando: t('chat.pensando'),
+            vacio: t('chat.vacio'), sinMicro: t('chat.sinMicro'), caido: t('chat.caido'),
+            demasiados: t('chat.demasiados'), sesion: t('chat.sesion'), verImagen: t('chat.verImagen'),
+            descargar: t('chat.descargar'),
+          }} />
+        )}
+      </>
+    )
+  }
 
   return (
     <>

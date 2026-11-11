@@ -1,10 +1,10 @@
 /**
- * La persona del ejemplo: Sofía, inventada de punta a punta, y dicho en pantalla.
+ * La persona del ejemplo: Mariana, inventada de punta a punta, y dicho en pantalla.
  *
  * Igual que `demo.ts` y `demo-familia.ts`, este archivo ocupa el lugar del
- * SERVIDOR: aquí sí se arma el estado, porque no hay motor detrás. Sofía es
- * Guía en la Familia Ríos (la del ejemplo de Familia) y Ejecutora en
- * Subestación Andes (la del ejemplo de Proyectos): así se ve lo único que
+ * SERVIDOR: aquí sí se arma el estado, porque no hay motor detrás. Mariana es
+ * Guía en la Familia Arce (la del ejemplo de Familia) y Ejecutora en
+ * Subestación Mirador (la del ejemplo de Proyectos): así se ve lo único que
  * Personal agrega, que es el cruce entre los dos.
  *
  * Nada de aquí es de nadie.
@@ -22,34 +22,34 @@ const sumar = (f: string, n: number) => {
 const dow = (f: string) => new Date(`${f}T12:00:00Z`).getUTCDay()
 const iso = (f: string, hhmm: string) => `${f}T${hhmm}:00-06:00`
 
-const FAM = 'Familia Ríos'
-const AND = 'Andes'
-const CUENTA = 'sofia@trabajo.example'
+const FAM = 'Familia Arce'
+const AND = 'Mirador'
+const CUENTA = 'mariana@trabajo.example'
 
 function diaDe(f: string, k: number): EntradaDelDia[] {
   const d = dow(f)
   const out: EntradaDelDia[] = []
   const habil = d >= 1 && d <= 5
   if (habil) {
-    out.push({ tipo: 'fuera', texto: 'Daily de Andes', inicio: iso(f, '09:00'), hhmm: '09:00', diaCompleto: false, cuenta: CUENTA })
+    out.push({ tipo: 'fuera', texto: 'Daily de Mirador', inicio: iso(f, '09:00'), hhmm: '09:00', diaCompleto: false, cuenta: CUENTA })
   }
   // Hoy siempre trae el cruce que Personal existe para enseñar: la revisión
-  // del trabajo a las 2:00 y recoger a Valeria a las 2:10.
+  // del trabajo a las 2:00 y recoger a Paula a las 2:10.
   if (k === 0) {
-    out.push({ tipo: 'encargo', texto: 'recoger a Valeria de la secundaria', hhmm: '14:10', hora: '2:10 de la tarde', grupo: FAM, hecho: false })
+    out.push({ tipo: 'encargo', texto: 'recoger a Paula de la secundaria', hhmm: '14:10', hora: '2:10 de la tarde', grupo: FAM, hecho: false })
   } else if (d === 1 || d === 3 || d === 5) {
-    out.push({ tipo: 'encargo', texto: 'recoger a Valeria de la secundaria', hhmm: '14:10', hora: '2:10 de la tarde', grupo: FAM, hecho: false })
+    out.push({ tipo: 'encargo', texto: 'recoger a Paula de la secundaria', hhmm: '14:10', hora: '2:10 de la tarde', grupo: FAM, hecho: false })
   }
   if (k !== 0 && (d === 2 || d === 4)) {
-    out.push({ tipo: 'encargo', texto: 'llevar a Mateo a futbol', hhmm: '16:45', hora: '4:45 de la tarde', grupo: FAM, hecho: false })
+    out.push({ tipo: 'encargo', texto: 'llevar a Emilio a futbol', hhmm: '16:45', hora: '4:45 de la tarde', grupo: FAM, hecho: false })
   }
   if (k === 0) {
-    out.push({ tipo: 'fuera', texto: 'Revisión de ingeniería con Termika', inicio: iso(f, '14:00'), hhmm: '14:00', diaCompleto: false, cuenta: CUENTA })
+    out.push({ tipo: 'fuera', texto: 'Revisión de ingeniería con Vértice', inicio: iso(f, '14:00'), hhmm: '14:00', diaCompleto: false, cuenta: CUENTA })
     out.push({ tipo: 'recordatorio', id: 'r1', texto: 'pagar la tarjeta', inicio: iso(f, '18:00'), hhmm: '18:00', grupo: null })
     out.push({ tipo: 'vence', pendienteId: 'x2', texto: 'Memoria de cálculo de tierras', grupo: AND, estatus: 'en_curso' })
   }
   if (k === 1) out.push({ tipo: 'recordatorio', id: 'r2', texto: 'llevar el coche a servicio', inicio: iso(f, '08:00'), hhmm: '08:00', grupo: null })
-  if (k === 3) out.push({ tipo: 'evento', id: 'e1', texto: 'Cumpleaños de la abuela Tere', inicio: iso(f, '19:00'), hhmm: '19:00', grupo: FAM })
+  if (k === 3) out.push({ tipo: 'evento', id: 'e1', texto: 'Cumpleaños de la abuela Rosa', inicio: iso(f, '19:00'), hhmm: '19:00', grupo: FAM })
   if (k === 5) out.push({ tipo: 'vence', pendienteId: 'x3', texto: 'Lista de materiales del patio de 115 kV', grupo: AND, estatus: 'abierto' })
   if (k === 9) out.push({ tipo: 'recordatorio', id: 'r3', texto: 'renovar el pasaporte', inicio: iso(f, '10:00'), hhmm: '10:00', grupo: null })
   return out.sort((a, b) => ((a.tipo === 'vence' ? null : a.hhmm) ?? '99').localeCompare((b.tipo === 'vence' ? null : b.hhmm) ?? '99'))
@@ -79,13 +79,13 @@ export function demoPersona(): EstadoDePersona {
   return {
     hoy, tz: 'America/Monterrey', dias,
     alertas: [
-      ...(choque ? [{ tipo: 'choque' as const, hhmm: '14:00', cosas: ['Revisión de ingeniería con Termika', 'recoger a Valeria de la secundaria'] }] : []),
+      ...(choque ? [{ tipo: 'choque' as const, hhmm: '14:00', cosas: ['Revisión de ingeniería con Vértice', 'recoger a Paula de la secundaria'] }] : []),
       { tipo: 'vencida', texto: 'Matriz de pruebas FAT', grupo: AND, vence: sumar(hoy, -2) },
       { tipo: 'por_aprobar', grupo: FAM, groupId: 'g-rios', cuantos: 2 },
     ],
     foco: [
       { texto: 'Matriz de pruebas FAT', porque: `venció el ${sumar(hoy, -2)}`, grupo: AND },
-      ...(choque ? [{ texto: 'Revisión de ingeniería con Termika · recoger a Valeria de la secundaria', porque: 'chocan a las 14:00', grupo: null }] : []),
+      ...(choque ? [{ texto: 'Revisión de ingeniería con Vértice · recoger a Paula de la secundaria', porque: 'chocan a las 14:00', grupo: null }] : []),
       { texto: 'Memoria de cálculo de tierras', porque: 'vence hoy', grupo: AND },
     ].slice(0, 3),
     compromisos: {
@@ -93,14 +93,14 @@ export function demoPersona(): EstadoDePersona {
         { groupId: 'g-rios', grupo: FAM, clase: 'family', rol: 'responsable', nombreRol: 'Guía', cajon: 'diriges',
           propio: true, paga: { quien: 'tu', nombre: null }, ocupaLugar: null, proyectosActivos: 0, misAbiertas: 0, misVencidas: 0 },
         { groupId: 'g-andes', grupo: AND, clase: 'work', rol: 'integrante', nombreRol: 'Ejecutor', cajon: 'ejecutas',
-          propio: false, paga: { quien: 'sponsor', nombre: '@marcela' }, ocupaLugar: true, proyectosActivos: 1, misAbiertas: 3, misVencidas: 1 },
+          propio: false, paga: { quien: 'sponsor', nombre: '@ines' }, ocupaLugar: true, proyectosActivos: 1, misAbiertas: 3, misVencidas: 1 },
       ],
       pendientes: [
-        { pendienteId: 'x1', groupId: 'g-andes', grupo: AND, plan: 'Subestación Andes', texto: 'Matriz de pruebas FAT',
+        { pendienteId: 'x1', groupId: 'g-andes', grupo: AND, plan: 'Subestación Mirador', texto: 'Matriz de pruebas FAT',
           vence: sumar(hoy, -2), estatus: 'en_curso', avance: 60, vencida: true },
-        { pendienteId: 'x2', groupId: 'g-andes', grupo: AND, plan: 'Subestación Andes', texto: 'Memoria de cálculo de tierras',
+        { pendienteId: 'x2', groupId: 'g-andes', grupo: AND, plan: 'Subestación Mirador', texto: 'Memoria de cálculo de tierras',
           vence: hoy, estatus: 'en_curso', avance: 80, vencida: false },
-        { pendienteId: 'x3', groupId: 'g-andes', grupo: AND, plan: 'Subestación Andes', texto: 'Lista de materiales del patio de 115 kV',
+        { pendienteId: 'x3', groupId: 'g-andes', grupo: AND, plan: 'Subestación Mirador', texto: 'Lista de materiales del patio de 115 kV',
           vence: sumar(hoy, 5), estatus: 'abierto', avance: 0, vencida: false },
       ],
     },

@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
  * `/app/g/<grupo>` — el grupo.
  *
  * Con UN plan no enseña una lista de uno: redirige. Es a lo que apunta el pase
- * cuando alguien dice «el portal de Andes», y hacer que esa persona dé un clic
+ * cuando alguien dice «el portal de Mirador», y hacer que esa persona dé un clic
  * más para elegir entre una sola opción es justo la fricción de la que se
  * quejó la primera versión.
  */

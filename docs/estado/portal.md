@@ -95,5 +95,6 @@ Familia visual de la app · Tailwind v4 · todo a la vez · Zaelyn al lado en un
 ## Desde cero (decisiones/2026-11-10-landings-y-portal)
 
 - Hecho: las cuatro landings nuevas (`/`, `/personal`, `/familia`, `/pmo`) con la plantilla única.
-- Siguiente: el portal con barra lateral e Inicio de la persona; luego el dashboard de cada sección y el teléfono.
+- Hecho: el portal con barra lateral (Inicio · Personal · Familia · PMO · Apps · Configuración · Cuenta · Admin) y pestañas abajo en el teléfono; Inicio de la persona; PMO con sus proyectos en renglones; el plan con tres vistas a la mano y «Más»; Apps y Configuración nuevas; Zaelyn como el orbe flotante con las conversaciones sin leer arriba de él. Los ejemplos (/demo…) ya usan gente nueva (Subestación Mirador, Familia Arce, Mariana).
+- Siguiente: los dashboards mínimos de Personal y Familia y pasar a Tailwind las pantallas que siguen con hojas viejas (editor, obra, horas, cuenta, admin).
 - Falta: inglés y portugués de las landings nuevas; qué se le puede pedir a Zaelyn sobre Kore y TCGBusters (dueño).

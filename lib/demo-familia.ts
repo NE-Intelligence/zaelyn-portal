@@ -5,7 +5,7 @@
  * arma la semana, porque no hay motor detrás. La pantalla no se entera — el
  * mismo componente pinta esto y la familia real de quien entra.
  *
- * Nada de aquí es de nadie. Los Ríos no existen.
+ * Nada de aquí es de nadie. Los Arce no existen.
  */
 import type { AlertaDeFamilia, DiaDeFamilia, EstadoDeFamilia, EventoDelDia } from './familia'
 
@@ -20,11 +20,11 @@ const sumar = (f: string, n: number) => {
 const dow = (f: string) => new Date(`${f}T12:00:00Z`).getUTCDay()
 
 const P = {
-  sofia: { id: 'p-sofia', nombre: 'Sofía', rol: 'responsable' },
-  andres: { id: 'p-andres', nombre: 'Andrés', rol: 'responsable' },
-  vale: { id: 'p-vale', nombre: 'Valeria', rol: 'a_cargo' },
-  mateo: { id: 'p-mateo', nombre: 'Mateo', rol: 'a_cargo' },
-  tere: { id: 'p-tere', nombre: 'Abuela Tere', rol: 'apoyo' },
+  mariana: { id: 'p-mariana', nombre: 'Mariana', rol: 'responsable' },
+  andres: { id: 'p-andres', nombre: 'Diego', rol: 'responsable' },
+  vale: { id: 'p-vale', nombre: 'Paula', rol: 'a_cargo' },
+  mateo: { id: 'p-mateo', nombre: 'Emilio', rol: 'a_cargo' },
+  tere: { id: 'p-tere', nombre: 'Abuela Rosa', rol: 'apoyo' },
 } as const
 
 type Act = { id: string; titulo: string; de: keyof typeof P; dias: number[]; inicio: string; fin: string
@@ -33,18 +33,18 @@ type Act = { id: string; titulo: string; de: keyof typeof P; dias: number[]; ini
 const ACTS: Act[] = [
   { id: 'a-esc-v', titulo: 'secundaria', de: 'vale', dias: [1, 2, 3, 4, 5], inicio: '07:20', fin: '14:10',
     llevar: { 1: 'andres', 2: 'andres', 3: 'andres', 4: 'andres', 5: 'andres' },
-    recoger: { 1: 'sofia', 2: 'tere', 3: 'sofia', 4: 'tere', 5: 'sofia' } },
+    recoger: { 1: 'mariana', 2: 'tere', 3: 'mariana', 4: 'tere', 5: 'mariana' } },
   { id: 'a-esc-m', titulo: 'primaria', de: 'mateo', dias: [1, 2, 3, 4, 5], inicio: '07:45', fin: '13:30',
     llevar: { 1: 'andres', 2: 'andres', 3: 'andres', 4: 'andres', 5: 'andres' },
-    recoger: { 1: 'sofia', 2: 'tere', 3: 'sofia', 4: 'tere', 5: 'sofia' } },
+    recoger: { 1: 'mariana', 2: 'tere', 3: 'mariana', 4: 'tere', 5: 'mariana' } },
   { id: 'a-fut', titulo: 'futbol', de: 'mateo', dias: [2, 4], inicio: '17:00', fin: '18:30',
-    llevar: { 2: 'sofia', 4: 'andres' }, recoger: { 2: 'sofia' } },
+    llevar: { 2: 'mariana', 4: 'andres' }, recoger: { 2: 'mariana' } },
   { id: 'a-nat', titulo: 'natación', de: 'mateo', dias: [6], inicio: '09:00', fin: '10:00',
     llevar: { 6: 'andres' }, recoger: { 6: 'andres' } },
   { id: 'a-vol', titulo: 'voleibol', de: 'vale', dias: [1, 3, 5], inicio: '16:30', fin: '18:00',
-    llevar: { 1: 'sofia', 3: 'tere', 5: 'sofia' }, recoger: { 1: 'andres', 3: 'andres', 5: 'andres' } },
+    llevar: { 1: 'mariana', 3: 'tere', 5: 'mariana' }, recoger: { 1: 'andres', 3: 'andres', 5: 'andres' } },
   { id: 'a-pia', titulo: 'piano', de: 'vale', dias: [2], inicio: '18:30', fin: '19:30',
-    llevar: { 2: 'sofia' }, recoger: { 2: 'sofia' } },
+    llevar: { 2: 'mariana' }, recoger: { 2: 'mariana' } },
 ]
 
 const QUEHACERES = [
@@ -98,18 +98,18 @@ function armar(): EstadoDeFamilia {
       fechas: [],
     })
   }
-  // El jueves Sofía lleva a Mateo a futbol a las 5 y recoge a Valeria a las…
+  // El jueves Mariana lleva a Emilio a futbol a las 5 y recoge a Paula a las…
   // no: el choque del ejemplo es el martes, piano y futbol casi juntos.
   const martes = dias.find(x => dow(x.fecha) === 2)
-  if (martes) alertas.unshift({ tipo: 'choque', fecha: martes.fecha, quien: 'Sofía', hora: '18:30',
-    cosas: ['recoger a Mateo (futbol)', 'llevar a Valeria (piano)'] })
+  if (martes) alertas.unshift({ tipo: 'choque', fecha: martes.fecha, quien: 'Mariana', hora: '18:30',
+    cosas: ['recoger a Emilio (futbol)', 'llevar a Paula (piano)'] })
 
   const cumpleMateo = sumar(hoy, 9)
   const fechas = [
-    { titulo: 'Cumpleaños de Mateo', tipo: 'cumpleanos', de: 'Mateo', fecha: cumpleMateo, faltan: 9, cumple: 10 },
-    { titulo: 'Aniversario de Sofía y Andrés', tipo: 'aniversario', de: null, fecha: sumar(hoy, 23), faltan: 23, cumple: 15 },
-    { titulo: 'Cumpleaños de la abuela Tere', tipo: 'cumpleanos', de: 'Abuela Tere', fecha: sumar(hoy, 41), faltan: 41, cumple: 71 },
-    { titulo: 'Cumpleaños de Valeria', tipo: 'cumpleanos', de: 'Valeria', fecha: sumar(hoy, 128), faltan: 128, cumple: 13 },
+    { titulo: 'Cumpleaños de Emilio', tipo: 'cumpleanos', de: 'Emilio', fecha: cumpleMateo, faltan: 9, cumple: 10 },
+    { titulo: 'Aniversario de Mariana y Diego', tipo: 'aniversario', de: null, fecha: sumar(hoy, 23), faltan: 23, cumple: 15 },
+    { titulo: 'Cumpleaños de la abuela Rosa', tipo: 'cumpleanos', de: 'Abuela Rosa', fecha: sumar(hoy, 41), faltan: 41, cumple: 71 },
+    { titulo: 'Cumpleaños de Paula', tipo: 'cumpleanos', de: 'Paula', fecha: sumar(hoy, 128), faltan: 128, cumple: 13 },
   ]
   for (const f of fechas) dias.find(d => d.fecha === f.fecha)?.fechas.push(f.titulo)
   alertas.push({ tipo: 'por_aprobar', cuantos: 2, puntos: 18 })
@@ -117,23 +117,23 @@ function armar(): EstadoDeFamilia {
   const personas = Object.values(P).map(p => ({ id: p.id, nombre: p.nombre, rol: p.rol,
     rolDicho: p.rol === 'responsable' ? 'Guía' : p.rol === 'a_cargo' ? 'A cargo' : 'Apoyo',
     aCargo: p.rol === 'a_cargo', conCuenta: p.id !== 'p-mateo' && p.id !== 'p-tere',
-    cuidadoPor: p.rol === 'a_cargo' ? ['Sofía', 'Andrés', 'Abuela Tere'] : [] }))
+    cuidadoPor: p.rol === 'a_cargo' ? ['Mariana', 'Diego', 'Abuela Rosa'] : [] }))
 
   return {
-    grupo: { id: 'demo-familia', nombre: 'Familia Ríos', clase: 'family' },
+    grupo: { id: 'demo-familia', nombre: 'Familia Arce', clase: 'family' },
     hoy,
-    yo: { personaId: P.sofia.id, rol: 'responsable', rolDicho: 'Guía', guia: true },
+    yo: { personaId: P.mariana.id, rol: 'responsable', rolDicho: 'Guía', guia: true },
     personas,
     dias,
     alertas,
     tablero: [
-      { personaId: P.vale.id, nombre: 'Valeria', saldo: 142, porAprobar: 8, semana: 61 },
-      { personaId: P.mateo.id, nombre: 'Mateo', saldo: 96, porAprobar: 10, semana: 47 },
+      { personaId: P.vale.id, nombre: 'Paula', saldo: 142, porAprobar: 8, semana: 61 },
+      { personaId: P.mateo.id, nombre: 'Emilio', saldo: 96, porAprobar: 10, semana: 47 },
     ],
     quehaceres: QUEHACERES.map(t => ({ id: t.id, titulo: t.titulo, de: nombre(t.de), puntos: t.puntos, cuando: t.regla })),
     porAprobar: [
-      { de: 'Mateo', titulo: 'sacar la basura', puntos: 10, fecha: sumar(hoy, -1) },
-      { de: 'Valeria', titulo: 'lavar los trastes', puntos: 8, fecha: hoy },
+      { de: 'Emilio', titulo: 'sacar la basura', puntos: 10, fecha: sumar(hoy, -1) },
+      { de: 'Paula', titulo: 'lavar los trastes', puntos: 8, fecha: hoy },
     ],
     premios: [
       { titulo: 'elegir la película del viernes', puntos: 40 },
@@ -142,17 +142,17 @@ function armar(): EstadoDeFamilia {
       { titulo: 'salida al cine', puntos: 200 },
     ],
     medallero: [
-      { personaId: P.mateo.id, nombre: 'Mateo', medallas: 4, trofeos: 1, reconocimientos: 1, partidos: 9, disciplinas: ['natación', 'futbol'] },
-      { personaId: P.vale.id, nombre: 'Valeria', medallas: 2, trofeos: 2, reconocimientos: 2, partidos: 6, disciplinas: ['voleibol', 'piano'] },
+      { personaId: P.mateo.id, nombre: 'Emilio', medallas: 4, trofeos: 1, reconocimientos: 1, partidos: 9, disciplinas: ['natación', 'futbol'] },
+      { personaId: P.vale.id, nombre: 'Paula', medallas: 2, trofeos: 2, reconocimientos: 2, partidos: 6, disciplinas: ['voleibol', 'piano'] },
     ],
     logros: [
-      { de: 'Mateo', tipo: 'resultado', titulo: 'Ganó 3 a 1 contra Halcones, metió 2 goles', disciplina: 'futbol', fecha: sumar(hoy, -2) },
-      { de: 'Valeria', tipo: 'trofeo', titulo: 'Primer lugar del torneo estatal', disciplina: 'voleibol', fecha: sumar(hoy, -5) },
-      { de: 'Mateo', tipo: 'medalla', titulo: 'Medalla de oro, 50 m dorso', disciplina: 'natación', fecha: sumar(hoy, -11) },
-      { de: 'Mateo', tipo: 'marca', titulo: '50 m libre en 41.2 segundos', disciplina: 'natación', fecha: sumar(hoy, -11) },
-      { de: 'Valeria', tipo: 'reconocimiento', titulo: 'Diploma del recital de otoño', disciplina: 'piano', fecha: sumar(hoy, -19) },
-      { de: 'Mateo', tipo: 'resultado', titulo: 'Empató 2 a 2 contra Tigres', disciplina: 'futbol', fecha: sumar(hoy, -9) },
-      { de: 'Valeria', tipo: 'resultado', titulo: 'Ganó 2 sets a 0', disciplina: 'voleibol', fecha: sumar(hoy, -3) },
+      { de: 'Emilio', tipo: 'resultado', titulo: 'Ganó 3 a 1 contra Halcones, metió 2 goles', disciplina: 'futbol', fecha: sumar(hoy, -2) },
+      { de: 'Paula', tipo: 'trofeo', titulo: 'Primer lugar del torneo estatal', disciplina: 'voleibol', fecha: sumar(hoy, -5) },
+      { de: 'Emilio', tipo: 'medalla', titulo: 'Medalla de oro, 50 m dorso', disciplina: 'natación', fecha: sumar(hoy, -11) },
+      { de: 'Emilio', tipo: 'marca', titulo: '50 m libre en 41.2 segundos', disciplina: 'natación', fecha: sumar(hoy, -11) },
+      { de: 'Paula', tipo: 'reconocimiento', titulo: 'Diploma del recital de otoño', disciplina: 'piano', fecha: sumar(hoy, -19) },
+      { de: 'Emilio', tipo: 'resultado', titulo: 'Empató 2 a 2 contra Tigres', disciplina: 'futbol', fecha: sumar(hoy, -9) },
+      { de: 'Paula', tipo: 'resultado', titulo: 'Ganó 2 sets a 0', disciplina: 'voleibol', fecha: sumar(hoy, -3) },
     ],
     fechas,
   }

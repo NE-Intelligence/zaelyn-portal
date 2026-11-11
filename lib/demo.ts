@@ -26,11 +26,11 @@ const dias = (a: string, b: string) => Math.round((dia(b) - dia(a)) / DIA)
 const mas = (s: string, n: number) => new Date(dia(s) + n * DIA).toISOString().slice(0, 10)
 
 const PERSONAS: PersonaEnPlan[] = [
-  { id: 'p1', nombre: '@marcela', rol: 'responsable', nivel: 3, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
-  { id: 'p2', nombre: '@efrain', rol: 'lider', nivel: 2, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
-  { id: 'p3', nombre: '@lupita', rol: 'integrante', nivel: 1, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
-  { id: 'p4', nombre: 'Termika', rol: 'integrante', nivel: 1, tieneCuenta: false, abiertos: 0, cerrados: 0, atrasados: 0 },
-  { id: 'p5', nombre: '@rodrigo', rol: 'observador', nivel: 0, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
+  { id: 'p1', nombre: '@ines', rol: 'responsable', nivel: 3, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
+  { id: 'p2', nombre: '@bruno', rol: 'lider', nivel: 2, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
+  { id: 'p3', nombre: '@tomas', rol: 'integrante', nivel: 1, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
+  { id: 'p4', nombre: 'Vértice', rol: 'integrante', nivel: 1, tieneCuenta: false, abiertos: 0, cerrados: 0, atrasados: 0 },
+  { id: 'p5', nombre: '@lucia', rol: 'observador', nivel: 0, tieneCuenta: true, abiertos: 0, cerrados: 0, atrasados: 0 },
 ]
 
 type Semilla = {
@@ -133,7 +133,7 @@ const RENGLONES: Renglon[] = SEMILLA.map(s => {
     estatus: s.estatus,
     abierto,
     planId: 'plan-andes',
-    plan: 'Subestación Andes',
+    plan: 'Subestación Mirador',
     personaId: s.quien,
     quien: PERSONAS.find(p => p.id === s.quien)?.nombre ?? null,
     prioridad: 100,
@@ -297,21 +297,21 @@ function narrativa(): Narrativa {
 }
 
 const BITACORA: Suceso[] = [
-  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'prorroga_aprobada', texto: 'llovió tres días y no se pudo colar', avance: null, hasta: `${mas(HOY, 6)}`, en: `${mas(HOY, -1)}T19:02:00.000Z`, quien: '@marcela' },
-  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'prorroga_pedida', texto: 'llovió tres días y no se pudo colar', avance: null, hasta: `${mas(HOY, 6)}`, en: `${mas(HOY, -1)}T18:30:00.000Z`, quien: 'Termika' },
-  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'avance', texto: null, avance: 25, hasta: null, en: `${mas(HOY, -1)}T18:12:00.000Z`, quien: 'Termika' },
-  { pendienteId: ID.get('B-01')!, pendiente: 'Ingeniería de detalle del tablero', clave: 'B-01', evento: 'comentado', texto: 'el cliente pidió cambiar el interruptor principal, ya está en el plano', avance: null, hasta: null, en: `${mas(HOY, -2)}T22:40:00.000Z`, quien: '@efrain' },
-  { pendienteId: ID.get('B-03')!, pendiente: 'Tramitar el permiso municipal', clave: 'B-03', evento: 'hecho', texto: null, avance: null, hasta: null, en: `${mas(HOY, -12)}T17:05:00.000Z`, quien: '@lupita' },
-  { pendienteId: ID.get('B-01')!, pendiente: 'Ingeniería de detalle del tablero', clave: 'B-01', evento: 'avance', texto: null, avance: 70, hasta: null, en: `${mas(HOY, -9)}T16:20:00.000Z`, quien: '@efrain' },
-  { pendienteId: ID.get('C-03')!, pendiente: 'Montaje y conexionado', clave: 'C-03', evento: 'bloqueado', texto: null, avance: null, hasta: null, en: `${mas(HOY, -15)}T15:00:00.000Z`, quien: '@marcela' },
-  { pendienteId: ID.get('B-02')!, pendiente: 'Memoria de cálculo y planos', clave: 'B-02', evento: 'hecho', texto: null, avance: null, hasta: null, en: '2026-10-30T19:30:00.000Z', quien: '@lupita' },
-  { pendienteId: ID.get('A-03')!, pendiente: 'Aprobación del comité técnico', clave: 'A-03', evento: 'hecho', texto: null, avance: null, hasta: null, en: '2026-10-09T20:00:00.000Z', quien: '@marcela' },
+  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'prorroga_aprobada', texto: 'llovió tres días y no se pudo colar', avance: null, hasta: `${mas(HOY, 6)}`, en: `${mas(HOY, -1)}T19:02:00.000Z`, quien: '@ines' },
+  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'prorroga_pedida', texto: 'llovió tres días y no se pudo colar', avance: null, hasta: `${mas(HOY, 6)}`, en: `${mas(HOY, -1)}T18:30:00.000Z`, quien: 'Vértice' },
+  { pendienteId: ID.get('C-02')!, pendiente: 'Obra civil de la base', clave: 'C-02', evento: 'avance', texto: null, avance: 25, hasta: null, en: `${mas(HOY, -1)}T18:12:00.000Z`, quien: 'Vértice' },
+  { pendienteId: ID.get('B-01')!, pendiente: 'Ingeniería de detalle del tablero', clave: 'B-01', evento: 'comentado', texto: 'el cliente pidió cambiar el interruptor principal, ya está en el plano', avance: null, hasta: null, en: `${mas(HOY, -2)}T22:40:00.000Z`, quien: '@bruno' },
+  { pendienteId: ID.get('B-03')!, pendiente: 'Tramitar el permiso municipal', clave: 'B-03', evento: 'hecho', texto: null, avance: null, hasta: null, en: `${mas(HOY, -12)}T17:05:00.000Z`, quien: '@tomas' },
+  { pendienteId: ID.get('B-01')!, pendiente: 'Ingeniería de detalle del tablero', clave: 'B-01', evento: 'avance', texto: null, avance: 70, hasta: null, en: `${mas(HOY, -9)}T16:20:00.000Z`, quien: '@bruno' },
+  { pendienteId: ID.get('C-03')!, pendiente: 'Montaje y conexionado', clave: 'C-03', evento: 'bloqueado', texto: null, avance: null, hasta: null, en: `${mas(HOY, -15)}T15:00:00.000Z`, quien: '@ines' },
+  { pendienteId: ID.get('B-02')!, pendiente: 'Memoria de cálculo y planos', clave: 'B-02', evento: 'hecho', texto: null, avance: null, hasta: null, en: '2026-10-30T19:30:00.000Z', quien: '@tomas' },
+  { pendienteId: ID.get('A-03')!, pendiente: 'Aprobación del comité técnico', clave: 'A-03', evento: 'hecho', texto: null, avance: null, hasta: null, en: '2026-10-09T20:00:00.000Z', quien: '@ines' },
 ]
 
 const ESTADO: EstadoDePlan = {
-  grupo: { id: 'g-andes', nombre: 'Andes' },
-  plan: { id: 'plan-andes', clave: 'ANDES', nombre: 'Subestación Andes' },
-  planes: [{ id: 'plan-andes', clave: 'ANDES', nombre: 'Subestación Andes' }],
+  grupo: { id: 'g-andes', nombre: 'Mirador' },
+  plan: { id: 'plan-andes', clave: 'ANDES', nombre: 'Subestación Mirador' },
+  planes: [{ id: 'plan-andes', clave: 'ANDES', nombre: 'Subestación Mirador' }],
   hoy: HOY,
   punto: PUNTO,
   veredicto: PUNTO.esperado !== null && PUNTO.declarado < PUNTO.esperado - 5 ? 'atrasado' : 'al_dia',
@@ -350,9 +350,9 @@ export const DEMO: VistaDePlan = {
 
 export const GRUPOS_DEMO: GrupoEnPortal[] = [
   {
-    id: 'g-andes', nombre: 'Andes', clase: 'work', rol: 'responsable', nivel: 3,
+    id: 'g-andes', nombre: 'Mirador', clase: 'work', rol: 'responsable', nivel: 3,
     planes: [{
-      id: 'plan-andes', clave: 'ANDES', nombre: 'Subestación Andes',
+      id: 'plan-andes', clave: 'ANDES', nombre: 'Subestación Mirador',
       abiertos: RENGLONES.filter(r => r.abierto).length,
       vencidos: RENGLONES.filter(r => r.abierto && r.vence! < HOY).length,
       hasta: RUTA.venceElPlan,

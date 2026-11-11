@@ -23,7 +23,7 @@ Dos registros de la misma marca, cada uno bajo su clase, con los mismos tokens:
 | Ruta | Qué es |
 |---|---|
 | `/` | La portada. Proyectos, familia y personal. |
-| `/proyectos`, `/familia`, `/personal` | Las tres áreas. |
+| `/personal`, `/familia`, `/pmo` | Las landings de cada solución (`/proyectos` lleva a `/pmo`). |
 | `/precios`, `/nosotros`, `/legal`, `/empezar` | Precios, quiénes somos, avisos legales y arranque. |
 | `/demo`, `/demo/familia`, `/demo/personal` | Los portales completos con datos inventados, y lo dicen. |
 | `/entrar` | La puerta web (passkey, correo o Telegram). Con `?pase=` canjea por POST. |
@@ -32,6 +32,7 @@ Dos registros de la misma marca, cada uno bajo su clase, con los mismos tokens:
 | `…?p=<persona>&a=<actividad>&m=<AAAA-MM>` | Ver por persona, abrir el detalle de una actividad, cambiar de mes. Zaelyn puede mandar aquí con `portal.ir`. |
 | `/app/g/<grupo>/<plan>/obra`, `/app/g/<grupo>/horas`, `/presupuesto`, `/ajustes`, `/editor` | Obra, horas, presupuesto, ajustes del grupo y editor de planes. |
 | `/app/f/<grupo>`, `/app/personal` | Familia y Personal. |
+| `/app/apps`, `/app/configuracion` | Las apps conectadas (Kore, TCGBusters) y la configuración (en el teléfono, también «Más»). |
 | `/app/mensajes`, `/app/cuenta`, `/app/plan`, `/app/organizacion` | Mensajes, cuenta, plan y organización. |
 | `/admin` | Administración (solo el dueño). |
 | `/salir` | Entrega el token. **Solo POST**. |

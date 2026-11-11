@@ -9,7 +9,7 @@ export const metadata = { title: 'Personal · ejemplo' }
 /**
  * `/demo/personal` — el portal Personal con una persona inventada.
  *
- * Sofía no existe, y la barra lo dice. Es la misma pantalla que ve quien
+ * Mariana no existe, y la barra lo dice. Es la misma pantalla que ve quien
  * entra a `/app/personal`: solo cambia de dónde sale el estado.
  */
 export default async function DemoPersonal({
@@ -25,10 +25,10 @@ export default async function DemoPersonal({
         migas={[{ texto: 'Ejemplo' }, { texto: 'Personal' }]}
         ejemplo
         etq="Personal"
-        aviso="Sofía, sus grupos y sus pendientes están inventados. Con tus datos la pantalla es la misma: cambia de dónde sale tu día, no cómo se pinta."
+        aviso="Mariana, sus grupos y sus pendientes están inventados. Con tus datos la pantalla es la misma: cambia de dónde sale tu día, no cómo se pinta."
       />
       <main className="pt-lienzo">
-        <LienzoPersona e={e} vista={vista} base="/demo/personal" leido={new Date().toISOString()} nombre="Sofía" />
+        <LienzoPersona e={e} vista={vista} base="/demo/personal" leido={new Date().toISOString()} nombre="Mariana" />
       </main>
       <Pie />
     </>
