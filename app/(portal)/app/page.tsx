@@ -1,139 +1,137 @@
 import Link from 'next/link'
-import { Barra, Pie } from '@/components/portal/Marco'
+import { Barra } from '@/components/portal/Marco'
 import { SinSesion } from '@/components/portal/SinSesion'
-import { misGrupos, soyAdmin, yoMismo } from '@/lib/api'
-import { textos } from '@/lib/copy'
-import { idiomaActual } from '@/lib/preferencias'
+import { misGrupos, yoMismo } from '@/lib/api'
+import { lugarDe, type EntradaDelDia } from '@/lib/persona'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Portal' }
+export const metadata = { title: 'Inicio' }
 
 /**
- * `/app` — la portada del portal (#186): una tarjeta por área.
+ * `/app` — el Inicio de la persona (decisiones/2026-11-10-landings-y-portal).
  *
- * Antes aquí convivían Personal, los proyectos uno por uno, la familia y la
- * cuenta en una sola lista larga, y no se distinguía qué era qué. Ahora la
- * portada solo orienta: cuánto hay en cada área y la puerta para entrar.
- * Cada área tiene su propia casa con su detalle.
- *
- * NINGUNA TARJETA DICE UN PORCENTAJE: medir cada plan para pintar una
- * portada sería hacer cuentas aquí, y el atajo de hechas/total no es avance.
+ * Una pantalla tranquila: el saludo, lo primero que Zaelyn ve hoy, una tarjeta
+ * por solución con UNA sola cifra y la lista de hoy. Las cifras son las que el
+ * motor ya contó (`/portal/persona`, `/portal/grupos`): aquí no se mide nada,
+ * ni se pinta un porcentaje que no venga medido.
  */
+const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+
+function saludo(tz: string | null): string {
+  let h = new Date().getUTCHours()
+  try { h = Number(new Intl.DateTimeFormat('es-MX', { hour: 'numeric', hourCycle: 'h23', timeZone: tz ?? undefined }).format(new Date())) } catch { /* zona rara */ }
+  return h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'
+}
+function hoyLargo(iso: string): string {
+  const [a, m, d] = iso.slice(0, 10).split('-').map(Number) as [number, number, number]
+  const f = new Date(Date.UTC(a, m - 1, d))
+  const t = `${DIAS[f.getUTCDay()]} ${d} de ${MESES[m - 1]}`
+  return t[0]!.toUpperCase() + t.slice(1)
+}
+const hora = (e: EntradaDelDia): string => ('hhmm' in e && e.hhmm ? e.hhmm : 'Hoy')
+
+const TILE = 'flex flex-col gap-3.5 rounded-[26px] bg-superficie p-[26px] text-tinta no-underline shadow-z1 transition-shadow hover:shadow-z2'
+const GRANDE = { letterSpacing: '-0.04em' }
+
 export default async function Inicio() {
-  const [r, yo, admin, lang] = await Promise.all([misGrupos(), yoMismo(7), soyAdmin(), idiomaActual()])
+  const [r, yo] = await Promise.all([misGrupos(), yoMismo(1)])
   if (!r.ok) return <SinSesion fallo={r.fallo} />
-  const t = textos(lang)
 
   const grupos = r.dato.grupos
-  const proyectos = grupos.filter((g) => g.clase === 'work' || g.clase === 'other')
-  const familias = grupos.filter((g) => g.clase === 'family')
-  const planes = proyectos.reduce((n, g) => n + g.planes.length, 0)
-  const vencidas = proyectos.reduce((n, g) => n + g.planes.reduce((m, p) => m + p.vencidos, 0), 0)
-  const choques = yo.ok ? yo.dato.alertas.filter((a) => a.tipo === 'choque').length : 0
-  const vencidasYo = yo.ok ? yo.dato.compromisos.pendientes.filter((p) => p.vencida).length : 0
+  const familias = grupos.filter(g => g.clase === 'family')
+  const proyectos = grupos.filter(g => g.clase !== 'family')
+  const planes = proyectos.flatMap(g => g.planes.map(p => ({ ...p, grupo: g.id })))
+  const vencidasPmo = planes.reduce((n, p) => n + p.vencidos, 0)
+  const hoy = yo.ok ? yo.dato.dias[0]?.entradas ?? [] : []
+  const vencidasYo = yo.ok ? yo.dato.compromisos.pendientes.filter(p => p.vencida).length : 0
+  const foco = yo.ok ? yo.dato.foco[0] : undefined
+  const choques = yo.ok ? yo.dato.alertas.filter(a => a.tipo === 'choque').length : 0
 
   return (
     <>
       <Barra area="inicio" sesion />
-      <main className="pt-lienzo">
-        <div className="pt-hub-cabeza">
-          <h1>{t('po.hola.h1')}</h1>
-          <p>{t('po.hola.sub')}</p>
-        </div>
+      <main className="mx-auto flex w-full max-w-[1080px] flex-col gap-9 px-6 pt-12 pb-20 text-tinta sm:px-14">
+        <header className="flex flex-col gap-1.5">
+          <span className="text-[14px] text-tinta-3">{yo.ok ? hoyLargo(yo.dato.hoy) : ''}</span>
+          <h1 className="text-[34px] font-semibold sm:text-[40px]" style={GRANDE}>{saludo(yo.ok ? yo.dato.tz : null)}</h1>
+        </header>
 
-        <div className="pt-areas-rejilla">
-          {/* PERSONAL — lo que cruza a las otras dos */}
-          <section className="pt-area" data-area="personal">
-            <header>
-              <h2>{t('po.personal')}</h2>
-              {!yo.ok && yo.fallo === 'SIN_PLAN' && <span className="pt-chip">{t('po.sin.plan')}</span>}
-            </header>
-            <p>{t('po.pe.d')}</p>
-            {yo.ok && (
+        {/* Lo primero que Zaelyn ve hoy: su frase, tal cual la manda el motor */}
+        {foco && (
+          <section className="flex items-start gap-4">
+            <span className="z-orbe size-11" aria-hidden="true" />
+            <p className="max-w-[640px] rounded-[24px] bg-burbuja px-5 py-4 text-[17px] leading-[1.45]">
+              {foco.texto}{foco.porque ? <span className="text-tinta-2"> · {foco.porque}</span> : null}
+            </p>
+          </section>
+        )}
+
+        <section className="grid gap-4 md:grid-cols-3" aria-label="Tus soluciones">
+          <Link href="/app/personal" className={TILE}>
+            <span className="flex items-center gap-2 text-[14px] text-tinta-3"><span className="size-[9px] rounded-full bg-personal" aria-hidden="true" />Personal</span>
+            {yo.ok ? (
               <>
-                <div className="pt-cifras">
-                  <span>{yo.dato.dias[0]?.entradas.length ?? 0} {t('po.hoy')}</span>
-                  {choques > 0 && <span className="mal">{choques} {t('po.choques')}</span>}
-                  {vencidasYo > 0 && <span className="mal">{vencidasYo} {t('po.vencidas')}</span>}
-                </div>
-                {yo.dato.foco.length > 0 && (
-                  <ol className="pe-foco-lista">
-                    {yo.dato.foco.slice(0, 3).map((f, i) => (
-                      <li key={i}><span className="n">{i + 1}</span><div><b>{f.texto}</b><span>{f.grupo ?? '—'}</span></div></li>
-                    ))}
-                  </ol>
-                )}
+                <span className="text-[40px] leading-none font-semibold" style={GRANDE}>{hoy.length}</span>
+                <span className="text-[15px] text-tinta-2">
+                  {hoy.length === 1 ? 'cosa hoy' : 'cosas hoy'}
+                  {vencidasYo > 0 && <> · <span className="text-det-tinta">{vencidasYo} {vencidasYo === 1 ? 'vencida' : 'vencidas'}</span></>}
+                  {choques > 0 && <> · {choques} {choques === 1 ? 'choque' : 'choques'}</>}
+                </span>
               </>
+            ) : (
+              <span className="text-[15px] leading-[1.5] text-tinta-2">Tu día cruzado con todos tus grupos llega con Sprint. En el chat ya lo tienes.</span>
             )}
-            <div className="pt-area-acc">
-              <Link className="pt-area-boton" href="/app/personal">{t('po.abrir')}</Link>
-              {!yo.ok && <Link className="pt-area-boton suave" href="/demo/personal">{t('po.ejemplo.ver')}</Link>}
-            </div>
-          </section>
+          </Link>
 
-          {/* FAMILIA */}
-          <section className="pt-area" data-area="familia">
-            <header>
-              <h2>{t('po.familia')}</h2>
-              {familias.length === 0 && <span className="pt-chip">{t('po.sin.grupo')}</span>}
-            </header>
-            <p>{t('po.fa.d')}</p>
-            {familias.length > 0 && (
-              <div className="pt-lista-enlaces">
-                {familias.map((g) => (
-                  <Link key={g.id} href={`/app/f/${g.id}`}><span>{g.nombre}</span><small>→</small></Link>
-                ))}
-              </div>
+          <Link href={familias.length === 1 ? `/app/f/${familias[0]!.id}` : '/app/familia'} className={TILE}>
+            <span className="flex items-center gap-2 text-[14px] text-tinta-3"><span className="size-[9px] rounded-full bg-familia" aria-hidden="true" />Familia</span>
+            {familias.length > 0 ? (
+              <>
+                <span className="text-[28px] leading-[1.1] font-semibold" style={{ letterSpacing: '-0.03em' }}>{familias.length === 1 ? familias[0]!.nombre : `${familias.length} familias`}</span>
+                <span className="text-[15px] text-tinta-2">La semana de tu casa</span>
+              </>
+            ) : (
+              <span className="text-[15px] leading-[1.5] text-tinta-2">Todavía no tienes una familia en Zaelyn. Díselo en el chat: «crea mi familia».</span>
             )}
-            <div className="pt-area-acc">
-              <Link className="pt-area-boton" href="/app/familia">{t('po.abrir')}</Link>
-              {familias.length === 0 && <Link className="pt-area-boton suave" href="/demo/familia">{t('po.ejemplo.ver')}</Link>}
-            </div>
-          </section>
+          </Link>
 
-          {/* PROYECTOS */}
-          <section className="pt-area" data-area="proyectos">
-            <header>
-              <h2>{t('po.proyectos')}</h2>
-              {proyectos.length === 0 && <span className="pt-chip">{t('po.sin.grupo')}</span>}
-            </header>
-            <p>{t('po.pr.d')}</p>
-            {proyectos.length > 0 && (
-              <div className="pt-cifras">
-                <span>{proyectos.length} {t('po.grupos')}</span>
-                <span>{planes} {t('po.planes')}</span>
-                {vencidas > 0 && <span className="mal">{vencidas} {t('po.vencidas')}</span>}
-              </div>
+          <Link href={planes.length === 1 ? `/app/g/${planes[0]!.grupo}/${planes[0]!.id}` : '/app/proyectos'} className={TILE}>
+            <span className="flex items-center gap-2 text-[14px] text-tinta-3"><span className="size-[9px] rounded-full bg-proyectos" aria-hidden="true" />PMO</span>
+            {planes.length > 0 ? (
+              <>
+                <span className="text-[40px] leading-none font-semibold" style={GRANDE}>{planes.length}</span>
+                <span className="text-[15px] text-tinta-2">
+                  {planes.length === 1 ? 'proyecto' : 'proyectos'}
+                  {vencidasPmo > 0 && <> · <span className="text-det-tinta">{vencidasPmo} {vencidasPmo === 1 ? 'actividad vencida' : 'actividades vencidas'}</span></>}
+                </span>
+              </>
+            ) : (
+              <span className="text-[15px] leading-[1.5] text-tinta-2">Arma tu primer proyecto en el editor o súbelo desde Excel.</span>
             )}
-            <div className="pt-area-acc">
-              <Link className="pt-area-boton" href="/app/proyectos">{t('po.abrir')}</Link>
-              <Link className="pt-area-boton suave" href="/app/editor/nuevo">{t('po.pr.nuevo')}</Link>
-            </div>
-          </section>
+          </Link>
+        </section>
 
-          {/* CUENTA */}
-          <section className="pt-area" data-area="cuenta">
-            <header><h2>{t('po.cuenta')}</h2></header>
-            <p>{t('po.cu.d')}</p>
-            <div className="pt-lista-enlaces">
-              <Link href="/app/plan"><span>{t('po.cu.plan')}</span><small>→</small></Link>
-              <Link href="/app/participaciones"><span>{t('po.cu.part')}</span><small>→</small></Link>
-              <Link href="/app/organizacion"><span>{t('po.cu.org')}</span><small>→</small></Link>
-            </div>
-          </section>
-
-          {admin && (
-            <section className="pt-area" data-area="admin">
-              <header><h2>{t('po.admin')}</h2></header>
-              <p>{t('po.ad.d')}</p>
-              <div className="pt-area-acc">
-                <Link className="pt-area-boton" href="/admin">{t('po.abrir')}</Link>
+        {hoy.length > 0 && (
+          <section className="flex flex-col">
+            <h2 className="mb-1.5 text-[20px] font-semibold">Hoy</h2>
+            {hoy.slice(0, 8).map((e, i) => (
+              <div key={i} className="flex items-center gap-4 border-b border-linea py-4 last:border-0">
+                <span className="w-[72px] flex-none text-[14px] text-tinta-3 tabular-nums">{hora(e)}</span>
+                <span className="min-w-0 flex-1 truncate text-[16px]">{e.texto}</span>
+                <span className="flex-none text-[14px] text-tinta-3">{lugarDe(e)}</span>
               </div>
-            </section>
-          )}
-        </div>
+            ))}
+            {hoy.length > 8 && <Link href="/app/personal" className="pt-3 text-[15px] font-semibold text-tinta no-underline">Ver todo tu día ›</Link>}
+          </section>
+        )}
+
+        <section className="flex flex-wrap items-center gap-3">
+          <span className="mr-1.5 text-[14px] text-tinta-3">Apps</span>
+          <Link href="/app/apps" className="inline-flex h-10 items-center rounded-full bg-superficie px-4 text-[14px] text-tinta no-underline shadow-[0_0_0_1px_var(--z-line)]">Kore</Link>
+          <Link href="/app/apps" className="inline-flex h-10 items-center rounded-full bg-superficie px-4 text-[14px] text-tinta no-underline shadow-[0_0_0_1px_var(--z-line)]">TCGBusters</Link>
+        </section>
       </main>
-      <Pie />
     </>
   )
 }

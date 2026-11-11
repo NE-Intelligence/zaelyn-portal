@@ -10,7 +10,7 @@
  *
  * Todo se maneja con la dirección (`?v=`, `?p=`, `?a=`, `?m=`), sin estado en
  * el navegador: así Zaelyn puede mandar a alguien directo a «el Gantt de
- * @efrain con la B-01 abierta» con un enlace (`portal.ir`).
+ * @bruno con la B-01 abierta» con un enlace (`portal.ir`).
  */
 import Link from 'next/link'
 import type { Estatus, PersonaEnPlan, Renglon, VistaDePlan } from '@/lib/plan'

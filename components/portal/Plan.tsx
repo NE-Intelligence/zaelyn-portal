@@ -27,6 +27,11 @@ const POR_PERSONA: Vista[] = ['tablero', 'kanban', 'calendario']
 
 export const VISTAS = Object.keys(VISTA_NOMBRE) as Vista[]
 
+/** Las tres vistas a la mano y lo que va en «Más». */
+const PRINCIPALES: Array<[Vista, string]> = [['resumen', 'Resumen'], ['tablero', 'Actividades'], ['gantt', 'Línea de tiempo']]
+const MAS: Array<[Vista, string]> = [['calendario', 'Calendario'], ['ruta', 'Ruta crítica'], ['equipo', 'Equipo'], ['bitacora', 'Bitácora'], ['general', 'General y reportes']]
+const grupoDe = (v: Vista): Vista => (v === 'kanban' ? 'tablero' : v)
+
 export function esVista(v: string | string[] | undefined): Vista {
   const uno = Array.isArray(v) ? v[0] : v
   return (VISTAS as string[]).includes(uno ?? '') ? (uno as Vista) : 'resumen'
@@ -85,17 +90,37 @@ export function Lienzo({
           </div>
         </div>
 
-        <nav className="pt-pestanas" aria-label="Vistas del plan">
-          {VISTAS.filter(x => x !== 'general' || e.plan).map(x => (
-            <Link
-              key={x}
-              href={x === 'resumen' ? base : `${base}?v=${x}`}
-              aria-current={x === vista ? 'page' : undefined}
-            >
-              {VISTA_NOMBRE[x]}
-            </Link>
-          ))}
-        </nav>
+        {/* TRES VISTAS A LA MANO (decisiones/2026-11-10-landings-y-portal):
+            Resumen, Actividades (lista o Kanban) y Línea de tiempo; lo demás
+            en «Más». Cada vista sigue siendo una dirección (?v=). */}
+        <div className="flex flex-wrap items-center gap-3">
+          <nav className="pt-pestanas" aria-label="Vistas del plan">
+            {PRINCIPALES.map(([x, nombre]) => (
+              <Link key={x} href={x === 'resumen' ? base : `${base}?v=${x}`} aria-current={grupoDe(vista) === x ? 'page' : undefined}>
+                {nombre}
+              </Link>
+            ))}
+          </nav>
+          {(vista === 'tablero' || vista === 'kanban') && (
+            <nav className="pt-pestanas" aria-label="Cómo ver las actividades">
+              <Link href={`${base}?v=tablero`} aria-current={vista === 'tablero' ? 'page' : undefined}>Lista</Link>
+              <Link href={`${base}?v=kanban`} aria-current={vista === 'kanban' ? 'page' : undefined}>Kanban</Link>
+            </nav>
+          )}
+          <details className="relative">
+            <summary className={`flex h-10 cursor-pointer list-none items-center gap-1.5 rounded-full px-4 text-[14px] ${MAS.some(([x]) => x === vista) ? 'bg-superficie font-semibold text-tinta shadow-z1' : 'bg-superficie-2 text-tinta-2'}`}>
+              {MAS.find(([x]) => x === vista)?.[1] ?? 'Más'} <span aria-hidden="true">▾</span>
+            </summary>
+            <div className="absolute left-0 z-20 mt-2 flex min-w-[200px] flex-col rounded-[18px] bg-superficie p-1.5 shadow-z3">
+              {MAS.filter(([x]) => x !== 'general' || e.plan).map(([x, nombre]) => (
+                <Link key={x} href={`${base}?v=${x}`} aria-current={x === vista ? 'page' : undefined}
+                  className={`rounded-[12px] px-3.5 py-2.5 text-[15px] text-tinta no-underline hover:bg-superficie-2 ${x === vista ? 'font-semibold' : ''}`}>
+                  {nombre}
+                </Link>
+              ))}
+            </div>
+          </details>
+        </div>
       </div>
 
       {conSesion && (

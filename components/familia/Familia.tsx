@@ -2,7 +2,7 @@
  * El lienzo de una familia: encabezado, pestañas y la vista que toque.
  *
  * Lo usan dos, igual que el plan: `/app/f/…` con la familia real y
- * `/demo/familia` con los Ríos, que no existen. Ninguna vista suma ni mide:
+ * `/demo/familia` con los Arce, que no existen. Ninguna vista suma ni mide:
  * cada número llega hecho de `estadoDeFamilia`.
  */
 import Link from 'next/link'
@@ -135,7 +135,7 @@ function Hoy({ e, href }: { e: EstadoDeFamilia; href: (v: VistaFamilia) => strin
             <h2>Hoy, {DIA_LARGO[dow(e.hoy)]} {fecha(e.hoy)}</h2>
             {hoy?.festivo && <span className="fa-festivo">{hoy.festivo}</span>}
           </header>
-          {!conAlgo.length && <div className="pt-vacio"><b>Hoy no hay actividades</b><span>Se agregan por el chat: «Mateo tiene futbol martes y jueves de 5 a 6:30».</span></div>}
+          {!conAlgo.length && <div className="pt-vacio"><b>Hoy no hay actividades</b><span>Se agregan por el chat: «Emilio tiene futbol martes y jueves de 5 a 6:30».</span></div>}
           <div className="fa-columnas">
             {conAlgo.map(p => (
               <div key={p.id} className="fa-columna" style={{ '--c': colorDePersona(e.personas, p.id) } as React.CSSProperties}>
@@ -161,14 +161,14 @@ function Hoy({ e, href }: { e: EstadoDeFamilia; href: (v: VistaFamilia) => strin
                 })}
               </ul>
             )}
-          <p className="salida">Para mover algo, díselo a Zaelyn: «hoy recojo yo a Mateo de futbol». El portal solo muestra.</p>
+          <p className="salida">Para mover algo, díselo a Zaelyn: «hoy recojo yo a Emilio de futbol». El portal solo muestra.</p>
         </section>
       </div>
 
       <div className="fa-dos">
         <section className="pt-tarjeta">
           <header><h2>Quehaceres de hoy</h2><Link className="pt-overline" href={href('quehaceres')}>Ver todo</Link></header>
-          {!(hoy?.quehaceres.length) && <div className="pt-vacio"><b>Nada para hoy</b><span>«quehacer para Mateo: tender su cama todos los días por 5 puntos»</span></div>}
+          {!(hoy?.quehaceres.length) && <div className="pt-vacio"><b>Nada para hoy</b><span>«quehacer para Emilio: tender su cama todos los días por 5 puntos»</span></div>}
           <ul className="fa-lista">
             {(hoy?.quehaceres ?? []).map(q => (
               <li key={q.tareaId + (q.de ?? '')} className={q.hecho ? 'hecho' : ''}>
@@ -287,7 +287,7 @@ function Traslados({ e }: { e: EstadoDeFamilia }) {
     <div className="fa-pila">
       <section className="pt-tarjeta">
         <header><h2>Quién lleva y quién recoge</h2><span className="pt-overline">esta semana</span></header>
-        {!filas.length && <div className="pt-vacio"><b>Sin traslados repartidos</b><span>Se reparten por el chat: «yo llevo a Mateo a futbol los martes», «la abuela recoge a Valeria los jueves».</span></div>}
+        {!filas.length && <div className="pt-vacio"><b>Sin traslados repartidos</b><span>Se reparten por el chat: «yo llevo a Emilio a futbol los martes», «la abuela recoge a Paula los jueves».</span></div>}
         {filas.length > 0 && (
           <div className="pt-tabla-caja pt-scroll">
             <table className="pt-tabla fa-tabla">
@@ -399,7 +399,7 @@ function Quehaceres({ e }: { e: EstadoDeFamilia }) {
 
       <section className="pt-tarjeta">
         <header><h2>Todos los quehaceres</h2></header>
-        {!e.quehaceres.length && <div className="pt-vacio"><b>Todavía no hay quehaceres</b><span>«quehacer para Mateo: tender su cama todos los días por 5 puntos»</span></div>}
+        {!e.quehaceres.length && <div className="pt-vacio"><b>Todavía no hay quehaceres</b><span>«quehacer para Emilio: tender su cama todos los días por 5 puntos»</span></div>}
         <div className="fa-por-persona">
           {[...new Set(e.quehaceres.map(q => q.de ?? 'Quien sea'))].map(de => (
             <div key={de} className="fa-grupo-q">
@@ -423,7 +423,7 @@ function Medallero({ e }: { e: EstadoDeFamilia }) {
   return (
     <div className="fa-pila">
       {!e.medallero.length && (
-        <div className="pt-vacio"><b>La vitrina está vacía</b><span>Se llena por el chat: «Mateo ganó medalla de oro en natación», «Valeria ganó 2 sets a 0 en voleibol».</span></div>
+        <div className="pt-vacio"><b>La vitrina está vacía</b><span>Se llena por el chat: «Emilio ganó medalla de oro en natación», «Paula ganó 2 sets a 0 en voleibol».</span></div>
       )}
       <div className="pt-rejilla" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))' }}>
         {e.medallero.map(m => (
@@ -466,7 +466,7 @@ function Fechas({ e }: { e: EstadoDeFamilia }) {
       <div className="fa-dos">
         <section className="pt-tarjeta">
           <header><h2>🎂 Lo que viene</h2></header>
-          {!e.fechas.length && <div className="pt-vacio"><b>Sin fechas guardadas</b><span>«Mateo cumple años el 14 de marzo», «aniversario de los abuelos: 3 de junio».</span></div>}
+          {!e.fechas.length && <div className="pt-vacio"><b>Sin fechas guardadas</b><span>«Emilio cumple años el 14 de marzo», «aniversario de los abuelos: 3 de junio».</span></div>}
           <ul className="fa-fechas">
             {e.fechas.map(f => (
               <li key={f.titulo}>

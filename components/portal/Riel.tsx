@@ -111,7 +111,8 @@ export function Riel({ app }: { app: string | null }) {
   const lista: Item[] = (deApp ?? convs.map(c => ({ id: c.id, titulo: c.titulo, tipo: c.tipo, sinLeer: c.sinLeer })))
     .slice()
     .sort((a, b) => (b.sinLeer > 0 ? 1 : 0) - (a.sinLeer > 0 ? 1 : 0))
-  const visibles = lista.slice(0, 8)
+  // Arriba del orbe solo lo que espera respuesta; todo lo demás, en Mensajes.
+  const visibles = lista.filter(c => c.sinLeer > 0 || c.id === abierta).slice(0, 4)
   const resto = lista.length - visibles.length
 
   useEffect(() => {

@@ -6,7 +6,7 @@
  * hay que llenar esos objetos con las mismas claves — ni las rutas ni los
  * componentes cambian.
  *
- * Los ejemplos usan un proyecto y unas personas inventadas (Andes, @mariana,
+ * Los ejemplos usan un proyecto y unas personas inventadas (Mirador, @mariana,
  * @rafa). Nada de lo que aparece aquí es de un cliente real.
  */
 
@@ -83,7 +83,7 @@ const es = {
   'chat.2a': 'Anotado. «Mandar la cotización» va en',
   'chat.2b': 'Para hoy se esperaba',
   'chat.2c': 'va 25 puntos abajo',
-  'chat.3': 'ruta crítica de Andes',
+  'chat.3': 'ruta crítica de Mirador',
   'chat.4a': 'La cadena más larga son 7 actividades y termina en «Capacitar a usuarios clave».',
   'chat.4b': 'No te doy el total: faltan las horas de 3 renglones.',
   'chat.4c': 'Rellenarlas con un promedio sería un número inventado con cara de cálculo.',
@@ -275,18 +275,18 @@ const es = {
   'fa.cta1': 'Ver una familia de ejemplo',
   'fa.cta2': 'Cómo se le habla',
   'fa.charla': 'Una conversación de ejemplo con Zaelyn',
-  'fa.chat.1': 'Hoy no puedo recoger a Mateo de futbol',
-  'fa.chat.2a': 'Listo, lo suelto. Les aviso a Andrés y a la abuela Tere que hoy nadie recoge a Mateo;',
+  'fa.chat.1': 'Hoy no puedo recoger a Emilio de futbol',
+  'fa.chat.2a': 'Listo, lo suelto. Les aviso a Diego y a la abuela Rosa que hoy nadie recoge a Emilio;',
   'fa.chat.2b': 'el primero que diga «voy yo» se queda con él',
   'fa.chat.2c': 'y si nadie lo toma, insisto.',
-  'fa.chat.3': 'Mateo cumplió con sacar la basura',
-  'fa.chat.4a': '⭐ Sacar la basura — 10 puntos para Mateo. Lleva',
+  'fa.chat.3': 'Emilio cumplió con sacar la basura',
+  'fa.chat.4a': '⭐ Sacar la basura — 10 puntos para Emilio. Lleva',
   'fa.chat.4b': '96',
   'fa.chat.4c': 'puntos, y para «invitar a un amigo a dormir» le faltan 24.',
 
   'fa.vistas.rotulo': 'La pantalla de la casa',
   'fa.vistas.h2': 'Seis vistas, la misma semana que lleva el chat.',
-  'fa.vistas.sub': 'Ninguna pantalla hace cuentas por su lado: quién recoge a Mateo el jueves sale de la misma función que contesta en el chat. Ábrelas con una familia de ejemplo.',
+  'fa.vistas.sub': 'Ninguna pantalla hace cuentas por su lado: quién recoge a Emilio el jueves sale de la misma función que contesta en el chat. Ábrelas con una familia de ejemplo.',
   'fa.v1.t': 'Hoy en casa',
   'fa.v1.p': 'Una columna por persona, con su día, quién lleva y quién recoge. Arriba, lo que nadie ha cubierto y los choques: dos lugares a la misma hora con un solo adulto.',
   'fa.v2.t': 'Calendario',
@@ -303,14 +303,14 @@ const es = {
   'fa.dice.rotulo': 'Se habla, no se llena',
   'fa.dice.h2': 'Nadie tiene que aprender una app.',
   'fa.dice.sub': 'Zaelyn entiende la forma en que ya hablan en casa. Estas frases funcionan hoy, tal cual:',
-  'fa.d1': 'Mateo tiene futbol martes y jueves de 5 a 6:30',
-  'fa.d2': 'yo llevo a Mateo a futbol los martes',
-  'fa.d3': 'hoy no puedo recoger a Valeria',
-  'fa.d4': 'quehacer para Mateo: tender su cama todos los días por 5 puntos',
+  'fa.d1': 'Emilio tiene futbol martes y jueves de 5 a 6:30',
+  'fa.d2': 'yo llevo a Emilio a futbol los martes',
+  'fa.d3': 'hoy no puedo recoger a Paula',
+  'fa.d4': 'quehacer para Emilio: tender su cama todos los días por 5 puntos',
   'fa.d5': 'premio: elegir la película del viernes por 40 puntos',
-  'fa.d6': 'Valeria ganó el primer lugar en voleibol',
-  'fa.d7': 'Mateo cumple años el 2 de noviembre',
-  'fa.d8': '¿quién recoge a Mateo hoy?',
+  'fa.d6': 'Paula ganó el primer lugar en voleibol',
+  'fa.d7': 'Emilio cumple años el 2 de noviembre',
+  'fa.d8': '¿quién recoge a Emilio hoy?',
 
   'fa.roles.rotulo': 'Cada quien su papel',
   'fa.roles.h2': 'Una familia no es un equipo de trabajo, y los permisos tampoco.',
@@ -331,7 +331,7 @@ const es = {
   'fa.g2.t': 'No supone un festivo',
   'fa.g2.p': 'Que sea Consejo Técnico no dice si hay clases en tu escuela. Zaelyn pregunta, y la primera respuesta queda para todos.',
   'fa.g3.t': 'No se aprueba solo',
-  'fa.g3.p': 'Si Mateo dice que ya cumplió, sus puntos esperan a que un Guía los apruebe con un botón. Nadie se aprueba sus propios puntos.',
+  'fa.g3.p': 'Si Emilio dice que ya cumplió, sus puntos esperan a que un Guía los apruebe con un botón. Nadie se aprueba sus propios puntos.',
 
   'fa.precio.rotulo': 'Precio',
   'fa.precio.h2': 'Tribu: tu familia conectada.',
@@ -353,8 +353,8 @@ const es = {
   'pe.charla': 'Una conversación de ejemplo',
   'pe.chat.1': '¿qué tengo hoy?',
   'pe.chat.2a': 'Tres cosas, en este orden:',
-  'pe.chat.2b': '«Matriz de pruebas» venció el lunes (Andes);',
-  'pe.chat.2c': 'a las 2:00 te chocan la revisión con Termika y recoger a Valeria.',
+  'pe.chat.2b': '«Matriz de pruebas» venció el lunes (Mirador);',
+  'pe.chat.2c': 'a las 2:00 te chocan la revisión con Vértice y recoger a Paula.',
   'pe.chat.3': 'recuérdame mañana a las 8 llevar el coche a servicio',
   'pe.chat.4a': 'Listo: mañana a las',
   'pe.chat.4b': '8:00 am',
@@ -381,7 +381,7 @@ const es = {
   'pe.d3': 'quiero leer 10 páginas al día',
   'pe.d4': 'leí 12 páginas',
   'pe.d5': '¿qué tengo hoy?',
-  'pe.d6': '¿qué tengo pendiente en Andes?',
+  'pe.d6': '¿qué tengo pendiente en Mirador?',
   'pe.d7': 'anota: la clave del portón es la del garage',
   'pe.d8': 'mándame el resumen a las 7',
 
@@ -404,7 +404,7 @@ const es = {
   'pe.precio.cta': 'Ver todos los planes',
 
   'pe.fin.h2': 'Ábrelo con el día de alguien más y dime qué le falta al tuyo.',
-  'pe.fin.sub': 'Sofía no existe. Tu día entra por el chat, y la pantalla se abre con «ábreme el portal».',
+  'pe.fin.sub': 'Mariana no existe. Tu día entra por el chat, y la pantalla se abre con «ábreme el portal».',
   'pe.fin.cta': 'Ver un día de ejemplo',
   // ── marca, tema e idioma (#186) ──────────────────────────────────────
   'marca.by': 'by NE National Expertise',

@@ -9,7 +9,7 @@ export const metadata = { title: 'Familia · ejemplo' }
 /**
  * `/demo/familia` — el portal de Familia con una familia inventada.
  *
- * Los Ríos no existen, y la barra lo dice. Es la misma pantalla que ve una
+ * Los Arce no existen, y la barra lo dice. Es la misma pantalla que ve una
  * familia real en `/app/f/…`: solo cambia de dónde sale la semana.
  */
 export default async function DemoFamilia({
