@@ -60,6 +60,13 @@ async function leer<T>(ruta: string): Promise<{ ok: true; dato: T } | { ok: fals
 
 export const misGrupos = () => leer<{ grupos: GrupoEnPortal[] }>('/portal/grupos')
 
+/** Lo de todos mis espacios en un rango (máx. 62 días), ya ordenado por el motor. */
+export const laAgenda = (desde: string, hasta: string) =>
+  leer<import('./agenda').Agenda>(`/portal/agenda?desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`)
+
+/** Las otras aplicaciones (TCGBusters, Kore…) y si están encendidas. */
+export const losModulos = () => leer<{ modulos: import('./agenda').Modulo[] }>('/portal/modulos')
+
 export type Bienvenida = {
   telegram: { usuario: string; enlace: string } | null
   whatsapp: { enlace: string } | null
@@ -615,7 +622,7 @@ export async function elPresupuesto(groupId: string): Promise<
 
 /** Reenvía una petición del chat al motor. Devuelve código y cuerpo tal cual (salvo 5xx). */
 export async function reenviarChat(
-  ruta: '/portal/chat/mensaje' | '/portal/chat/voz' | '/portal/chat/recibir',
+  ruta: '/portal/chat/mensaje' | '/portal/chat/voz' | '/portal/chat/recibir' | '/portal/chat/abrir',
   init: { metodo: 'GET' | 'POST'; cuerpo?: BodyInit; tipo?: string; cabeceras?: Record<string, string>; consulta?: string },
 ): Promise<{ status: number; cuerpo: string }> {
   if (!hayApi()) return { status: 503, cuerpo: JSON.stringify({ error: 'SIN_API' }) }
