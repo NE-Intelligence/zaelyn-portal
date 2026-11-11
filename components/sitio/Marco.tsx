@@ -18,9 +18,8 @@ export function Encabezado({ lang, tema }: { lang: Idioma; tema: Tema }) {
   const enlaces = [
     { href: '/personal', texto: t('nav.personal') },
     { href: '/familia', texto: t('nav.familia') },
-    { href: '/proyectos', texto: t('nav.proyectos') },
+    { href: '/pmo', texto: 'PMO' },
     { href: '/precios', texto: t('nav.precios') },
-    { href: '/nosotros', texto: t('nav.nosotros') },
   ]
 
   return (
@@ -38,12 +37,6 @@ export function Encabezado({ lang, tema }: { lang: Idioma; tema: Tema }) {
             <LogoBarra ancho={128} />
           </Link>
           <Menu enlaces={enlaces} etiqueta={t('nav.menu')} />
-          <Preferencias
-            lang={lang}
-            tema={tema}
-            clase="st"
-            et={{ tema: t('nav.tema'), claro: t('nav.tema.claro'), oscuro: t('nav.tema.oscuro'), sistema: t('nav.tema.sistema'), idioma: t('nav.idioma') }}
-          />
           <Link className="st-btn st-btn-2 st-entrar" href="/app" title={t('nav.entrar.ayuda')}>
             {t('nav.entrar')}
           </Link>
@@ -56,43 +49,43 @@ export function Encabezado({ lang, tema }: { lang: Idioma; tema: Tema }) {
   )
 }
 
-export function PieSitio({ lang }: { lang: Idioma }) {
+/**
+ * El pie, en una sola franja (decisiones/2026-11-10-landings-y-portal): quién
+ * lo hace, los enlaces que se buscan al final y las preferencias de tema e
+ * idioma, que salieron de la barra para dejarla limpia.
+ */
+export function PieSitio({ lang, tema }: { lang: Idioma; tema: Tema }) {
   const t = textos(lang)
+  const enl = 'text-tinta-2 no-underline hover:text-tinta'
   return (
-    <footer className="st-banda st-piep">
-      <div className="st-caja">
-        <div className="st-pie-rejilla">
-          <div className="st-pie-marca">
-            <Logo ancho={112} />
-            <p className="st-pie-by">{t('pie.by')}</p>
-            <p>{t('pie.lema')}</p>
-          </div>
-          <nav aria-label={t('pie.col.producto')}>
-            <h2>{t('pie.col.producto')}</h2>
-            <Link href="/personal">{t('pie.personal')}</Link>
-            <Link href="/familia">{t('pie.familia')}</Link>
-            <Link href="/proyectos">{t('pie.proyectos')}</Link>
-            <Link href="/precios">{t('pie.precios')}</Link>
-            <Link href="/demo">{t('pie.demo')}</Link>
-            <Link href="/app">{t('pie.entrar')}</Link>
-          </nav>
-          <nav aria-label={t('pie.col.empresa')}>
-            <h2>{t('pie.col.empresa')}</h2>
-            <Link href="/nosotros">{t('pie.nosotros')}</Link>
-            <Link href="/nosotros#por-que">{t('pie.porque')}</Link>
-            <Link href="/nosotros#contacto">{t('pie.contacto')}</Link>
-          </nav>
-          <nav aria-label={t('pie.col.legal')}>
-            <h2>{t('pie.col.legal')}</h2>
-            <Link href="/legal/privacidad">{t('pie.privacidad')}</Link>
-            <Link href="/legal/datos">{t('pie.datos')}</Link>
-            <Link href="/legal/terminos">{t('pie.terminos')}</Link>
-            <Link href="/legal/deslinde">{t('pie.deslinde')}</Link>
+    <footer className="border-t border-linea bg-fondo">
+      <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-6 py-10 text-[13px] text-tinta-3 sm:px-8">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <Logo ancho={84} />
+          <span>{t('pie.by')}</span>
+          <nav aria-label={t('pie.col.producto')} className="flex flex-wrap gap-x-5 gap-y-2 md:ml-auto">
+            <Link className={enl} href="/personal">Personal</Link>
+            <Link className={enl} href="/familia">Familia</Link>
+            <Link className={enl} href="/pmo">PMO</Link>
+            <Link className={enl} href="/precios">{t('pie.precios')}</Link>
+            <Link className={enl} href="/nosotros">{t('pie.nosotros')}</Link>
+            <Link className={enl} href="/app">{t('pie.entrar')}</Link>
           </nav>
         </div>
-        <div className="st-pie-legal">
-          <p>{t('pie.mx')} · {t('pie.us')}</p>
-          <p>{t('pie.copy')} {t('pie.marcas')}</p>
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-linea pt-5">
+          <nav aria-label={t('pie.col.legal')} className="flex flex-wrap gap-x-5 gap-y-2">
+            <Link className={enl} href="/legal/privacidad">{t('pie.privacidad')}</Link>
+            <Link className={enl} href="/legal/datos">{t('pie.datos')}</Link>
+            <Link className={enl} href="/legal/terminos">{t('pie.terminos')}</Link>
+            <Link className={enl} href="/legal/deslinde">{t('pie.deslinde')}</Link>
+          </nav>
+          <span className="md:ml-auto">{t('pie.mx')} · {t('pie.us')}</span>
+          <Preferencias
+            lang={lang}
+            tema={tema}
+            clase="st"
+            et={{ tema: t('nav.tema'), claro: t('nav.tema.claro'), oscuro: t('nav.tema.oscuro'), sistema: t('nav.tema.sistema'), idioma: t('nav.idioma') }}
+          />
         </div>
       </div>
     </footer>

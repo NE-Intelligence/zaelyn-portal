@@ -14,7 +14,7 @@ export default async function SitioLayout({ children }: { children: React.ReactN
     <div className="st" style={{ minHeight: '100dvh' }}>
       <Encabezado lang={lang} tema={tema} />
       {children}
-      <PieSitio lang={lang} />
+      <PieSitio lang={lang} tema={tema} />
     </div>
   )
 }
