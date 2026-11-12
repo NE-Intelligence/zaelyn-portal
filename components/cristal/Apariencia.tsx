@@ -12,8 +12,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   COOKIE_CRISTAL, CRISTAL_FABRICA, PALETAS, PRESETS, aCookie, normalizar, variables,
-  type Cristal, type Material, type Paleta,
-} from '@/lib/cristal'
+  type Cristal, type Material, type Paleta, LETRAS, type Letra } from '@/lib/cristal'
 
 type Tema = 'claro' | 'oscuro' | 'sistema'
 const ANIO = 'path=/; max-age=31536000; samesite=lax'
@@ -26,6 +25,7 @@ function aplicar(c: Cristal) {
   if (c.fondo3d) delete h.dataset.fondo3d
   else h.dataset.fondo3d = 'no'
   for (const [k, v] of Object.entries(variables(c.material))) h.style.setProperty(k, v)
+  h.style.setProperty('--zy-esc', String(LETRAS[c.letra].escala))
   document.cookie = `${COOKIE_CRISTAL}=${aCookie(c)}; ${ANIO}`
 }
 
@@ -172,6 +172,18 @@ export function Apariencia({ inicial, compacto = false }: { inicial: Cristal; co
                   className="h-5 w-9 cursor-pointer accent-[var(--z-ink)]" />
               </label>
             ))}
+          </fieldset>
+
+          <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
+            <legend className="mb-2 p-0 text-[12.5px] font-medium text-tinta-3">Tamaño de Zaelyn en el portal</legend>
+            <div className="flex gap-1.5" role="radiogroup" aria-label="Tamaño de Zaelyn en el portal">
+              {(Object.keys(LETRAS) as Letra[]).map(k => (
+                <button key={k} type="button" role="radio" aria-checked={c.letra === k} onClick={() => cambiar({ letra: k })}
+                  className={`h-9 flex-1 cursor-pointer rounded-full border-0 text-[13px] ${c.letra === k ? 'bg-tinta text-superficie' : 'bg-superficie-2 text-tinta'}`}>
+                  {LETRAS[k].nombre}
+                </button>
+              ))}
+            </div>
           </fieldset>
 
           <button type="button" onClick={() => cambiar(CRISTAL_FABRICA)}

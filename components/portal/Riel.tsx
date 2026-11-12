@@ -217,7 +217,7 @@ export function Riel({ app }: { app: string | null }) {
             <button type="button" className="rl-acc" onClick={() => setAbierta(null)} aria-label="Cerrar">×</button>
           </header>
           {srcApp
-            ? <iframe ref={marco} className="rl-marco" src={srcApp} title={titulo} onLoad={contexto} allow="microphone; clipboard-write" />
+            ? <div className="rl-marco-caja"><iframe ref={marco} className="rl-marco" src={srcApp} title={titulo} onLoad={contexto} allow="microphone; clipboard-write" /></div>
             : conv && <Conversacion key={conv.id} conv={conv} compacta cabecera={false} alActividad={() => void recargar()} />}
         </section>
       )}
