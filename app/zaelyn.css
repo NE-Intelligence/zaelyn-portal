@@ -1036,9 +1036,23 @@ body {
   cursor: pointer;
   font-size: 16px;
 }
-.pt .rl-marco {
+.pt .rl-marco-caja {
+  position: relative;
   flex: 1;
-  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+/* La app se pinta a su tamaño y se escala entera: «Tamaño de Zaelyn» en
+   Apariencia (--zy-esc: 1, .9 o .8). Así la letra, los botones y el
+   espaciado bajan juntos y la app no se entera. */
+.pt .rl-marco {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(100% / var(--zy-esc, 1));
+  height: calc(100% / var(--zy-esc, 1));
+  transform: scale(var(--zy-esc, 1));
+  transform-origin: 0 0;
   border: 0;
   background: var(--z-bg);
 }

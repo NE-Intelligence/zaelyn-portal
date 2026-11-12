@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { display, inter, serif } from '@/lib/fuentes'
 import { LANG_HTML, cristalActual, idiomaActual, temaActual } from '@/lib/preferencias'
-import { variables } from '@/lib/cristal'
+import { variables, LETRAS } from '@/lib/cristal'
 import type { CSSProperties } from 'react'
 import './globals.css'
 
@@ -40,7 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       data-paleta={cr.paleta}
       data-flotar={cr.flotar ? undefined : 'no'}
       data-fondo3d={cr.fondo3d ? undefined : 'no'}
-      style={variables(cr.material) as CSSProperties}
+      style={{ ...variables(cr.material), '--zy-esc': String(LETRAS[cr.letra].escala) } as CSSProperties}
       className={`${display.variable} ${inter.variable} ${serif.variable}`}
     >
       <body>{children}</body>

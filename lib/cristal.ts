@@ -22,10 +22,13 @@ export const PALETAS = {
 export type Paleta = keyof typeof PALETAS
 
 export type Material = { blur: number; opacidad: number; saturacion: number; tinte: string; borde: number }
-export type Cristal = { paleta: Paleta; material: Material; flotar: boolean; fondo3d: boolean }
+/** Tamaño de la app de Zaelyn dentro del portal: se escala el panel completo. */
+export const LETRAS = { normal: { nombre: 'Normal', escala: 1 }, chica: { nombre: 'Chica', escala: 0.9 }, minima: { nombre: 'Mínima', escala: 0.8 } } as const
+export type Letra = keyof typeof LETRAS
+export type Cristal = { paleta: Paleta; material: Material; flotar: boolean; fondo3d: boolean; letra: Letra }
 
 export const MATERIAL_FABRICA: Material = { blur: 24, opacidad: 0.42, saturacion: 1.35, tinte: '#ffffff', borde: 0.7 }
-export const CRISTAL_FABRICA: Cristal = { paleta: 'lavanda', material: MATERIAL_FABRICA, flotar: true, fondo3d: true }
+export const CRISTAL_FABRICA: Cristal = { paleta: 'lavanda', material: MATERIAL_FABRICA, flotar: true, fondo3d: true, letra: 'chica' }
 
 export const PRESETS: Array<{ nombre: string; material: Partial<Material> }> = [
   { nombre: 'Claro', material: { blur: 10, opacidad: 0.18, saturacion: 1.2, borde: 0.85 } },
@@ -53,6 +56,7 @@ export function normalizar(x: unknown): Cristal {
     },
     flotar: typeof o.flotar === 'boolean' ? o.flotar : true,
     fondo3d: typeof o.fondo3d === 'boolean' ? o.fondo3d : true,
+    letra: typeof o.letra === 'string' && o.letra in LETRAS ? (o.letra as Letra) : CRISTAL_FABRICA.letra,
   }
 }
 
