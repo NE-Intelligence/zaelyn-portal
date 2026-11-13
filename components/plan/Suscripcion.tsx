@@ -2,7 +2,7 @@
 /**
  * Tu suscripción y tu historial de pagos (#192).
  *
- * Lo primero que tiene que ver quien pagó: QUÉ tiene activo (PMO + Tribu, no
+ * Lo primero que tiene que ver quien pagó: QUÉ tiene activo (PMO + Familia, no
  * solo «PMO»), CUÁNTO paga de verdad —con su descuento de fundador, no el
  * precio de lista—, hasta cuándo está pagado y cuándo es el siguiente cargo.
  * Y desde aquí mismo puede suspender la renovación o pedir la factura de un
@@ -75,7 +75,7 @@ export function Suscripcion({ v }: { v: VistaPlan }) {
                 ? <>{dia(s.proximoCargo.fecha)} · <b>{dinero(s.proximoCargo.totalCentavos, s.proximoCargo.moneda)}</b></>
                 : dia(s.hasta)}
           </dd>
-          {s.cancelaAlFinal && <small>Después vuelves a Kickoff, gratis en Telegram.</small>}
+          {s.cancelaAlFinal && <small>Después vuelves a Zaelyn Personal, gratis en la app y en Telegram.</small>}
         </div>
       </dl>
 
@@ -88,9 +88,13 @@ export function Suscripcion({ v }: { v: VistaPlan }) {
         ) : confirmar ? (
           <>
             <p>
-              No se hará el siguiente cargo. Conservas todo hasta el {dia(s.hasta)} y después tu cuenta vuelve a Kickoff: sin portal, sin WhatsApp y con los límites del plan gratuito.
-              {descuento > 0 && <> <b>Si dejas que termine, pierdes tu precio de fundador.</b> Puedes reanudar antes de esa fecha.</>}
+              No se hará el siguiente cargo. Conservas todo hasta el {dia(s.hasta)} y después tu cuenta vuelve a Zaelyn Personal: sin portal y con los límites del plan gratuito.
             </p>
+            {descuento > 0 && (
+              <p className="pu-aviso" role="alert" style={{ fontSize: '1.15rem', fontWeight: 700 }}>
+                Si cancelas pierdes tu descuento de fundador para siempre. Puedes reanudar antes del {dia(s.hasta)} para conservarlo.
+              </p>
+            )}
             <div className="pu-sus-botones">
               <button className="ed-btn suave" disabled={enviando} onClick={() => setConfirmar(false)}>No, mantener</button>
               <button className="ed-btn peligro" disabled={enviando} onClick={() => void cambiar('cancelar')}>{enviando ? 'Suspendiendo…' : 'Sí, suspender la renovación'}</button>

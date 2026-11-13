@@ -15,10 +15,14 @@ import type { Tema } from '@/lib/preferencias'
  */
 export function Encabezado({ lang, tema }: { lang: Idioma; tema: Tema }) {
   const t = textos(lang)
+  // Una landing por nivel y la de módulos (decisiones/2026-11-13-planes-por-ambito).
   const enlaces = [
     { href: '/personal', texto: t('nav.personal') },
+    { href: '/personal-plus', texto: 'Personal+' },
     { href: '/familia', texto: t('nav.familia') },
+    { href: '/profesional', texto: 'Profesional' },
     { href: '/pmo', texto: 'PMO' },
+    { href: '/modulos', texto: 'Módulos' },
     { href: '/precios', texto: t('nav.precios') },
   ]
 
@@ -65,8 +69,11 @@ export function PieSitio({ lang, tema }: { lang: Idioma; tema: Tema }) {
           <span>{t('pie.by')}</span>
           <nav aria-label={t('pie.col.producto')} className="flex flex-wrap gap-x-5 gap-y-2 md:ml-auto">
             <Link className={enl} href="/personal">Personal</Link>
+            <Link className={enl} href="/personal-plus">Personal+</Link>
             <Link className={enl} href="/familia">Familia</Link>
+            <Link className={enl} href="/profesional">Profesional</Link>
             <Link className={enl} href="/pmo">PMO</Link>
+            <Link className={enl} href="/modulos">Módulos</Link>
             <Link className={enl} href="/precios">{t('pie.precios')}</Link>
             <Link className={enl} href="/nosotros">{t('pie.nosotros')}</Link>
             <Link className={enl} href="/app">{t('pie.entrar')}</Link>

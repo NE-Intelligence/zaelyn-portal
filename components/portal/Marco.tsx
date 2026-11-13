@@ -6,7 +6,9 @@ import { BotonZaelyn } from '@/components/portal/BotonZaelyn'
 import { Riel } from '@/components/portal/Riel'
 import { origenDeLaApp } from '@/lib/ruta-propia'
 import { cookies } from 'next/headers'
-import { COOKIE, cuentaWeb, soyAdmin } from '@/lib/api'
+import { COOKIE, cuentaWeb, elAcceso, misGrupos, soyAdmin } from '@/lib/api'
+import { ambitoDe } from '@/lib/plan'
+import type { Espacios } from '@/components/portal/Lateral'
 import { Lateral } from '@/components/portal/Lateral'
 import { cristalActual } from '@/lib/preferencias'
 import { textos, type Clave } from '@/lib/copy'
@@ -68,10 +70,32 @@ export async function Barra({
   // van; quedan la barra lateral (o las pestañas abajo en el teléfono) y el
   // orbe de Zaelyn. Sin sesión se queda la barra negra con «Entrar».
   if (sesion || ejemplo) {
-    const [quien, cristal] = await Promise.all([
-      sesion && !ejemplo ? cuentaWeb().then(c => (c.ok ? c.dato.handle : null)).catch(() => null) : Promise.resolve(null),
+    const real = sesion && !ejemplo
+    const [quien, cristal, gr, acc] = await Promise.all([
+      real ? cuentaWeb().then(c => (c.ok ? c.dato.handle : null)).catch(() => null) : Promise.resolve(null),
       cristalActual(),
+      real ? misGrupos().catch(() => null) : Promise.resolve(null),
+      real ? elAcceso().catch(() => null) : Promise.resolve(null),
     ])
+    // El menú por ámbitos (decisiones/2026-11-13-planes-por-ambito): una
+    // entrada por familia, por grupo y por proyecto. Lo apagado se ve con
+    // candado y el plan que lo trae.
+    const grupos = gr?.ok ? gr.dato.grupos : []
+    const sec = acc?.ok ? acc.dato.secciones : {}
+    const traeLo = (k: string) => (sec[k] && !sec[k]!.encendido ? (sec[k]!.plan?.nombre ?? 'otro plan') : null)
+    const espacios: Espacios = ejemplo
+      ? {
+        familias: [{ id: 'rios', nombre: 'Familia Ríos', href: '/demo/familia' }],
+        grupos: [{ id: 'diseno', nombre: 'Grupo Diseño', href: '/demo/inicio#grupo' }],
+        proyectos: [{ id: 'andes', nombre: 'Subestación Andes', href: '/demo' }],
+        bloqueo: {},
+      }
+      : {
+        familias: grupos.filter(g => ambitoDe(g) === 'family').map(g => ({ id: g.id, nombre: g.nombre, href: `/app/f/${g.id}` })),
+        grupos: grupos.filter(g => ambitoDe(g) === 'equipo').map(g => ({ id: g.id, nombre: g.nombre, href: `/app/g/${g.id}` })),
+        proyectos: grupos.filter(g => ambitoDe(g) === 'proyecto').map(g => ({ id: g.id, nombre: g.nombre, href: `/app/g/${g.id}` })),
+        bloqueo: { personal: traeLo('personal'), familia: traeLo('familia'), grupos: traeLo('grupos'), proyectos: traeLo('proyectos') },
+      }
     return (
       <>
         {ejemplo && (
@@ -80,7 +104,7 @@ export async function Barra({
             <span>{aviso ?? t('po.ejemplo.p')}</span>
           </div>
         )}
-        <Lateral admin={admin} ejemplo={ejemplo} cristal={cristal} quien={quien ? `@${quien.replace(/^@/, '')}` : null} />
+        <Lateral admin={admin} ejemplo={ejemplo} cristal={cristal} espacios={espacios} quien={quien ? `@${quien.replace(/^@/, '')}` : null} />
         {sesion && !ejemplo && <Riel app={app} />}
         {sesion && !ejemplo && !app && (
           <Chat t={{

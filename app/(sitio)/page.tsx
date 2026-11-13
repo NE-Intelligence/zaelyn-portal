@@ -1,23 +1,11 @@
 import type { Metadata } from 'next'
-import { Landing } from '@/components/landing/Landing'
-import { LANDINGS } from '@/lib/landings'
+import { LandingGeneral } from '@/components/landing/Landing'
+import { GENERAL } from '@/lib/landings'
+import { metaDeLanding } from '@/lib/meta-landing'
 
-const L = LANDINGS.zaelyn
+export const metadata: Metadata = metaDeLanding(GENERAL.meta, '/')
 
-export const metadata: Metadata = {
-  title: { absolute: L.meta.titulo },
-  description: L.meta.descripcion,
-  openGraph: {
-    type: 'website',
-    siteName: 'Zaelyn',
-    title: L.meta.titulo,
-    description: L.meta.descripcion,
-    url: '/',
-    images: [{ url: '/og.png', width: 1200, height: 630, alt: 'zælyn' }],
-  },
-}
-
-/** La landing oficial de Zaelyn. Plantilla única: components/landing/Landing.tsx (decisiones/2026-11-10-landings-y-portal). */
+/** La landing general de Zaelyn (decisiones/2026-11-13-planes-por-ambito). */
 export default function Pagina() {
-  return <Landing l={L} />
+  return <LandingGeneral />
 }

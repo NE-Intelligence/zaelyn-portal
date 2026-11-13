@@ -7,11 +7,11 @@
 import type { Agenda, ItemAgenda, Modulo } from './agenda'
 import type { EstadoDePersona } from './persona'
 import type { EstadoDeFamilia } from './familia'
-import type { GrupoEnPortal } from './plan'
+import { ambitoDe, type GrupoEnPortal } from './plan'
 import type { Cosa, DatosEjecucion, Espacio } from '@/components/portal/Ejecucion'
 
 const ESPACIO: Record<ItemAgenda['espacio']['tipo'], Espacio> = {
-  personal: 'personal', familia: 'familia', proyecto: 'proyecto', grupo: 'proyecto',
+  personal: 'personal', familia: 'familia', proyecto: 'proyecto', grupo: 'grupo',
 }
 
 const hhmm = (h: string | null | undefined): string | null => {
@@ -30,11 +30,12 @@ export function desdeAgenda(a: Agenda): Cosa[] {
   return a.items.map(i => ({
     clave: `${i.tipo}:${i.id}:${i.fecha}`,
     abrir: { tipo: i.tipo, id: i.id },
+    tipo: i.tipo,
     titulo: i.titulo,
     dia: i.fecha.slice(0, 10),
     hora: hhmm(i.hora),
     espacio: ESPACIO[i.espacio.tipo],
-    lugar: i.espacio.tipo === 'personal' ? 'Tuyo' : i.espacio.nombre,
+    lugar: i.espacio.tipo === 'personal' ? 'Personal' : i.espacio.nombre,
     quien: i.quien,
     vencida: false,
     hecho: i.estatus === 'hecho',
@@ -49,7 +50,7 @@ export function desdePersona(p: EstadoDePersona, ya: Set<string>): Cosa[] {
   for (const x of p.compromisos.pendientes) {
     if (!x.vencida || ya.has(`pendiente:${x.pendienteId}`)) continue
     out.push({
-      clave: `pendiente:${x.pendienteId}`, abrir: { tipo: 'pendiente', id: x.pendienteId },
+      clave: `pendiente:${x.pendienteId}`, abrir: { tipo: 'pendiente', id: x.pendienteId }, tipo: 'pendiente',
       titulo: x.texto, dia: x.vence?.slice(0, 10) ?? null, hora: null, espacio: 'proyecto',
       lugar: x.plan || x.grupo, quien: null, vencida: true, hecho: x.estatus === 'hecho',
       avance: x.avance, esEvento: false,
@@ -59,12 +60,12 @@ export function desdePersona(p: EstadoDePersona, ya: Set<string>): Cosa[] {
   for (const e of p.dias[0]?.entradas ?? []) {
     if (e.tipo === 'encargo') {
       out.push({
-        clave: `encargo:${e.texto}:${e.hhmm ?? ''}`, abrir: null, titulo: e.texto, dia: p.hoy, hora: hhmm(e.hhmm),
+        clave: `encargo:${e.texto}:${e.hhmm ?? ''}`, abrir: null, tipo: 'actividad', titulo: e.texto, dia: p.hoy, hora: hhmm(e.hhmm),
         espacio: 'familia', lugar: e.grupo, quien: null, vencida: false, hecho: e.hecho, avance: null, esEvento: !!e.hhmm,
       })
     } else if (e.tipo === 'fuera') {
       out.push({
-        clave: `fuera:${e.texto}:${e.inicio}`, abrir: null, titulo: e.texto, dia: p.hoy, hora: e.diaCompleto ? null : hhmm(e.hhmm),
+        clave: `fuera:${e.texto}:${e.inicio}`, abrir: null, tipo: 'evento', titulo: e.texto, dia: p.hoy, hora: e.diaCompleto ? null : hhmm(e.hhmm),
         espacio: 'personal', lugar: e.cuenta, quien: null, vencida: false, hecho: false, avance: null, esEvento: !e.diaCompleto,
       })
     }
@@ -111,9 +112,13 @@ export function fechasDe(familias: EstadoDeFamilia[]): DatosEjecucion['fechas'] 
 
 export function proyectosDe(grupos: GrupoEnPortal[]): DatosEjecucion['proyectos'] {
   return grupos
-    .filter(g => g.clase !== 'family')
+    .filter(g => ambitoDe(g) === 'proyecto')
     .flatMap(g => g.planes.map(p => ({ nombre: p.nombre, grupo: g.nombre, href: `/app/g/${g.id}/${p.id}`, abiertos: p.abiertos, vencidos: p.vencidos })))
     .sort((a, b) => b.vencidos - a.vencidos || b.abiertos - a.abiertos)
 }
 
 export const appsDe = (m: Modulo[]): DatosEjecucion['apps'] => m.map(x => ({ clave: x.clave, nombre: x.nombre, estado: x.estado }))
+
+/** Los Grupos de trabajo (Profesional): solo nombre y liga; nunca el avance de los demás. */
+export const gruposDe = (grupos: GrupoEnPortal[]): NonNullable<DatosEjecucion['grupos']> =>
+  grupos.filter(g => ambitoDe(g) === 'equipo').map(g => ({ nombre: g.nombre, href: `/app/g/${g.id}` }))

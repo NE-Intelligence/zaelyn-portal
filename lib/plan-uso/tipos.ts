@@ -63,7 +63,7 @@ export type Movimiento = {
 }
 
 /** Los niveles que se pueden contratar por sí solos (#190). */
-export type NivelDePaga = 'base' | 'family' | 'pro'
+export type NivelDePaga = 'base' | 'family' | 'profesional' | 'pro'
 
 /** Un tope que el motor dijo que se alcanzó (402 · LIMITE). */
 export type Limite = {

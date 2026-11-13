@@ -1475,7 +1475,7 @@ a.pt-plan:hover {
 }
 .pu-fundador b { font-size: 14.5px; }
 .pu-fundador span { font-size: 13px; color: var(--ink-2); }
-.pu-niveles { display: grid; gap: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pu-niveles { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .pu-nivel {
   display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: 10px;
   padding: 16px; border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--sombra-1); min-width: 0;
