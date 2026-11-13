@@ -1,8 +1,9 @@
 import { Barra } from '@/components/portal/Marco'
 import { SinSesion } from '@/components/portal/SinSesion'
-import { cuentaWeb, laAgenda, laFamilia, losModulos, misGrupos, yoMismo } from '@/lib/api'
+import { cuentaWeb, elAcceso, laAgenda, laFamilia, losModulos, misGrupos, yoMismo } from '@/lib/api'
+import { ambitoDe } from '@/lib/plan'
 import { Ejecucion } from '@/components/portal/Ejecucion'
-import { appsDe, avisosDe, casaDe, desdeAgenda, desdePersona, fechasDe, proyectosDe } from '@/lib/ejecucion'
+import { appsDe, avisosDe, casaDe, desdeAgenda, desdePersona, fechasDe, gruposDe, proyectosDe } from '@/lib/ejecucion'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Inicio' }
@@ -39,14 +40,14 @@ const sumar = (iso: string, n: number) => {
 }
 
 export default async function Inicio() {
-  const [r, yo, cuenta, mods] = await Promise.all([misGrupos(), yoMismo(1), cuentaWeb(), losModulos()])
+  const [r, yo, cuenta, mods, acc] = await Promise.all([misGrupos(), yoMismo(1), cuentaWeb(), losModulos(), elAcceso()])
   if (!r.ok) return <SinSesion fallo={r.fallo} />
 
   const grupos = r.dato.grupos
   const tz = yo.ok ? yo.dato.tz : null
   const hoy = yo.ok ? yo.dato.hoy.slice(0, 10) : enZona(tz)
-  const familias = grupos.filter(g => g.clase === 'family')
-  const [agenda, ...casas] = await Promise.all([laAgenda(hoy, sumar(hoy, 13)), ...familias.slice(0, 3).map(g => laFamilia(g.id))])
+  const familias = grupos.filter(g => ambitoDe(g) === 'family')
+  const [agenda, ...casas] = await Promise.all([laAgenda(hoy, sumar(hoy, 41)), ...familias.slice(0, 3).map(g => laFamilia(g.id))])
 
   const cosas = agenda.ok ? desdeAgenda(agenda.dato) : []
   const ya = new Set(cosas.map(c => c.clave.split(':').slice(0, 2).join(':')))
@@ -70,6 +71,15 @@ export default async function Inicio() {
         fechas: fechasDe(fams.map(x => x.f)),
         habitos: yo.ok ? yo.dato.habitos.map(h => ({ nombre: h.nombre, hoy: h.hoy, meta: h.meta, unidad: h.unidad, racha: h.racha })) : [],
         proyectos: proyectosDe(grupos),
+        grupos: gruposDe(grupos),
+        contratado: acc.ok ? {
+          plan: acc.dato.plan.nombre,
+          apagado: ([['familia', 'Familia'], ['grupos', 'Grupos'], ['proyectos', 'Proyectos PMO']] as const)
+            .flatMap(([k, que]) => {
+              const s = acc.dato.secciones[k]
+              return s && !s.encendido ? [{ que, plan: s.plan?.nombre ?? 'otro plan' }] : []
+            }),
+        } : undefined,
         apps: mods.ok ? appsDe(mods.dato.modulos) : [],
         hrefs: { personal: '/app/personal', familia: '/app/familia', proyectos: '/app/proyectos', apps: '/app/apps', calendario: '/app/personal?v=calendario' },
         faltan: [

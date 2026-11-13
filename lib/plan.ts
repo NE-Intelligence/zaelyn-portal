@@ -342,6 +342,8 @@ export type GrupoEnPortal = {
   nombre: string
   /** family | work | study | other. Decide qué vistas tiene el lienzo. */
   clase: string
+  /** El ámbito del Core (decisiones/2026-11-13-planes-por-ambito). Puede no venir de un Core viejo. */
+  kind?: 'personal' | 'family' | 'equipo' | 'proyecto'
   rol: string | null
   nivel: number
   planes: Array<{
@@ -352,6 +354,16 @@ export type GrupoEnPortal = {
     vencidos: number
     hasta: string | null
   }>
+}
+
+/**
+ * El ámbito de un grupo: lo dice el Core (`kind`); si no lo manda todavía, se
+ * deduce de la clase (familia) y de si tiene planes (proyecto PMO).
+ */
+export function ambitoDe(g: Pick<GrupoEnPortal, 'clase' | 'kind' | 'planes'>): 'personal' | 'family' | 'equipo' | 'proyecto' {
+  if (g.kind) return g.kind
+  if (g.clase === 'family') return 'family'
+  return g.planes.length > 0 ? 'proyecto' : 'equipo'
 }
 
 // ── recortes: ni uno de éstos es un número nuevo ────────────────────────────

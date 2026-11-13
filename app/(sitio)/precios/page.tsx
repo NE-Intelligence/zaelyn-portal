@@ -1,122 +1,90 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
-import Campo from '@/components/sitio/Campo'
-import { textos, type Clave } from '@/lib/copy'
-import { idiomaActual } from '@/lib/preferencias'
-import { COMPARATIVA, COMPLEMENTOS_PMO, COMPLEMENTOS_TRIBU, PLANES_PUBLICOS } from '@/lib/precios'
+import { Ramas } from '@/components/landing/Ramas'
+import { BTN_PRI, BTN_SEC } from '@/components/landing/piezas'
 import { fundadores } from '@/lib/api'
+import { COMPLEMENTOS, FAMILIA_A_MITAD, MESES_ANUAL, PLANES, plan, usd } from '@/lib/planes'
+import { metaDeLanding } from '@/lib/meta-landing'
 
-export async function generateMetadata() {
-  const t = textos(await idiomaActual())
-  return { title: t('pc.meta.titulo'), description: t('pc.meta.desc') }
-}
+export const metadata: Metadata = metaDeLanding(
+  { titulo: 'Precios de Zaelyn · Personal, Personal+, Familia, Profesional y PMO', descripcion: 'No es una escalera: cada nivel y cada módulo se contrata por separado. Personal es gratis.' },
+  '/precios',
+)
 
-const Palomita = ({ si, et }: { si: boolean; et: string }) =>
-  si ? (
-    <svg className="st-si" viewBox="0 0 24 24" width="18" height="18" role="img" aria-label={et}>
-      <path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  ) : (
-    <span className="st-no" role="img" aria-label={et}>—</span>
-  )
+const CAJA = 'mx-auto w-full max-w-[1120px] px-6 sm:px-8'
+const TITULO = { letterSpacing: '-0.04em' }
 
-/**
- * `/precios` — los cuatro niveles, la tabla, los complementos, los roles y
- * las preguntas de siempre (#186). Antes los precios eran una sección al
- * final de la portada, mezclados con complementos sin decir de qué plan.
- */
+type Celda = boolean | string
+/** Lo que trae cada nivel, en el orden de `PLANES`: Personal, Personal+, Familia, Profesional, PMO. */
+const COMPARA: { f: string; v: [Celda, Celda, Celda, Celda, Celda] }[] = [
+  { f: 'App y Telegram', v: [true, true, true, true, true] },
+  { f: 'Portal web', v: [false, true, true, true, true] },
+  { f: 'Recordatorios activos', v: ['5', 'Sin tope', 'Sin tope', 'Sin tope', 'Sin tope'] },
+  { f: 'Memoria', v: ['15 días', 'Sin tope', 'Sin tope', 'Sin tope', 'Sin tope'] },
+  { f: 'Chat con IA, voz, fotos y documentos', v: [false, true, true, true, true] },
+  { f: 'Familia: quién lleva, obligaciones y premios', v: [false, false, true, false, false] },
+  { f: 'Grupos de trabajo', v: [false, false, false, 'Sin tope de miembros', 'Sin tope de miembros'] },
+  { f: 'Registro de horas', v: [false, false, false, true, true] },
+  { f: 'Proyectos con roles, asignación y aprobaciones', v: [false, false, false, false, true] },
+  { f: 'Asientos incluidos', v: ['—', '—', '4 integrantes', '—', 'Sponsor, 1 Líder, 3 Ejecutores'] },
+  { f: 'Kore y TCGBusters', v: [true, true, true, true, true] },
+]
+
+const PREGUNTAS = [
+  { q: '¿Es una escalera?', a: 'No. Personal es la base y Personal+ le suma portal e IA. De ahí salen dos ramas hermanas: Familia, para tu casa, y Profesional, para tu trabajo. PMO es el módulo de proyectos e incluye Profesional y Personal+.' },
+  { q: '¿Y si quiero Familia y trabajo?', a: `Pagas la rama más cara completa y la otra a mitad: Familia como complemento de Profesional o de PMO cuesta ${usd(FAMILIA_A_MITAD)} USD al mes.` },
+  { q: '¿Los precios incluyen impuestos?', a: 'No. Son netos en dólares al mes; el IVA o el sales tax se agregan al pagar. También puedes pagar en pesos.' },
+  { q: '¿Hay pago anual?', a: `En PMO, sí: pagas ${MESES_ANUAL} meses y usas 12. Los demás planes son mensuales.` },
+  { q: '¿Qué es el precio de fundador?', a: 'Las primeras 30 suscripciones tienen un descuento permanente: 75% las primeras 10, 50% las siguientes 10 y 25% las últimas 10. Lo pone el sistema al pagar, sin códigos. Dura mientras sigas pagando: si cancelas, se pierde para siempre. Hoy no aplica a Profesional.' },
+  { q: '¿Qué pasa con los integrantes de mi familia que no pagan?', a: 'Tienen Zaelyn Personal: la app y Telegram, sin portal. Ven y hacen lo que les toca en la familia.' },
+  { q: '¿Puedo cancelar cuando quiera?', a: 'Sí, desde Plan y uso. Se cancela al final del periodo pagado y tu cuenta vuelve a Personal, gratis.' },
+]
+
+/** `/precios` — las ramas, la comparación, los complementos y las preguntas (decisiones/2026-11-13-planes-por-ambito). */
 export default async function Precios() {
-  const [lang, f] = await Promise.all([idiomaActual(), fundadores()])
-  const t = textos(lang)
-  /** El tramo de fundador lo decide el motor en vivo; si no contesta, no se anuncia. */
-  const tramo = f.abierto && f.tramo ? f.tramo : null
-  const deFundador = (precio: string) => (Math.round(Number(precio) * (1 - (tramo ?? 0) / 100) * 100) / 100).toFixed(2)
-  const NIVEL: Record<string, string> = { sprint: 'base', tribu: 'family', pmo: 'pro' }
-  const celda = (v: boolean | string, fila: Clave) => {
-    if (typeof v === 'boolean') return <Palomita si={v} et={v ? '✓' : '—'} />
-    const txt = v.startsWith('pc.') ? t(v as Clave) : v
-    return fila === 'pc.f.voz' && !v.startsWith('pc.') ? `${txt} ${t('pc.v.min')}` : txt
-  }
+  const f = await fundadores()
+  const celda = (v: Celda) => (typeof v === 'boolean' ? (v ? <span aria-label="Incluido">✓</span> : <span className="text-tinta-3" aria-label="No incluido">—</span>) : v)
 
   return (
-    <main>
-      <section className="st-banda st-hero st-hero-chico">
-        <Campo />
-        <div className="st-caja">
-          <p className="st-rotulo st-hero-etq">{t('pc.etq')}</p>
-          <h1>
-            <span>{t('pc.h1a')}</span> <em>{t('pc.h1b')}</em>
+    <div className="bg-fondo text-tinta">
+      <section className="pt-20 pb-12 text-center sm:pt-28">
+        <div className={`${CAJA} flex flex-col items-center gap-5`}>
+          <h1 className="text-[38px] leading-[1.05] font-semibold sm:text-[60px]" style={{ letterSpacing: '-0.045em' }}>
+            No es una escalera.<br /><span className="text-[#8e8e93]">Tomas solo lo que usas.</span>
           </h1>
-          <p className="st-bajada">{t('pc.sub')}</p>
+          {f.abierto && f.tramo && (
+            <p className="m-0 rounded-full bg-superficie px-5 py-2.5 text-[15px] shadow-z1">
+              Quedan <b>{f.quedan}</b> {f.quedan === 1 ? 'lugar' : 'lugares'} de fundador al <b>{f.tramo}%</b> de por vida.
+            </p>
+          )}
         </div>
       </section>
 
-      <section className="st-banda st-seccion st-seccion-pegada">
-        <div className="st-caja">
-          <div className="st-fundador">
-            <div>
-              <p className="st-rotulo">{t('pc.fund.t')}</p>
-              <p>{t('pc.fund.p')}</p>
-            </div>
-            {tramo && <b>{t('pc.fund.abierto').replace('{t}', String(tramo)).replace('{q}', String(f.quedan))}</b>}
-          </div>
-          <div className="st-planes st-planes-grandes">
-            {PLANES_PUBLICOS.map((p) => (
-              <article className={`st-plan${p.destacado ? ' st-plan-pmo' : ''}`} key={p.id} data-espacio={p.espacio}>
-                {p.destacado && <span className="st-sello">{t('pc.popular')}</span>}
-                <div className="st-plan-cab">
-                  <p className="st-para">{t(p.para)}</p>
-                  <h2 className="st-plan-nombre">{p.nombre}</h2>
-                </div>
-                <div className="st-plan-precio">
-                  <div className="st-precio">
-                    {p.precio === null ? t('pc.gratis') : p.precio}
-                    {p.precio !== null && <small> {t('pc.mes')}</small>}
-                  </div>
-                  {tramo && <p className="st-anual st-anual-fundador">{p.precio ? t('pc.fund.precio').replace('{p}', deFundador(p.precio)) : '\u00a0'}</p>}
-                  {p.id === 'pmo' && <p className="st-anual">{t('pc.anio')}</p>}
-                </div>
-                <p className="st-plan-resumen">{t(p.resumen)}</p>
-                <div className="st-plan-cta">
-                  <Link className={`st-btn ${p.destacado ? 'st-btn-1' : 'st-btn-2'}`} href={p.id === 'kickoff' ? '/empezar' : `/empezar?para=${p.espacio}`}>
-                    {p.id === 'kickoff' ? t(p.cta) : t('fi.probar')}
-                  </Link>
-                  {p.id !== 'kickoff' && <a className="st-plan-ya" href={`/app/plan?plan=${NIVEL[p.id]}`}>{t(p.cta)}</a>}
-                </div>
-                <p className="st-incluye">{t(p.incluye ?? 'pc.inc.k')}</p>
-                <ul className="st-rasgos">
-                  {p.rasgos.map((r) => <li key={r}>{t(r)}</li>)}
-                </ul>
-              </article>
-            ))}
-          </div>
-          <p className="st-nota">{t('pz.nota')}</p>
-        </div>
+      <section className="pb-24">
+        <div className={CAJA}><Ramas /></div>
       </section>
 
-      <section className="st-banda st-seccion" id="comparar">
-        <div className="st-caja">
-          <div className="st-encabeza">
-            <h2>{t('pc.tabla.h2')}</h2>
-          </div>
-          <div className="st-tabla-caja" role="region" aria-label={t('pc.tabla.cap')} tabIndex={0}>
-            <table className="st-tabla">
-              <caption className="st-oculto">{t('pc.tabla.cap')}</caption>
+      <section className="bg-superficie-2 py-24" id="comparar">
+        <div className={`${CAJA} flex flex-col gap-8`}>
+          <h2 className="text-[40px] leading-[1.05] font-semibold" style={TITULO}>Qué trae cada uno.</h2>
+          <div className="overflow-x-auto rounded-[24px] bg-superficie shadow-z1" role="region" aria-label="Comparación de planes" tabIndex={0}>
+            <table className="w-full min-w-[820px] border-collapse text-[15px]">
               <thead>
                 <tr>
-                  <th scope="col"><span className="st-oculto">{t('pc.tabla.cap')}</span></th>
-                  {PLANES_PUBLICOS.map((p) => (
-                    <th scope="col" key={p.id} data-espacio={p.espacio}>
-                      <span>{p.nombre}</span>
-                      <small>{p.precio === null ? t('pc.gratis') : `${p.precio} USD`}</small>
+                  <th scope="col" className="p-4 text-left"><span className="sr-only">Qué incluye</span></th>
+                  {PLANES.map(p => (
+                    <th scope="col" key={p.clave} className="p-4 text-left align-bottom">
+                      <span className="block font-semibold">{p.nombre.replace('Zaelyn ', '')}</span>
+                      <small className="font-normal text-tinta-3">{p.precio ? `${usd(p.precio)} USD` : 'Gratis'}</small>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {COMPARATIVA.map((fila) => (
-                  <tr key={fila.f}>
-                    <th scope="row">{t(fila.f)}</th>
-                    {fila.v.map((v, i) => <td key={i}>{celda(v, fila.f)}</td>)}
+                {COMPARA.map(fila => (
+                  <tr key={fila.f} className="border-t border-linea">
+                    <th scope="row" className="p-4 text-left font-medium">{fila.f}</th>
+                    {fila.v.map((v, i) => <td key={i} className="p-4 text-tinta-2">{celda(v)}</td>)}
                   </tr>
                 ))}
               </tbody>
@@ -125,66 +93,45 @@ export default async function Precios() {
         </div>
       </section>
 
-      <section className="st-banda st-leyes" id="complementos">
-        <div className="st-caja">
-          <div className="st-encabeza">
-            <h2>{t('pc.comp.h2')}</h2>
-            <p>{t('pc.comp.sub')}</p>
-          </div>
-          <div className="st-comp-rejilla">
-            <article className="st-comp" data-espacio="proyectos">
-              <h3>{t('pc.comp.pmo')}</h3>
-              <ul>{COMPLEMENTOS_PMO.map((k) => <li key={k}>{t(k)}</li>)}</ul>
-            </article>
-            <article className="st-comp" data-espacio="familia">
-              <h3>{t('pc.comp.tribu')}</h3>
-              <ul>{COMPLEMENTOS_TRIBU.map((k) => <li key={k}>{t(k)}</li>)}</ul>
-            </article>
-            <article className="st-comp st-comp-paq">
-              <h3>{t('pc.paq.t')}</h3>
-              <p>{t('pc.paq.p')}</p>
-              <p className="st-precio">52.78 <small>{t('pc.mes')}</small></p>
-            </article>
-          </div>
-          <p className="st-nota">{t('pz.anual')} {t('pz.org')}</p>
-        </div>
-      </section>
-
-      <section className="st-banda st-seccion" id="roles">
-        <div className="st-caja">
-          <div className="st-encabeza">
-            <h2>{t('pc.roles.h2')}</h2>
-            <p>{t('pc.roles.sub')}</p>
-          </div>
-          <div className="st-roles">
-            {(['sp', 'li', 'ej', 'su', 'st', 'mo'] as const).map((r) => (
-              <div className="st-rol" key={r}>
-                <h3>{t(`pc.r.${r}`)}</h3>
-                <p>{t(`pc.r.${r}.p`)}</p>
+      <section className="py-24" id="complementos">
+        <div className={`${CAJA} flex flex-col gap-8`}>
+          <h2 className="text-[40px] leading-[1.05] font-semibold" style={TITULO}>Complementos.</h2>
+          <div className="grid gap-5 md:grid-cols-2">
+            {(['family', 'pro'] as const).map(de => (
+              <div key={de} className="flex flex-col gap-3 rounded-[24px] bg-superficie p-7 shadow-z1">
+                <span className="text-[22px] font-semibold">{plan(de).nombre}</span>
+                <ul className="m-0 grid list-none gap-2 p-0 text-[16px]">
+                  {COMPLEMENTOS.filter(c => c.de === de).map(c => (
+                    <li key={c.nombre} className="flex justify-between gap-4">
+                      <span>{c.nombre}{c.nota && <span className="text-tinta-3"> · {c.nota}</span>}</span>
+                      <span className="tabular-nums text-tinta-2">{usd(c.precio)} USD</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
+          <p className="m-0 text-[15px] text-tinta-3">Precios netos al mes; el IVA o el sales tax van aparte. Los complementos no llevan descuento de fundador.</p>
         </div>
       </section>
 
-      <section className="st-banda st-seccion st-faq-banda" id="preguntas">
-        <div className="st-caja st-caja-angosta">
-          <h2 className="st-h2">{t('pc.faq.h2')}</h2>
-          <div className="st-faq">
-            {(['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7'] as const).map((f) => (
-              <details key={f}>
-                <summary>{t(`pc.${f}.q`)}</summary>
-                <p>{t(`pc.${f}.a`)}</p>
+      <section className="bg-superficie-2 py-24" id="preguntas">
+        <div className="mx-auto flex w-full max-w-[760px] flex-col gap-6 px-6 sm:px-8">
+          <h2 className="text-[40px] leading-[1.05] font-semibold" style={TITULO}>Preguntas.</h2>
+          <div className="flex flex-col gap-3">
+            {PREGUNTAS.map(p => (
+              <details key={p.q} className="rounded-[20px] bg-superficie px-6 py-4 shadow-z1">
+                <summary className="cursor-pointer text-[17px] font-semibold">{p.q}</summary>
+                <p className="mt-3 mb-0 text-[16px] leading-[1.55] text-tinta-2">{p.a}</p>
               </details>
             ))}
           </div>
-          <p className="st-nota">{t('pc.nota')}</p>
-          <div className="st-acciones st-acciones-izq">
-            <Link className="st-btn st-btn-1" href="/empezar">{t('hero.cta0')}</Link>
-            <Link className="st-btn st-btn-2" href="/legal/terminos">{t('pie.terminos')}</Link>
+          <div className="flex flex-wrap gap-3 pt-4">
+            <Link href="/empezar" className={BTN_PRI}>Empieza gratis</Link>
+            <Link href="/legal/terminos" className={BTN_SEC}>Condiciones de uso</Link>
           </div>
         </div>
       </section>
-    </main>
+    </div>
   )
 }

@@ -114,7 +114,6 @@ export function Organizacion({ o, cobro, plan, pagado, codigo }: {
             <Medidor titulo="Monitores incluidos" usados={Math.min(o.uso.monitores, o.topes.monitoresIncluidos)} tope={o.topes.monitoresIncluidos} />
             {o.informados && <Medidor titulo="Lugares de Stakeholder o Monitor extra" usados={o.informados.usados} tope={o.informados.tope} />}
             <Medidor titulo="Créditos IA este mes" usados={o.uso.creditos} tope={o.topes.creditos} />
-            <Medidor titulo="Avisos de WhatsApp este mes" usados={o.uso.avisos} tope={o.topes.avisos} />
           </div>
         </section>
       )}

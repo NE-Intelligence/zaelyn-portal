@@ -4,6 +4,7 @@ import { Iconos } from '@/components/sitio/Iconos'
 import { bienvenida, fundadores } from '@/lib/api'
 import { textos, type Clave } from '@/lib/copy'
 import { idiomaActual } from '@/lib/preferencias'
+import { PLANES, type ClavePlan } from '@/lib/planes'
 
 export async function generateMetadata() {
   const t = textos(await idiomaActual())
@@ -35,6 +36,8 @@ export default async function Empezar({ searchParams }: { searchParams: Promise<
   const [lang, b, f, q] = await Promise.all([idiomaActual(), bienvenida(), fundadores(), searchParams])
   const t = textos(lang)
   const para = ES_PARA(q.para) ? q.para : null
+  // El plan elegido en una landing viaja en la URL (decisiones/2026-11-13-planes-por-ambito).
+  const elegido = PLANES.find(p => p.clave !== 'free' && p.clave === (q.plan as ClavePlan)) ?? null
   const carga = para ? `prueba_${para}` : 'prueba'
   // El nombre del bot lo dice Zaelyn; si no contesta, el de siempre.
   const usuario = b.telegram?.usuario ?? 'ZaelynBot'
@@ -55,6 +58,15 @@ export default async function Empezar({ searchParams }: { searchParams: Promise<
 
       <section className="st-banda st-seccion st-seccion-pegada">
         <div className="st-caja st-ez">
+          {elegido && (
+            <div className="st-fundador">
+              <div>
+                <p className="st-rotulo">Elegiste {elegido.nombre}</p>
+                <p>Si ya tienes cuenta, entra y contrata. Si no, créala abajo con Telegram o <Link href="/entrar" className="st-enlace">con tu correo</Link>; después contratas desde tu portal, en «Plan y uso».</p>
+              </div>
+              <Link className="st-btn st-btn-1" href={`/app/plan?plan=${elegido.clave}`}>Entrar y contratar</Link>
+            </div>
+          )}
           {/* 1 · para qué */}
           <div className="st-ez-paso">
             <span className="st-ez-n">1</span>

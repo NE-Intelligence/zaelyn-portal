@@ -60,6 +60,14 @@ async function leer<T>(ruta: string): Promise<{ ok: true; dato: T } | { ok: fals
 
 export const misGrupos = () => leer<{ grupos: GrupoEnPortal[] }>('/portal/grupos')
 
+/**
+ * Qué ve cada plan (decisiones/2026-11-13-planes-por-ambito): cada sección
+ * encendida o apagada, y lo apagado trae el plan que lo enciende.
+ */
+export type SeccionAcceso = { encendido: boolean; plan?: { clave: string; nombre: string } | null }
+export type Acceso = { plan: { clave: string; nombre: string }; secciones: Record<string, SeccionAcceso | undefined> }
+export const elAcceso = () => leer<Acceso>('/portal/acceso')
+
 /** Lo de todos mis espacios en un rango (máx. 62 días), ya ordenado por el motor. */
 export const laAgenda = (desde: string, hasta: string) =>
   leer<import('./agenda').Agenda>(`/portal/agenda?desde=${encodeURIComponent(desde)}&hasta=${encodeURIComponent(hasta)}`)
@@ -409,8 +417,8 @@ export const organizacion = () => leer<{ organizacion: import('@/lib/plan-uso/ti
 /**
  * Dónde estoy parado, en todos mis grupos (#184).
  *
- * Va aparte de `leer` por una sola respuesta: el 402. Kickoff tiene todo esto
- * en el chat y el portal Personal es de Sprint en adelante, así que «no lo
+ * Va aparte de `leer` por una sola respuesta: el 402. Personal (gratis) tiene todo esto
+ * en el chat y el portal es de Personal+ en adelante, así que «no lo
  * tienes en tu plan» es una respuesta normal —con su pantalla—, no un fallo.
  */
 export async function yoMismo(dias = 7): Promise<
@@ -428,7 +436,7 @@ export async function yoMismo(dias = 7): Promise<
     })
     if (r.status === 402) {
       const j = (await r.json().catch(() => ({}))) as { plan?: { clave: string; nombre: string } }
-      return { ok: false, fallo: 'SIN_PLAN', plan: j.plan ?? { clave: 'free', nombre: 'Zaelyn Kickoff' } }
+      return { ok: false, fallo: 'SIN_PLAN', plan: j.plan ?? { clave: 'free', nombre: 'Zaelyn Personal' } }
     }
     if (r.status === 401 || r.status === 403) return { ok: false, fallo: 'SIN_SESION' }
     if (r.status === 404) return { ok: false, fallo: 'NO_LO_ENCUENTRO' }

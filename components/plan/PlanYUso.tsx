@@ -40,11 +40,15 @@ function Medidor({ titulo, usados, tope, nota }: { titulo: string; usados: numbe
   )
 }
 
-/** Lo que trae cada nivel, en una línea por cosa (#190). Los números son los del motor. */
+/**
+ * Lo que trae cada nivel, en una línea por cosa (decisiones/2026-11-13-planes-por-ambito).
+ * Los nombres y los precios los manda el motor; esto solo describe.
+ */
 const NIVELES: { clave: NivelDePaga; para: string; rasgos: string[] }[] = [
-  { clave: 'base', para: 'Para ti', rasgos: ['Portal Personal: tu día cruzado con todos tus grupos', 'Avisos por WhatsApp', '50 recordatorios activos', 'Un año de historial'] },
-  { clave: 'family', para: 'Para tu familia', rasgos: ['Todo Sprint, más:', 'Portal de Familia completo', '4 participantes incluidos', 'Traslados, quehaceres con puntos, medallero y fechas'] },
-  { clave: 'pro', para: 'Para tus proyectos', rasgos: ['Todo Sprint, más:', 'Portal de Proyectos y editor con IA', 'Proyectos sin límite, un Líder o PMO y 3 Ejecutores; más asientos de uno en uno', '30 créditos de IA y 100 avisos de WhatsApp al mes'] },
+  { clave: 'base', para: 'Para ti', rasgos: ['Todo Personal, sin topes', 'Portal web', 'Chat con IA, voz, fotos y documentos', 'Brief diario y resúmenes'] },
+  { clave: 'family', para: 'Para tu casa', rasgos: ['Todo Personal+, más:', 'Memoria compartida y actividades familiares', 'Quién lleva y quién trae, obligaciones y premios', '4 integrantes contando al responsable'] },
+  { clave: 'profesional', para: 'Para tu trabajo', rasgos: ['Todo Personal+, más:', 'Grupos de trabajo sin tope de miembros', 'Chat, memoria, correo y calendario del grupo', 'Registro de horas; cada quien lleva lo suyo'] },
+  { clave: 'pro', para: 'Módulo de proyectos', rasgos: ['Incluye Profesional y Personal+', 'Proyectos con dueño, roles y aprobaciones', 'Plan desde Excel, materiales y reportes', 'Sponsor, 1 Líder o PMO y 3 Ejecutores; más asientos con complementos'] },
 ]
 
 export function PlanYUso({ v, pagado, inicial, comprar: pedido }: { v: VistaPlan; pagado: boolean; inicial?: NivelDePaga | null; comprar?: string | null }) {
@@ -117,7 +121,7 @@ export function PlanYUso({ v, pagado, inicial, comprar: pedido }: { v: VistaPlan
         <div>
           <span className="pu-rotulo">Tu plan</span>
           <h1>{v.plan.nombre}</h1>
-          <p>{v.plan.queEs}{v.plan.precioUsd ? ` · ${usd(v.plan.precioUsd)} al mes, IVA incluido` : ''}</p>
+          <p>{v.plan.queEs}{v.plan.precioUsd ? ` · ${usd(v.plan.precioUsd)} al mes` : ''}</p>
         </div>
         {v.suscripcion && (
           <div className="pu-sub">
@@ -159,7 +163,6 @@ export function PlanYUso({ v, pagado, inicial, comprar: pedido }: { v: VistaPlan
             <Medidor titulo="Asientos de Visibilidad (Stakeholder o Monitor)" usados={v.cuenta.informados.usados} tope={v.cuenta.informados.tope}
               nota={`${v.cuenta.stakeholders} Stakeholder${v.cuenta.stakeholders === 1 ? '' : 's'} · ${Math.max(0, v.cuenta.monitores - t.monitoresIncluidos)} Monitor(es)`} />
             <Medidor titulo="Créditos IA este mes" usados={v.cuenta.creditos} tope={t.creditos} nota="Armar un plan gasta 1 a 3; reorganizar, 1 o más según el tamaño." />
-            <Medidor titulo="Avisos de WhatsApp este mes" usados={v.cuenta.avisos} tope={t.avisos} nota="En Telegram los avisos no tienen tope." />
           </div>
         </section>
       )}
@@ -192,7 +195,7 @@ export function PlanYUso({ v, pagado, inicial, comprar: pedido }: { v: VistaPlan
 
       {!pagaOrg && <section className="pu-seccion">
         <h2>{viva ? 'Tu nivel' : 'Elige tu nivel'}</h2>
-        <p className="pu-nota">Kickoff es gratis en Telegram. Precios en dólares al mes, IVA incluido{moneda === 'mxn' ? '; en pesos al tipo de cambio FIX del día' : ''}.</p>
+        <p className="pu-nota">No es una escalera: cada nivel se contrata por separado. Zaelyn Personal es gratis en la app y en Telegram. Precios en dólares al mes{moneda === 'mxn' ? '; en pesos al tipo de cambio FIX del día' : ''}; el IVA se ve al pagar.</p>
         <div className="pu-niveles">
           {NIVELES.map(n => {
             const p = v.planes.find(x => x.clave === n.clave)
@@ -201,7 +204,8 @@ export function PlanYUso({ v, pagado, inicial, comprar: pedido }: { v: VistaPlan
             // Lo que ya viene dentro de lo que pagas no se vende otra vez (#192).
             const conTribu = (actuales['tribu'] ?? 0) > 0
             const incluido = viva && !actual && (
-              (n.clave === 'base' && (pagado_ === 'family' || pagado_ === 'pro'))
+              (n.clave === 'base' && (pagado_ === 'family' || pagado_ === 'profesional' || pagado_ === 'pro'))
+              || (n.clave === 'profesional' && pagado_ === 'pro')
               || (n.clave === 'family' && pagado_ === 'pro' && conTribu))
             const final = conDescuento(p.precioUsd)
             return (
@@ -235,7 +239,7 @@ export function PlanYUso({ v, pagado, inicial, comprar: pedido }: { v: VistaPlan
 
       {!pagaOrg && (esPmo || configurandoPmo) && <section className="pu-seccion" id="pmo">
         <h2>{esPmo ? 'Complementos de PMO' : `Arma tu ${pmo.nombre}`}</h2>
-        {!esPmo && <p className="pu-nota">PMO incluye proyectos sin límite, un Líder o PMO, 3 Ejecutores, 30 créditos de IA y 100 avisos de WhatsApp. Suma los asientos que necesites: Ejecutores, Líderes, Supervisores y Visibilidad (Stakeholders o Monitores); los complementos no llevan descuento de fundador.</p>}
+        {!esPmo && <p className="pu-nota">PMO incluye Profesional y Personal+, proyectos sin límite, un Sponsor, un Líder o PMO y 3 Ejecutores. Suma los asientos que necesites: Ejecutores, Líderes, Supervisores y Visibilidad (Stakeholders o Monitores); los complementos no llevan descuento de fundador.</p>}
         <div className="pu-comps">
           {v.complementos.map(c => {
             const n = cant[c.clave] ?? 0
@@ -261,8 +265,8 @@ export function PlanYUso({ v, pagado, inicial, comprar: pedido }: { v: VistaPlan
             <span>{anual ? 'Total al año' : 'Total al mes'}</span>
             <b className="mono">{enMoneda(total)}</b>
             {moneda === 'mxn' && tc && <small>{usd(total)} al tipo de cambio FIX de Banxico del {tc.fecha} ({tc.valor.toFixed(4)}). Se recalcula antes de cada renovación.</small>}
-            <small>IVA incluido.{descuento > 0 ? ` Con ${descuento}% de descuento en el plan.` : ''}</small>
-            {anual && <small>Al año: PMO y lugares se cobran como {pmo.mesesAnual} meses; los paquetes de créditos y avisos, completos. Créditos y avisos se renuevan cada mes.</small>}
+            <small>Más IVA.{descuento > 0 ? ` Con ${descuento}% de descuento en el plan.` : ''}</small>
+            {anual && <small>Al año: PMO y lugares se cobran como {pmo.mesesAnual} meses; los paquetes de créditos, completos. Los créditos se renuevan cada mes.</small>}
           </div>
           {!viva && (
             <div className="ed-segmentos chico">

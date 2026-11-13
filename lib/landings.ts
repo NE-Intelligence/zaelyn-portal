@@ -1,180 +1,253 @@
 /**
- * El contenido de las cuatro landings (decisiones/2026-11-10-landings-y-portal):
- * la principal y una por solución, con la MISMA plantilla
- * (`components/landing/Landing.tsx`).
+ * El contenido de las landings (decisiones/2026-11-13-planes-por-ambito):
+ * una general y una por nivel (Personal, Personal+, Familia, Profesional y
+ * PMO), más `/modulos`. Todas con la misma piel (`components/landing/`);
+ * aquí solo vive el texto.
  *
- * Los ejemplos de la conversación son inventados y lo son a propósito: la
- * gente, la familia y la obra de aquí no existen. Nunca un nombre de un
+ * Los ejemplos son inventados y lo son a propósito: la familia «Ríos», el
+ * proyecto «Subestación Andes» y su gente no existen. Nunca un nombre de un
  * cliente, de un usuario real ni de la familia del dueño.
- *
- * Por ahora solo en español; inglés y portugués se agregan aquí cuando se
- * traduzcan (las demás páginas del sitio ya los tienen).
  */
-import type { PlanPublico } from './precios'
+import { AMBITO, type Ambito, type ClavePlan } from './planes'
 
-export type Modulo = 'personal' | 'familia' | 'pmo'
-
-export const MODULO: Record<Modulo, { nombre: string; color: string; ruta: string }> = {
-  personal: { nombre: 'Personal', color: 'var(--z-personal)', ruta: '/personal' },
-  familia: { nombre: 'Familia', color: 'var(--z-familia)', ruta: '/familia' },
-  pmo: { nombre: 'PMO', color: 'var(--z-proyectos)', ruta: '/pmo' },
-}
+export { AMBITO }
 
 /** Una pieza de la conversación de ejemplo, pintada como en la app. */
 export type Pieza =
   | { yo: string }
   | { zaelyn: string }
-  | { tarjeta: { modulo: Modulo; contexto: string; titulo: string; dato: string; opciones: string[] } }
+  | { tarjeta: { ambito: Ambito; contexto: string; titulo: string; dato: string; opciones: string[] } }
 
-export type Beneficio = { titulo: string; texto: string }
+export type Beneficio = { titulo: string; texto: string; conversacion: Pieza[] }
 
-export type Landing = {
-  id: 'zaelyn' | Modulo
+export type LandingNivel = {
+  id: ClavePlan
   meta: { titulo: string; descripcion: string }
-  /** El rótulo de arriba del titular; en las soluciones lleva el punto del módulo. */
-  rotulo?: string
   titular: [string, string]
-  bajada: string
-  cta: { texto: string; href: string }
-  cta2: { texto: string; href: string }
-  conversacion: Pieza[]
-  beneficios: { titulo: string; lista: Beneficio[] }
-  /** Las tres soluciones en tarjetas: solo en la principal. */
-  soluciones?: boolean
-  apps?: boolean
-  /** Qué planes se enseñan. La principal enseña los cuatro. */
-  planes: PlanPublico['id'][]
-  preciosTitulo: [string, string]
+  beneficios: Beneficio[]
+  ventajas: string[]
 }
 
-const CANALES = 'Telegram hoy · WhatsApp en activación · Portal web'
-export const canales = CANALES
+/** «Qué es Zaelyn», igual en todas. */
+export const QUE_ES = [
+  'Zaelyn es un asistente que entiende lo que le escribes o le dices.',
+  'Lo convierte en recordatorios, actividades, metas y memoria, y te contesta con tarjetas y botones: nada de adivinar comandos.',
+]
 
-export const LANDINGS: Record<Landing['id'], Landing> = {
-  zaelyn: {
-    id: 'zaelyn',
-    meta: {
-      titulo: 'Zaelyn · Tu asistente personal, familiar y de proyectos',
-      descripcion: 'Le hablas como a una persona; Zaelyn recuerda, avisa a quien le toca y te enseña dónde estás parado.',
-    },
-    titular: ['Dilo una vez.', 'Zaelyn se encarga.'],
-    bajada: 'Tu asistente para lo tuyo, tu casa y tus proyectos. Le hablas como a una persona; ella recuerda, avisa y te enseña dónde estás parado.',
-    cta: { texto: 'Probar 7 días gratis', href: '/empezar' },
-    cta2: { texto: 'Ver las soluciones', href: '#soluciones' },
-    conversacion: [
-      { yo: '¿Qué tengo hoy?' },
-      { tarjeta: { modulo: 'personal', contexto: 'Hoy', titulo: 'Pagar el seguro del coche', dato: 'Vence hoy · lo agregaste el lunes', opciones: ['Ya lo pagué', 'Mañana'] } },
-      { yo: 'Hoy no puedo recoger a Emilio' },
-      { tarjeta: { modulo: 'familia', contexto: 'Casa', titulo: '¿Quién recoge a Emilio?', dato: 'Natación · sale 6:30 pm', opciones: ['Diego', 'Abuela Rosa'] } },
-      { yo: '¿Cómo va la torre?' },
-      { zaelyn: 'Va al 58%; hoy tocaba 64%. La frena la losa del nivel 3, con Bruno.' },
+export const CANALES = 'App · Portal web · Telegram'
+
+const t = (ambito: Ambito, contexto: string, titulo: string, dato: string, opciones: string[]): Pieza =>
+  ({ tarjeta: { ambito, contexto, titulo, dato, opciones } })
+
+export const NIVELES: Record<ClavePlan, LandingNivel> = {
+  free: {
+    id: 'free',
+    meta: { titulo: 'Zaelyn Personal · Gratis, para que nada se te olvide', descripcion: 'Recordatorios, actividades, metas y tu memoria en una conversación. Gratis en la app y en Telegram.' },
+    titular: ['Que nada se te olvide.', 'Gratis, en tu teléfono.'],
+    beneficios: [
+      {
+        titulo: 'Recordatorios en una frase', texto: 'Díselo como se te ocurra: Zaelyn entiende el día, la hora y si se repite.',
+        conversacion: [
+          { yo: 'Recuérdame pagar la luz el viernes a las 9' },
+          t('personal', 'Recordatorio', 'Pagar la luz', 'Viernes · 9:00', ['Cambiar hora', 'Repetir cada mes', 'Listo']),
+          { yo: 'Repetir cada mes' },
+          { zaelyn: 'Hecho: cada mes el día 15 a las 9:00.' },
+        ],
+      },
+      {
+        titulo: 'Actividades que siguen contigo', texto: 'Lo que tienes que hacer queda en tu lista y Zaelyn te pregunta qué sigue.',
+        conversacion: [
+          { yo: 'Tengo que comprar regalo para mamá' },
+          t('personal', 'Actividad', 'Comprar regalo para mamá', '¿Qué sigue con esto?', ['Ponerle fecha', 'Hacerla meta', 'Otra actividad', 'Listo']),
+        ],
+      },
+      {
+        titulo: 'Tu memoria', texto: 'Anótale lo que no quieres cargar en la cabeza y pregúntale después.',
+        conversacion: [
+          { yo: 'Anota que la talla de Emilio es 8' },
+          { zaelyn: 'Nota guardada: «Talla de Emilio: 8».' },
+          { yo: '¿Qué talla es Emilio?' },
+          { zaelyn: '8. Lo anotaste el 3 de noviembre.' },
+        ],
+      },
+      {
+        titulo: 'Metas', texto: 'Ponle fecha a lo que quieres lograr y Zaelyn te lo recuerda cada semana.',
+        conversacion: [
+          { yo: 'Quiero correr 5 km en enero' },
+          t('metas', 'Meta', 'Correr 5 km', 'Enero', ['Agregar pasos', 'Recordármelo cada semana']),
+        ],
+      },
     ],
-    beneficios: {
-      titulo: 'Lo que hace por ti, sin que abras otra app.',
-      lista: [
-        { titulo: 'Recuerda por ti', texto: 'Lo que le dices queda guardado: pendientes, fechas, notas. Te lo trae cuando importa, no antes.' },
-        { titulo: 'Avisa a quien le toca', texto: 'En tu familia o tu equipo, Zaelyn le pregunta a la persona correcta y te cuenta qué dijo.' },
-        { titulo: 'Te enseña dónde estás parado', texto: 'El chat y el portal leen lo mismo: si Zaelyn dice 34%, la pantalla dice 34%.' },
-        { titulo: 'Texto, voz y fotos', texto: 'Escríbele, mándale un audio o una foto. Sin formularios ni contraseñas.' },
-      ],
-    },
-    soluciones: true,
-    apps: true,
-    planes: ['kickoff', 'sprint', 'tribu', 'pmo'],
-    preciosTitulo: ['Empieza gratis.', 'Paga solo lo que decides.'],
+    ventajas: ['Sin instalar otra app de tareas: es una conversación.', 'Nada de formularios ni contraseñas.', 'Lo mismo en la app y en Telegram.'],
   },
 
-  personal: {
-    id: 'personal',
-    meta: {
-      titulo: 'Zaelyn Personal · Todo lo que te toca, en un solo lugar',
-      descripcion: 'Recordatorios a su hora, tus compromisos de todos tus grupos, hábitos y tu semana. Zaelyn recuerda por ti.',
-    },
-    rotulo: 'Zaelyn Personal',
-    titular: ['Todo lo que te toca,', 'en un solo lugar.'],
-    bajada: 'Zaelyn recuerda por ti, te dice qué va primero y cruza tu día con todos tus grupos.',
-    cta: { texto: 'Empezar gratis', href: '/empezar?para=personal' },
-    cta2: { texto: 'Ver un día de ejemplo', href: '/demo/personal' },
-    conversacion: [
-      { yo: 'Recuérdame el viernes a las 6 la cena con Inés' },
-      { tarjeta: { modulo: 'personal', contexto: 'Agenda', titulo: 'Cena con Inés', dato: 'Viernes · 6:00 pm', opciones: ['Confirmar', 'Cambiar hora', 'Ayuda'] } },
-      { zaelyn: 'Listo. A las 5:30 te aviso para que salgas a tiempo.' },
-      { yo: '¿Cómo voy con correr esta semana?' },
-      { zaelyn: 'Llevas 2 de 3 salidas. Mañana toca la tercera.' },
+  base: {
+    id: 'base',
+    meta: { titulo: 'Zaelyn Personal+ · Lo tuyo sin topes, con IA y portal', descripcion: 'Chat con IA que se guarda solo, lee fotos y documentos, entiende tu voz, te manda tu día y te da un portal.' },
+    titular: ['Lo tuyo, sin topes.', 'Con IA que trabaja por ti.'],
+    beneficios: [
+      {
+        titulo: 'Chat con IA que se guarda solo', texto: 'Platica lo que necesites; al terminar, lo importante queda en tu Memoria.',
+        conversacion: [
+          { yo: 'Ayúdame a planear una semana de comidas sin gluten' },
+          t('personal', 'Chat con IA', 'Semana sin gluten', 'Lunes a domingo · 3 comidas · lista del súper', ['Terminar chat']),
+          { zaelyn: 'Guardé la plática en tu Memoria.' },
+        ],
+      },
+      {
+        titulo: 'Lee fotos y documentos', texto: 'Mándale la foto de un recibo o un PDF y te dice qué hacer con él.',
+        conversacion: [
+          { yo: '📷 Foto de un recibo' },
+          t('personal', 'Documento', 'Recibo de agua', '412 MXN · vence el 20 nov', ['Recordármelo', 'Guardar en Memoria']),
+        ],
+      },
+      {
+        titulo: 'Voz', texto: 'Una nota de voz de camino al trabajo y Zaelyn saca lo que tienes que hacer.',
+        conversacion: [
+          { yo: '🎙 Nota de voz · 0:40' },
+          t('personal', 'Voz', '3 actividades', 'Llamar al dentista · renovar el seguro · comprar focos', ['Crear las 3', 'Elegir']),
+        ],
+      },
+      {
+        titulo: 'Tu día y tu portal', texto: 'Cada mañana, tu día en una tarjeta. En la computadora, todo junto en el portal.',
+        conversacion: [
+          { zaelyn: 'Buenos días.' },
+          t('personal', 'Tu día', 'Hoy', '2 eventos · 3 actividades · una meta en riesgo', ['Ver en el portal']),
+        ],
+      },
     ],
-    beneficios: {
-      titulo: 'Tu día, sin tener que acordarte de todo.',
-      lista: [
-        { titulo: 'Recordatorios que llegan a su hora', texto: 'Díselos como se te ocurran: «el viernes a las 6», «cada lunes», «en dos horas».' },
-        { titulo: 'Dónde estás parado', texto: 'Lo que vence, lo que choca y lo que espera de ti, en una sola pantalla.' },
-        { titulo: 'Tus compromisos de todos lados', texto: 'Lo que te toca en tu familia y en tus proyectos se junta con lo tuyo.' },
-        { titulo: 'Hábitos y calendario', texto: 'Tu semana completa y los hábitos que quieres sostener, sin otra app.' },
-      ],
-    },
-    apps: true,
-    planes: ['kickoff', 'sprint'],
-    preciosTitulo: ['Empieza gratis.', 'Sube cuando lo necesites.'],
+    ventajas: ['Una sola IA para tus pendientes, tus documentos y tus pláticas.', 'Lo que platicas no se pierde: queda en tu Memoria.', 'El portal y el teléfono ven lo mismo.'],
   },
 
-  familia: {
-    id: 'familia',
-    meta: {
-      titulo: 'Zaelyn Familia · Organiza tu día, disfruta en familia',
-      descripcion: 'Quién lleva y quién recoge, quehaceres con puntos, cumpleaños y la semana completa de tu casa, en una conversación.',
-    },
-    rotulo: 'Zaelyn Familia',
-    titular: ['Organiza tu día,', 'disfruta en familia.'],
-    bajada: 'La escuela, los entrenamientos, quién lleva y quién recoge. Se lo dices a Zaelyn como a alguien de la casa y le avisa a quien le toca.',
-    cta: { texto: 'Empezar gratis', href: '/empezar?para=familia' },
-    cta2: { texto: 'Ver una familia de ejemplo', href: '/demo/familia' },
-    conversacion: [
-      { yo: 'Hoy no puedo recoger a Emilio de natación' },
-      { tarjeta: { modulo: 'familia', contexto: 'Casa', titulo: '¿Quién recoge a Emilio?', dato: 'Natación · sale 6:30 pm', opciones: ['Diego', 'Abuela Rosa'] } },
-      { zaelyn: 'Le pregunté a Diego y a la abuela. El primero que diga «yo voy» se queda con él.' },
-      { yo: '¿Quién va ganando los quehaceres?' },
-      { zaelyn: 'Paula, con 42 puntos. Emilio lleva 35 y le falta tender su cama hoy.' },
+  family: {
+    id: 'family',
+    meta: { titulo: 'Zaelyn Familia · Cada quien sabe qué le toca', descripcion: 'Quién lleva y quién trae, obligaciones y premios, memoria compartida y actividades familiares con plan.' },
+    titular: ['Cada quien sabe qué le toca.', 'Sin perseguir a nadie.'],
+    beneficios: [
+      {
+        titulo: 'Quién lleva y quién trae', texto: 'Cada traslado tiene responsable y Zaelyn le avisa a quien le toca.',
+        conversacion: [
+          { yo: 'Mañana Marta lleva a Emilio a natación y yo lo recojo' },
+          t('familia', 'Familia Ríos', 'Natación de Emilio', 'Lleva Marta 4:00 pm · trae Tú 5:30 pm', ['Avisarles', 'Repetir los martes']),
+        ],
+      },
+      {
+        titulo: 'Obligaciones y premios', texto: 'Lo que toca en casa suma, y lo que suma se canjea.',
+        conversacion: [
+          { yo: 'Si Emilio tiende su cama 5 días, gana una salida al cine' },
+          t('familia', 'Familia Ríos', 'Premio: salida al cine', 'Emilio · 0 de 5', ['Ver obligaciones de Emilio']),
+        ],
+      },
+      {
+        titulo: 'Memoria compartida', texto: 'Lo que uno anota, la familia lo sabe.',
+        conversacion: [
+          { yo: '¿Cuándo le toca vacuna a Paula?' },
+          { zaelyn: 'El 12 de diciembre. Lo anotó Marta en la familia Ríos.' },
+        ],
+      },
+      {
+        titulo: 'Actividades familiares con plan', texto: 'Lo grande se parte en pasos y cada paso tiene quién.',
+        conversacion: [
+          { yo: 'Organizar la posada familiar' },
+          t('familia', 'Familia Ríos', 'Posada familiar', '4 pasos · sin fecha', ['Repartir pasos', 'Ponerle fecha']),
+        ],
+      },
     ],
-    beneficios: {
-      titulo: 'La semana de tu casa, sin perseguir a nadie.',
-      lista: [
-        { titulo: 'Quién lleva y quién recoge', texto: 'Cada traslado tiene responsable. Si alguien no puede, Zaelyn busca quién sí.' },
-        { titulo: 'Quehaceres con puntos', texto: 'Cada quien sabe qué le toca; lo hecho suma puntos y se canjea por premios.' },
-        { titulo: 'Calendario de todos', texto: 'Escuela, entrenamientos y fechas importantes en un solo lugar.' },
-        { titulo: 'Cumpleaños y fechas importantes', texto: 'Todas a la vista en el portal, junto con la semana de cada quien.' },
-      ],
-    },
-    planes: ['kickoff', 'tribu'],
-    preciosTitulo: ['Empieza gratis.', 'Tu familia completa, cuando la quieras.'],
+    ventajas: ['Nadie tiene que acordarse de avisar: Zaelyn avisa.', 'Los niños ven lo suyo, sin acceso a lo de los adultos.', 'Una sola cuenta paga; los demás entran gratis desde el teléfono.'],
   },
 
-  pmo: {
-    id: 'pmo',
-    meta: {
-      titulo: 'Zaelyn PMO · Tu PMO de bolsillo',
-      descripcion: 'Proyectos actividad por actividad, avance real contra esperado y un equipo que se actualiza hablando con Zaelyn.',
-    },
-    rotulo: 'Zaelyn PMO',
-    titular: ['Tu PMO', 'de bolsillo.'],
-    bajada: 'Cada quien actualiza su avance hablando con Zaelyn. Tú ves el proyecto completo, al día, sin perseguir a nadie.',
-    cta: { texto: 'Empezar gratis', href: '/empezar?para=proyectos' },
-    cta2: { texto: 'Ver un proyecto de ejemplo', href: '/demo' },
-    conversacion: [
-      { yo: 'Quiero actualizar mi avance de hoy' },
-      { tarjeta: { modulo: 'pmo', contexto: 'Torre Mirador', titulo: 'Losa del nivel 3', dato: '60% · esperado hoy 70% · vence viernes', opciones: ['70%', '80%', 'Terminada'] } },
-      { zaelyn: 'Listo, quedó en 80%. Ya vas por arriba de lo esperado.' },
-      { yo: '¿Qué está atrasado?' },
-      { zaelyn: 'Dos cosas: la instalación eléctrica del nivel 2, con Tomás, y el contrato de acero.' },
+  profesional: {
+    id: 'profesional',
+    meta: { titulo: 'Zaelyn Profesional · Grupos de trabajo', descripcion: 'Grupos donde todos comparten chat, memoria, calendario y archivos, y cada quien lleva lo suyo. Con registro de horas.' },
+    titular: ['Todos comparten lo mismo.', 'Cada quien lleva lo suyo.'],
+    beneficios: [
+      {
+        titulo: 'Pedir sin asignar', texto: 'Lo pides al grupo y lo toma quien puede. Entra en su lista, no en la tuya.',
+        conversacion: [
+          { yo: 'Alguien que revise el logo para el viernes' },
+          t('grupo', 'Grupo Diseño', 'Revisar el logo', 'Para el viernes · lo pidió Tú', ['Lo tomo']),
+          { zaelyn: 'Carla lo tomó. Ya está en su lista.' },
+        ],
+      },
+      {
+        titulo: 'Registro de horas', texto: 'Dile en qué trabajaste y cuánto. La semana se exporta a Excel.',
+        conversacion: [
+          { yo: 'Hoy 3 horas en la propuesta de Acme' },
+          t('grupo', 'Horas', 'Propuesta de Acme', '3 h hoy · 14 h esta semana', ['Enviar semana', 'Exportar Excel']),
+        ],
+      },
+      {
+        titulo: 'Memoria del grupo', texto: 'Lo que el grupo acordó, a la mano de todos.',
+        conversacion: [
+          { yo: '¿Qué acordamos de tipografías?' },
+          { zaelyn: 'Prompt para texto y MuseoModerno para títulos. Lo acordaron el 4 de noviembre.' },
+        ],
+      },
+      {
+        titulo: 'Calendario y correo', texto: 'Juntas del grupo con invitación y recordatorio.',
+        conversacion: [
+          { yo: 'Junta del grupo el jueves a las 10' },
+          t('grupo', 'Grupo Diseño', 'Junta del grupo', 'Jueves · 10:00 am', ['Invitar por correo', 'Recordar 15 min antes']),
+        ],
+      },
     ],
-    beneficios: {
-      titulo: 'El proyecto al día, sin juntas para preguntar cómo va.',
-      lista: [
-        { titulo: 'Avance real contra esperado', texto: 'Cada actividad dice dónde va y dónde debería ir hoy. Sin adivinar.' },
-        { titulo: 'El equipo actualiza hablando', texto: 'Nadie llena hojas: le dicen a Zaelyn cómo van y el plan se mueve solo.' },
-        { titulo: 'Lo que manda sobre la fecha', texto: 'Ruta crítica, dependencias y lo que se atrasa, a la vista.' },
-        { titulo: 'Tu plan, desde tu Excel', texto: 'Súbelo o ármalo con IA en el editor; Zaelyn lo lleva desde ahí.' },
-      ],
-    },
-    planes: ['kickoff', 'pmo'],
-    preciosTitulo: ['Empieza gratis.', 'Crece asiento por asiento.'],
+    ventajas: ['Sin jefes de tablero: nadie le asigna nada a nadie.', 'Chat, memoria, archivos y calendario del grupo en un lugar.', 'Miembros sin tope.'],
   },
+
+  pro: {
+    id: 'pro',
+    meta: { titulo: 'Zaelyn PMO · Proyectos con dueño, plan y seguimiento', descripcion: 'El módulo de proyectos de Zaelyn: plan desde tu Excel, roles, aprobaciones, materiales y seguimiento. Incluye Profesional y Personal+.' },
+    titular: ['Proyectos con dueño y plan.', 'Sin hojas de cálculo sueltas.'],
+    beneficios: [
+      {
+        titulo: 'Importa el plan', texto: 'Sube tu Excel y Zaelyn lo convierte en un plan que el equipo actualiza hablando.',
+        conversacion: [
+          { yo: '📎 Plan Subestación Andes.xlsx' },
+          t('pmo', 'Subestación Andes', 'Plan importado', '48 actividades · 6 frentes · 3 responsables', ['Revisar', 'Publicar plan']),
+        ],
+      },
+      {
+        titulo: 'Asigna y aprueba', texto: 'Cada actividad tiene responsable y lo terminado pasa por tu visto bueno.',
+        conversacion: [
+          { yo: 'Que Raúl haga el tendido de cable para el 28' },
+          t('pmo', 'Subestación Andes', 'Tendido de cable', 'Raúl · para el 28', ['Pedir aprobación al terminar']),
+          t('pmo', 'Subestación Andes', 'Raúl terminó', '¿Lo apruebas?', ['Aprobar', 'Regresar']),
+        ],
+      },
+      {
+        titulo: 'Seguimiento', texto: 'Cada lunes, dónde va el proyecto y qué lo frena.',
+        conversacion: [
+          t('pmo', 'Subestación Andes', 'Tu semana', '62% de avance · 3 atrasadas · 2 por aprobar', ['Ver atrasadas', 'Reporte para Sponsor']),
+        ],
+      },
+      {
+        titulo: 'Materiales y estimaciones', texto: 'Lo que llega a la obra queda ligado a su actividad.',
+        conversacion: [
+          { yo: 'Llegaron 200 m de cable' },
+          t('pmo', 'Subestación Andes', 'Entrada de material', '200 m de cable · tendido de cable', ['Ver estimación']),
+        ],
+      },
+    ],
+    ventajas: ['El equipo actualiza hablando; nadie llena hojas.', 'Avance real contra esperado, actividad por actividad.', 'Reportes para el Sponsor sin armarlos a mano.', 'Incluye Profesional y Personal+.'],
+  },
+}
+
+/** La landing general. */
+export const GENERAL = {
+  meta: { titulo: 'Zaelyn · Tu asistente portátil', descripcion: 'Uno solo para tu día, tu familia y tu trabajo. En la app, en el portal y en Telegram.' },
+  titular: ['Zaelyn, tu asistente portátil.', 'Uno solo para tu día, tu familia y tu trabajo.'] as [string, string],
+  conversacion: [
+    { yo: '¿Qué tengo hoy?' },
+    t('personal', 'Hoy', 'Pagar el seguro del coche', 'Vence hoy', ['Ya lo pagué', 'Mañana']),
+    { yo: 'Mañana Marta lleva a Emilio a natación' },
+    t('familia', 'Familia Ríos', 'Natación de Emilio', 'Lleva Marta 4:00 pm', ['Avisarle', 'Repetir los martes']),
+    { yo: '¿Cómo va Subestación Andes?' },
+    { zaelyn: 'Va al 62%; 3 actividades atrasadas y 2 esperan tu aprobación.' },
+  ] as Pieza[],
+  dondeVive: [
+    { titulo: 'App', texto: 'En tu mano. La conversación con tarjetas y botones.' },
+    { titulo: 'Portal', texto: 'En tu escritorio, todo junto: tu día, tu casa y tu trabajo.' },
+    { titulo: 'Telegram', texto: 'Donde ya platicas. Sin instalar nada.' },
+  ],
+  objetivo: 'Que nada se te olvide y que lo compartido tenga dueño, sin que tengas que aprender una herramienta.',
 }

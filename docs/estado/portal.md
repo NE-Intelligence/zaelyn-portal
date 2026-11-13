@@ -113,3 +113,13 @@ paletas pastel (conversación de la app).
 ## Inicio de ejecución (decisiones/2026-11-11-inicio-de-ejecucion) — 11 nov 2026
 
 `/app` ahora es la lista de todo lo que hay que hacer (Lista / Tarjetas / Semana, filtro por espacio) con agenda, casa, fechas, hábitos, proyectos y apps al lado. Tocar una cosa la abre con Zaelyn. Falta en el Core: marcar estatus directo, orden propio, listas y pendientes de las apps. `ZAELYN_APP_URL=https://app.zaelyn.ai` quedó en Vercel (producción y previews) el 11 nov: la columna de Zaelyn es la app embebida.
+
+## Planes por ámbito (decisiones/2026-11-13-planes-por-ambito) — 13 nov 2026
+
+Landings por nivel y de módulos, `/precios` en ramas, menú por Familia, Grupos y Proyectos con candados, e Inicio con Tableros, Calendario, Lista y Kanban. Sin cambios de diseño.
+
+Pendiente:
+- pantalla de Metas (contrato de `/portal/proyectos-personales`);
+- resumen por módulo (Core);
+- EN y PT de las landings nuevas;
+- respuestas de JJR sobre anual, fundador de Profesional y URLs legales.

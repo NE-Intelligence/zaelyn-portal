@@ -4,14 +4,14 @@
  * y tarjetas con opciones como diálogos sutiles. Solo presentación: no hay
  * nada que tocar.
  */
-import { MODULO, type Pieza } from '@/lib/landings'
+import { AMBITO, type Pieza } from '@/lib/landings'
 
 const SOMBRA = 'shadow-[0_1px_2px_rgba(0,0,0,.04),0_6px_20px_rgba(0,0,0,.06)]'
 
-export function Telefono({ piezas, etiqueta }: { piezas: Pieza[]; etiqueta: string }) {
+export function Telefono({ piezas, etiqueta, chico }: { piezas: Pieza[]; etiqueta: string; chico?: boolean }) {
   return (
     <figure className="m-0" aria-label={etiqueta}>
-      <div className="h-[740px] w-[360px] max-w-full rounded-[54px] bg-[#1d1d1f] p-3 shadow-[0_30px_80px_rgba(0,0,0,.18)]">
+      <div className={`${chico ? 'h-[600px] w-[320px]' : 'h-[740px] w-[360px]'} max-w-full rounded-[54px] bg-[#1d1d1f] p-3 shadow-[0_30px_80px_rgba(0,0,0,.18)]`}>
         <div className="flex h-full flex-col overflow-hidden rounded-[44px] bg-fondo text-left text-tinta">
           <div className="flex flex-none items-start justify-between px-4 pt-[18px] pb-1" aria-hidden="true">
             <span className={`grid size-10 place-items-center rounded-full bg-superficie ${SOMBRA}`}>
@@ -47,13 +47,13 @@ function Pedazo({ p }: { p: Pieza }) {
     return <p className="m-0 max-w-[88%] self-start rounded-[20px] bg-burbuja px-3.5 py-2.5 text-[14px] leading-snug">{p.zaelyn}</p>
   }
   const t = p.tarjeta
-  const m = MODULO[t.modulo]
-  const cols = Math.min(t.opciones.length, 3)
+  const m = AMBITO[t.ambito]
+  const cols = t.opciones.some(o => o.length > 22) ? 1 : t.opciones.length === 4 ? 2 : Math.min(t.opciones.length, 3)
   return (
     <div className="grid gap-2.5 rounded-[22px] bg-burbuja px-4 py-3.5">
       <span className="flex items-center gap-[7px] text-[12px] text-tinta-2">
         <span className="size-[7px] rounded-full" style={{ background: m.color }} />
-        {m.nombre} · {t.contexto}
+        {t.contexto.startsWith(m.nombre) ? t.contexto : `${m.nombre} · ${t.contexto}`}
       </span>
       <span className="text-[17px] font-semibold leading-tight tracking-[-0.02em]">{t.titulo}</span>
       <span className="text-[13px] text-tinta-2">{t.dato}</span>
@@ -66,6 +66,9 @@ function Pedazo({ p }: { p: Pieza }) {
             {o}
           </span>
         ))}
+      </span>
+      <span className="flex justify-end gap-3 text-[12px] text-tinta-3" aria-hidden="true">
+        <span>Ayuda</span><span>Más</span>
       </span>
     </div>
   )
