@@ -53,6 +53,15 @@ export default async function Inicio() {
   const ya = new Set(cosas.map(c => c.clave.split(':').slice(0, 2).join(':')))
   if (yo.ok) cosas.push(...desdePersona(yo.dato, ya))
   const fams = casas.flatMap((c, i) => (c.ok ? [{ f: c.dato, href: `/app/f/${familias[i]!.id}` }] : []))
+  // Quién lleva y quién trae va en el renglón de la actividad, no en otra caja.
+  const casasArmadas = fams.map(x => casaDe(x.f, x.href))
+  for (const casa of casasArmadas) {
+    for (const x of casa.cosas) {
+      if (!x.traslado) continue
+      const c = cosas.find(k => k.espacio === 'familia' && k.dia === hoy && k.titulo === x.texto)
+      if (c) c.detalle = x.traslado
+    }
+  }
   const foco = yo.ok ? yo.dato.foco[0] : undefined
   const handle = cuenta.ok ? cuenta.dato.handle : null
 
@@ -67,7 +76,7 @@ export default async function Inicio() {
         foco: foco ? { texto: foco.texto, porque: foco.porque || null } : null,
         avisos: yo.ok ? avisosDe(yo.dato) : [],
         cosas,
-        casa: fams.map(x => casaDe(x.f, x.href)),
+        casa: casasArmadas,
         fechas: fechasDe(fams.map(x => x.f)),
         habitos: yo.ok ? yo.dato.habitos.map(h => ({ nombre: h.nombre, hoy: h.hoy, meta: h.meta, unidad: h.unidad, racha: h.racha })) : [],
         proyectos: proyectosDe(grupos),
