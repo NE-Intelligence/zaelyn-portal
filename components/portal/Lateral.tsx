@@ -73,7 +73,6 @@ export function Lateral({ admin, ejemplo, quien, cristal, espacios }: { admin: b
       items: espacios.proyectos.length
         ? [
           ...espacios.proyectos.map(p => ({ href: p.href, texto: p.nombre, punto: PUNTO.proyecto, activa: ejemplo ? (r: string) => r === p.href : exacta(p.href) })),
-          ...(ejemplo ? [] : [{ href: '/app/proyectos', texto: 'Todos los proyectos', activa: empieza('/app/proyectos', '/app/editor') }]),
         ]
         : ejemplo ? [] : [{ href: '/app/proyectos', texto: 'Proyectos PMO', punto: PUNTO.proyecto, activa: empieza('/app/proyectos'), candado: b.proyectos }],
     },
@@ -86,19 +85,27 @@ export function Lateral({ admin, ejemplo, quien, cristal, espacios }: { admin: b
     : [
       { href: '/app/plan', texto: 'Plan y uso', activa: empieza('/app/plan') },
       { href: '/app/configuracion', texto: 'Configuración', activa: empieza('/app/configuracion') },
-      { href: '/app/cuenta', texto: 'Perfil', activa: empieza('/app/cuenta', '/app/acceso', '/app/participaciones') },
       { href: '/app/organizacion', texto: 'Organización', activa: empieza('/app/organizacion') },
       ...(admin ? [{ href: '/admin', texto: 'Admin', activa: empieza('/admin') }] : []),
     ]
 
-  const fila = (x: Item, chica = false) => {
+  // Todas las filas iguales: un hueco de 20 px a la izquierda (ícono, punto o
+  // nada), la misma letra y la misma altura. El activo solo cambia de peso y
+  // de fondo.
+  const fila = (x: Item) => {
     const on = x.activa(ruta)
-    const clase = `flex h-11 w-full items-center gap-3 rounded-[14px] px-3.5 text-[15px] no-underline transition-colors ${on ? 'bg-superficie font-semibold text-tinta shadow-z1' : `${chica || x.candado ? 'text-tinta-2' : 'text-tinta'} hover:bg-sel`}`
+    const clase = `flex h-10 w-full items-center gap-3 rounded-[12px] px-3 text-[14.5px] no-underline transition-colors ${on ? 'bg-superficie font-semibold text-tinta shadow-z1' : `${x.candado ? 'text-tinta-3' : 'text-tinta-2'} hover:bg-sel hover:text-tinta`}`
+    const hueco = (
+      <span className="grid size-5 flex-none place-items-center" aria-hidden="true">
+        {x.icono
+          ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{ICONO[x.icono]}</svg>
+          : x.punto ? <span className="size-2 rounded-full" style={{ background: x.punto }} /> : null}
+      </span>
+    )
     if (x.accion) {
       return (
         <button key={x.href} type="button" onClick={x.accion} className={`${clase} cursor-pointer border-0 bg-transparent text-left`}>
-          {x.icono && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONO[x.icono]}</svg>}
-          {x.texto}
+          {hueco}<span className="min-w-0 flex-1 truncate">{x.texto}</span>
         </button>
       )
     }
@@ -108,39 +115,40 @@ export function Lateral({ admin, ejemplo, quien, cristal, espacios }: { admin: b
         title={x.candado ? `Lo trae ${x.candado}` : undefined}
         href={x.candado ? (x.href.startsWith('/app') ? '/app/plan' : x.href) : x.href}
         aria-current={on ? 'page' : undefined}
-          className={clase}
+        className={clase}
       >
-        {x.punto && <span className="size-[9px] flex-none rounded-full" style={{ background: x.punto }} aria-hidden="true" />}
-        {x.icono && (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONO[x.icono]}</svg>
-        )}
+        {hueco}
         <span className="min-w-0 flex-1 truncate">{x.texto}</span>
         {x.candado && (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-label={`Lo trae ${x.candado}`}><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 018 0v3" /></svg>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-label={`Lo trae ${x.candado}`}><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 018 0v3" /></svg>
         )}
       </Link>
     )
+  }
+  const Titulo = ({ texto, href }: { texto: string; href?: string }) => {
+    const c = 'px-3 pb-1 text-[11px] font-semibold tracking-[0.08em] text-tinta-3 uppercase no-underline'
+    return href ? <Link href={href} className={`${c} hover:text-tinta`}>{texto}</Link> : <span className={c}>{texto}</span>
   }
 
   return (
     <>
       <aside className="pt-lateral fixed inset-y-0 left-0 z-30 hidden w-[248px] flex-col gap-1 border-r border-linea bg-superficie-2 px-3.5 py-6 lg:flex" aria-label="Secciones">
-        <Link href={ejemplo ? '/' : '/app'} className="px-3.5 pb-5 text-tinta no-underline" aria-label="zælyn, inicio">
+        <Link href={ejemplo ? '/' : '/app'} className="px-3 pb-5 text-tinta no-underline" aria-label="zælyn, inicio">
           <Logo ancho={96} />
         </Link>
-        <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-1">
-          <nav className="flex flex-col gap-1" aria-label="Principal">{principales.map(x => fila(x))}</nav>
+        <div className="-mx-1 flex min-h-0 flex-1 flex-col overflow-y-auto px-1" style={{ maskImage: 'linear-gradient(to bottom, #000 calc(100% - 28px), transparent)', WebkitMaskImage: 'linear-gradient(to bottom, #000 calc(100% - 28px), transparent)' }}>
+          <nav className="flex flex-col gap-0.5" aria-label="Principal">{principales.map(x => fila(x))}</nav>
           {ambitos.map(a => (
-            <nav key={a.titulo} className="flex flex-col gap-1 pt-3" aria-label={a.titulo}>
-              <span className="px-3.5 pb-1 text-[11.5px] font-semibold tracking-[0.06em] text-tinta-3 uppercase">{a.titulo}</span>
+            <nav key={a.titulo} className="flex flex-col gap-0.5 pt-4" aria-label={a.titulo}>
+              <Titulo texto={a.titulo} href={a.titulo === 'Proyectos' && !ejemplo ? '/app/proyectos' : undefined} />
               {a.items.map(x => fila(x))}
             </nav>
           ))}
-          {finales.length > 0 && <nav className="flex flex-col gap-1 pt-3" aria-label="Módulos">{finales.map(x => fila(x))}</nav>}
+          {finales.length > 0 && <nav className="flex flex-col gap-0.5 pt-4" aria-label="Módulos">{finales.map(x => fila(x))}</nav>}
           {ajustes.length > 0 && (
-            <nav className="flex flex-col gap-1 pt-3" aria-label="Cuenta">
-              <span className="px-3.5 pb-1 text-[11.5px] font-semibold tracking-[0.06em] text-tinta-3 uppercase">Cuenta</span>
-              {ajustes.map(x => fila(x, true))}
+            <nav className="flex flex-col gap-0.5 pt-4 pb-4" aria-label="Cuenta">
+              <Titulo texto="Cuenta" />
+              {ajustes.map(x => fila(x))}
             </nav>
           )}
         </div>
@@ -153,7 +161,7 @@ export function Lateral({ admin, ejemplo, quien, cristal, espacios }: { admin: b
                 <span className="grid size-[34px] place-items-center rounded-full bg-pri text-[13px] font-semibold text-sobre-pri" aria-hidden="true">
                   {(quien ?? '·').replace(/^@/, '').slice(0, 1).toUpperCase()}
                 </span>
-                <span className="min-w-0 flex-1 truncate text-[14px] font-semibold">{quien ?? 'Tu cuenta'}</span>
+                <Link href="/app/cuenta" className="min-w-0 flex-1 truncate text-[14px] font-semibold text-tinta no-underline" title="Perfil">{quien ?? 'Tu cuenta'}</Link>
                 {/* Un FORMULARIO y no un enlace: ver `app/salir/route.ts`. */}
                 <form action="/salir" method="post" className="contents">
                   <button type="submit" className="cursor-pointer rounded-full border-0 bg-transparent px-2 py-1 text-[13px] text-tinta-2 hover:bg-sel">Salir</button>
