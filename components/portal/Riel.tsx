@@ -23,6 +23,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ConversacionEnPortal } from '@/lib/api'
 import { Conversacion, iniciales } from '@/components/portal/Conversacion'
+import { AjustesPanel } from '@/components/portal/AjustesPanel'
+import { ANCHOS, PANEL_FABRICA, guardarPanel, leerPanel, type PanelPrefs } from '@/lib/panel'
 
 type Item = { id: string; titulo: string; tipo?: string; sinLeer: number }
 const ABIERTA = 'zaelyn-riel-v1'
@@ -34,6 +36,15 @@ export function Riel({ app }: { app: string | null }) {
   const [abierta, setAbierta] = useState<string | null>(null) // id de conversación, o 'zaelyn' con la app
   const [zaelyn, setZaelyn] = useState(false) // panel propio de Zaelyn (sin app)
   const marco = useRef<HTMLIFrameElement>(null)
+  // Cómo se ve el panel, por dispositivo (decisiones/2026-11-18-panel-de-zaelyn).
+  const [pp, setPp] = useState<PanelPrefs>(PANEL_FABRICA)
+  const [ajustes, setAjustes] = useState(false)
+  const ppRef = useRef(pp)
+  ppRef.current = pp
+  useEffect(() => { setPp(leerPanel()) }, [])
+  const cambiarPanel = useCallback((x: Partial<PanelPrefs>) => {
+    setPp(a => { const n = { ...a, ...x }; guardarPanel(n); return n })
+  }, [])
 
   // ── la lista ────────────────────────────────────────────────────────────
   const recargar = useCallback(async () => {
@@ -54,6 +65,17 @@ export function Riel({ app }: { app: string | null }) {
     if (abierta) document.documentElement.dataset.zconv = 'abierta'
     else delete document.documentElement.dataset.zconv
   }, [abierta])
+  // En forma Columna la página se recorre para que nada quede tapado.
+  useEffect(() => {
+    const h = document.documentElement
+    h.style.setProperty('--rl-w', `${ANCHOS[pp.ancho]}px`)
+    if (abierta && pp.forma === 'columna') h.dataset.zcol = 'abierta'
+    else delete h.dataset.zcol
+    // Flotante o teléfono a la derecha sin arrastrar: el orbe se hace a un lado.
+    if (abierta && pp.forma !== 'columna' && pp.lado === 'der' && !pp.pos) h.dataset.zflot = 'der'
+    else delete h.dataset.zflot
+    return () => { delete h.dataset.zcol; delete h.dataset.zflot }
+  }, [abierta, pp.forma, pp.ancho, pp.lado, pp.pos])
 
   // ── el panel propio de Zaelyn (Chat.tsx) avisa si está abierto ──────────
   useEffect(() => {
@@ -84,10 +106,10 @@ export function Riel({ app }: { app: string | null }) {
     if (!app || !marco.current?.contentWindow) return
     const q = new URLSearchParams(window.location.search)
     const [, , , grupo, plan] = window.location.pathname.split('/')
-    marco.current.contentWindow.postMessage(
-      { tipo: 'portal:contexto', ruta: window.location.pathname, grupo: grupo ?? null, plan: plan ?? null, vista: q.get('v'), resaltar: q.get('a') },
-      app,
-    )
+    // La app lee `{ tipo, datos }` (specs/portal-con-app-embebida); se mandan
+    // también sueltos por compatibilidad.
+    const datos = { ruta: window.location.pathname, grupo: grupo ?? null, plan: plan ?? null, vista: q.get('v'), resaltar: q.get('a') }
+    marco.current.contentWindow.postMessage({ tipo: 'portal:contexto', datos, ...datos }, app)
     apariencia()
   }, [app])
   // La app embebida se pinta como el portal: misma luz y misma paleta
@@ -95,10 +117,17 @@ export function Riel({ app }: { app: string | null }) {
   // que la persona cambia algo en «Apariencia».
   const apariencia = useCallback(() => {
     if (!app || !marco.current?.contentWindow) return
+    if (ppRef.current.apariencia === 'app') {
+      // «Como mi app»: la app usa sus propios colores y luz.
+      marco.current.contentWindow.postMessage({ tipo: 'portal:apariencia', datos: { heredar: false }, heredar: false }, app)
+      return
+    }
     const h = document.documentElement
     const oscuro = h.dataset.tema === 'oscuro' || (h.dataset.tema !== 'claro' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-    marco.current.contentWindow.postMessage({ tipo: 'portal:apariencia', tema: oscuro ? 'oscuro' : 'claro', paleta: h.dataset.paleta ?? 'lavanda' }, app)
+    const datos = { heredar: true, tema: oscuro ? 'oscuro' : 'claro', paleta: h.dataset.paleta ?? 'lavanda' }
+    marco.current.contentWindow.postMessage({ tipo: 'portal:apariencia', datos, ...datos }, app)
   }, [app])
+  useEffect(() => { apariencia() }, [pp.apariencia, apariencia])
   useEffect(() => {
     if (!app) return
     const mo = new MutationObserver(() => apariencia())
@@ -163,6 +192,34 @@ export function Riel({ app }: { app: string | null }) {
     return () => window.removeEventListener('keydown', tecla)
   }, [abierta, alternarZaelyn, abrirConv, visibles])
 
+  // Arrastrar la ventana flotante o el teléfono desde su barra.
+  const columna = useRef<HTMLElement>(null)
+  const arrastrar = (e: React.PointerEvent) => {
+    if (pp.forma === 'columna' || (e.target as HTMLElement).closest('button,a')) return
+    const el = columna.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    const dx = e.clientX - r.left, dy = e.clientY - r.top
+    const mover = (m: PointerEvent) => {
+      const x = Math.max(8, Math.min(window.innerWidth - r.width - 8, m.clientX - dx))
+      const y = Math.max(8, Math.min(window.innerHeight - 80, m.clientY - dy))
+      el.style.left = `${x}px`; el.style.top = `${y}px`; el.style.right = 'auto'; el.style.bottom = 'auto'
+    }
+    const soltar = () => {
+      window.removeEventListener('pointermove', mover); window.removeEventListener('pointerup', soltar)
+      document.body.style.userSelect = ''
+      const f = el.getBoundingClientRect()
+      cambiarPanel({ pos: { x: Math.round(f.left), y: Math.round(f.top) } })
+    }
+    document.body.style.userSelect = 'none'
+    window.addEventListener('pointermove', mover); window.addEventListener('pointerup', soltar)
+  }
+  const estiloColumna = {
+    '--rl-w': `${ANCHOS[pp.ancho]}px`,
+    '--zy-esc': String(pp.letra),
+    ...(pp.forma !== 'columna' && pp.pos ? { left: `${pp.pos.x}px`, top: `${pp.pos.y}px`, right: 'auto', bottom: 'auto' } : {}),
+  } as React.CSSProperties
+
   const conv = abierta && abierta !== 'zaelyn' ? convs.find(c => c.id === abierta) : undefined
   const titulo = abierta === 'zaelyn' ? 'Zaelyn' : (conv?.titulo ?? lista.find(x => x.id === abierta)?.titulo ?? '')
   const srcApp = app && abierta ? `${app}/${abierta === 'zaelyn' ? 'zaelyn' : `chats/${encodeURIComponent(abierta)}`}?embebido=1` : null
@@ -207,17 +264,22 @@ export function Riel({ app }: { app: string | null }) {
       </nav>
 
       {abierta && (srcApp || conv) && (
-        <section id="rl-columna" className="rl-columna" aria-label={titulo}>
-          <header className="rl-cab">
+        <section id="rl-columna" ref={columna} className="rl-columna" aria-label={titulo}
+          data-forma={pp.forma} data-lado={pp.lado} data-alto={pp.alto} data-equipo={pp.equipo} data-marco={pp.marco} style={estiloColumna}>
+          <header className="rl-cab" onPointerDown={arrastrar} title={pp.forma !== 'columna' ? 'Arrástrame' : undefined}>
             {abierta === 'zaelyn'
               ? <span className="z-orbe rl-cab-orbe" aria-hidden="true" />
               : <span className="ms-avatar" data-tipo={conv?.tipo} aria-hidden="true">{iniciales(titulo)}</span>}
             <b className="rl-cab-t">{titulo}</b>
             {abierta !== 'zaelyn' && <a className="rl-acc" href={`/app/mensajes?c=${encodeURIComponent(abierta)}`} title="Abrir en grande" aria-label="Abrir en grande">⤢</a>}
+            <button type="button" className="rl-acc" onClick={() => setAjustes(a => !a)} aria-label="Ajustes del panel" aria-expanded={ajustes} title="Forma, tamaño y letra del panel">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg>
+            </button>
             <button type="button" className="rl-acc" onClick={() => setAbierta(null)} aria-label="Cerrar">×</button>
           </header>
+          {ajustes && <AjustesPanel p={pp} cambiar={cambiarPanel} cerrar={() => setAjustes(false)} />}
           {srcApp
-            ? <div className="rl-marco-caja"><iframe ref={marco} className="rl-marco" src={srcApp} title={titulo} onLoad={contexto} allow="microphone; clipboard-write" /></div>
+            ? <div className="rl-marco-caja">{pp.forma === 'telefono' && <span className="rl-isla" aria-hidden="true" />}<iframe ref={marco} className="rl-marco" src={srcApp} title={titulo} onLoad={contexto} allow="microphone; clipboard-write" /></div>
             : conv && <Conversacion key={conv.id} conv={conv} compacta cabecera={false} alActividad={() => void recargar()} />}
         </section>
       )}

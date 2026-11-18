@@ -123,3 +123,9 @@ Pendiente:
 - resumen por módulo (Core);
 - EN y PT de las landings nuevas;
 - respuestas de JJR sobre anual, fundador de Profesional y URLs legales.
+
+## Panel de Zaelyn configurable (decisiones/2026-11-18-panel-de-zaelyn) — 18 nov 2026
+
+El panel tiene tres formas (Columna, Flotante y Teléfono iPhone o Android), además de lado, ancho, alto, letra y si toma los colores del portal o de la app. Se guarda por dispositivo.
+
+A la app le toca escuchar `portal:apariencia { heredar }`; está pedido en `specs/portal-con-app-embebida.md`.
