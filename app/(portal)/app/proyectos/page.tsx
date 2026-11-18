@@ -10,7 +10,7 @@ import { textos } from '@/lib/copy'
 import { idiomaActual } from '@/lib/preferencias'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Proyectos' }
+export const metadata = { title: 'PMO' }
 
 /**
  * `/app/proyectos` — la casa de Proyectos (#186): los grupos de trabajo, sus
@@ -35,7 +35,7 @@ export default async function Proyectos({ searchParams }: { searchParams: Promis
         <header className="flex flex-wrap items-end gap-4">
           <div className="flex min-w-0 flex-1 flex-col gap-1.5">
             <span className="flex items-center gap-2 text-[14px] text-tinta-3"><span className="size-[9px] rounded-full bg-proyectos" aria-hidden="true" />PMO</span>
-            <h1 className="text-[34px] font-semibold sm:text-[40px]" style={{ letterSpacing: '-0.04em' }}>Tus proyectos</h1>
+            <h1 className="text-[34px] font-semibold sm:text-[40px]" style={{ letterSpacing: '-0.04em' }}>PMO · tus proyectos</h1>
           </div>
           <Link href="/app/editor" className="inline-flex h-11 items-center rounded-full bg-superficie px-5 text-[15px] font-medium text-tinta no-underline shadow-[0_0_0_1px_var(--z-line)]">{t('po.pr.mios')}</Link>
           <Link href="/app/editor/nuevo" className="inline-flex h-11 items-center rounded-full bg-pri px-5 text-[15px] font-semibold text-sobre-pri no-underline">{t('po.pr.nuevo')}</Link>

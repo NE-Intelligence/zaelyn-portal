@@ -6,7 +6,7 @@ import { BotonZaelyn } from '@/components/portal/BotonZaelyn'
 import { Riel } from '@/components/portal/Riel'
 import { origenDeLaApp } from '@/lib/ruta-propia'
 import { cookies } from 'next/headers'
-import { COOKIE, cuentaWeb, elAcceso, misGrupos, soyAdmin } from '@/lib/api'
+import { COOKIE, cuentaWeb, elAcceso, losModulos, misGrupos, soyAdmin } from '@/lib/api'
 import { ambitoDe } from '@/lib/plan'
 import type { Espacios } from '@/components/portal/Lateral'
 import { Lateral } from '@/components/portal/Lateral'
@@ -71,11 +71,12 @@ export async function Barra({
   // orbe de Zaelyn. Sin sesión se queda la barra negra con «Entrar».
   if (sesion || ejemplo) {
     const real = sesion && !ejemplo
-    const [quien, cristal, gr, acc] = await Promise.all([
+    const [quien, cristal, gr, acc, mods] = await Promise.all([
       real ? cuentaWeb().then(c => (c.ok ? c.dato.handle : null)).catch(() => null) : Promise.resolve(null),
       cristalActual(),
       real ? misGrupos().catch(() => null) : Promise.resolve(null),
       real ? elAcceso().catch(() => null) : Promise.resolve(null),
+      real ? losModulos().catch(() => null) : Promise.resolve(null),
     ])
     // El menú por ámbitos (decisiones/2026-11-13-planes-por-ambito): una
     // entrada por familia, por grupo y por proyecto. Lo apagado se ve con
@@ -94,6 +95,7 @@ export async function Barra({
         familias: grupos.filter(g => ambitoDe(g) === 'family').map(g => ({ id: g.id, nombre: g.nombre, href: `/app/f/${g.id}` })),
         grupos: grupos.filter(g => ambitoDe(g) === 'equipo').map(g => ({ id: g.id, nombre: g.nombre, href: `/app/g/${g.id}` })),
         proyectos: grupos.filter(g => ambitoDe(g) === 'proyecto').map(g => ({ id: g.id, nombre: g.nombre, href: `/app/g/${g.id}` })),
+        apps: mods?.ok ? mods.dato.modulos.map(m => ({ clave: m.clave, nombre: m.nombre, estado: m.estado })) : [],
         bloqueo: { personal: traeLo('personal'), familia: traeLo('familia'), grupos: traeLo('grupos'), proyectos: traeLo('proyectos') },
       }
     return (
