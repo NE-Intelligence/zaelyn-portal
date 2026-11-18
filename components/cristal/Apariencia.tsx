@@ -174,17 +174,9 @@ export function Apariencia({ inicial, compacto = false }: { inicial: Cristal; co
             ))}
           </fieldset>
 
-          <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
-            <legend className="mb-2 p-0 text-[12.5px] font-medium text-tinta-3">Tamaño de Zaelyn en el portal</legend>
-            <div className="flex gap-1.5" role="radiogroup" aria-label="Tamaño de Zaelyn en el portal">
-              {(Object.keys(LETRAS) as Letra[]).map(k => (
-                <button key={k} type="button" role="radio" aria-checked={c.letra === k} onClick={() => cambiar({ letra: k })}
-                  className={`h-9 flex-1 cursor-pointer rounded-full border-0 text-[13px] ${c.letra === k ? 'bg-tinta text-superficie' : 'bg-superficie-2 text-tinta'}`}>
-                  {LETRAS[k].nombre}
-                </button>
-              ))}
-            </div>
-          </fieldset>
+          <p className="m-0 text-[12.5px] leading-[1.45] text-tinta-3">
+            La forma, el tamaño y la letra del panel de Zaelyn se ajustan en el propio panel, con el botón de ajustes de su barra.
+          </p>
 
           <button type="button" onClick={() => cambiar(CRISTAL_FABRICA)}
             className="h-10 cursor-pointer rounded-full border-0 bg-superficie-2 text-[13.5px] text-tinta">Volver a lo de fábrica</button>

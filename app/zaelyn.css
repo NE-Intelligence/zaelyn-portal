@@ -990,7 +990,6 @@ body {
   animation: ch-entra 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 @media (min-width: 700px) {
-  .pt .rl-columna,
   :root .pt .ch-panel {
     inset: auto 24px 100px auto;
     width: 400px;
@@ -1000,6 +999,120 @@ body {
     overflow: hidden;
     box-shadow: var(--z-sombra-3);
   }
+
+  /* ── El panel de Zaelyn configurable (decisiones/2026-11-18-panel-de-zaelyn) ── */
+  .pt .rl-columna {
+    width: var(--rl-w, 400px);
+    border: 0;
+    overflow: visible;
+  }
+  /* Columna: a todo lo alto, a la derecha; la página se recorre. */
+  .pt .rl-columna[data-forma='columna'] {
+    inset: 0 0 0 auto;
+    height: 100dvh;
+    border-left: 1px solid var(--z-line);
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .pt .rl-columna[data-forma='columna'] .rl-marco-caja { border-radius: 0; }
+  /* Flotante: una ventana encima de la página. */
+  .pt .rl-columna[data-forma='flotante'] {
+    inset: auto 24px 100px auto;
+    height: min(680px, calc(100dvh - 140px));
+    border-radius: 26px;
+    box-shadow: var(--z-sombra-3);
+  }
+  .pt .rl-columna[data-forma='flotante'][data-alto='medio'] { height: min(540px, calc(100dvh - 140px)); }
+  .pt .rl-columna[data-forma='flotante'][data-alto='completo'] { inset: 24px 24px 24px auto; height: auto; }
+  .pt .rl-columna[data-forma='flotante'] > .rl-cab,
+  .pt .rl-columna[data-forma='telefono'] > .rl-cab { cursor: grab; }
+  .pt .rl-columna[data-forma='flotante'] { overflow: hidden; }
+  .pt .rl-columna[data-lado='izq'][data-forma='flotante'] { inset: auto auto 100px 272px; }
+  .pt .rl-columna[data-lado='izq'][data-forma='flotante'][data-alto='completo'] { inset: 24px auto 24px 272px; }
+
+  /* Teléfono: el marco de un equipo, con la barra arriba de él. */
+  .pt .rl-columna[data-forma='telefono'] {
+    inset: auto 28px 28px auto;
+    height: min(calc(var(--rl-w, 400px) * 2.05), calc(100dvh - 96px));
+    padding: 12px;
+    border-radius: 56px;
+    background: #1d1d1f;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25), inset 0 0 0 1.5px rgba(255, 255, 255, 0.08);
+  }
+  .pt .rl-columna[data-lado='izq'][data-forma='telefono'] { inset: auto auto 28px 276px; }
+  .pt .rl-columna[data-forma='telefono'][data-equipo='android'] { border-radius: 38px; padding: 9px; }
+  .pt .rl-columna[data-forma='telefono'][data-marco='titanio'] {
+    background: linear-gradient(145deg, #c9c5bd, #8f8a82 45%, #b8b3aa);
+  }
+  .pt .rl-columna[data-forma='telefono'][data-marco='blanco'] {
+    background: #f2f2f4;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.18), inset 0 0 0 1.5px rgba(0, 0, 0, 0.08);
+  }
+  .pt .rl-columna[data-forma='telefono'] > .rl-cab {
+    position: absolute;
+    left: 50%;
+    top: -50px;
+    transform: translateX(-50%);
+    padding: 6px 8px 6px 12px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--z-surface);
+    box-shadow: var(--z-sombra-2);
+    white-space: nowrap;
+  }
+  .pt .rl-columna[data-forma='telefono'] .rl-marco-caja {
+    border-radius: 44px;
+    background: var(--z-bg);
+  }
+  .pt .rl-columna[data-forma='telefono'][data-equipo='android'] .rl-marco-caja { border-radius: 30px; }
+  .pt .rl-isla {
+    position: absolute;
+    z-index: 2;
+    top: 11px;
+    left: 50%;
+    width: 112px;
+    height: 32px;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: #000;
+    pointer-events: none;
+  }
+  .pt .rl-columna[data-equipo='android'] .rl-isla { width: 14px; height: 14px; top: 12px; }
+  /* La barra de estado del teléfono: la app empieza debajo de la isla. */
+  .pt .rl-columna[data-forma='telefono'] .rl-marco {
+    top: 50px;
+    height: calc((100% - 50px) / var(--zy-esc, 1));
+  }
+  .pt .rl-columna[data-forma='telefono'][data-equipo='android'] .rl-marco { top: 36px; height: calc((100% - 36px) / var(--zy-esc, 1)); }
+
+  /* Ajustes del panel */
+  .pt .rl-ajustes {
+    position: absolute;
+    z-index: 5;
+    top: 58px;
+    right: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 300px;
+    max-height: calc(100dvh - 120px);
+    overflow-y: auto;
+    padding: 14px 16px 16px;
+    border-radius: 20px;
+    box-shadow: var(--z-sombra-3);
+  }
+  .pt .rl-columna[data-forma='telefono'] .rl-ajustes { top: 8px; right: calc(100% + 16px); }
+  .pt .rl-columna[data-forma='telefono'][data-lado='izq'] .rl-ajustes { right: auto; left: calc(100% + 16px); }
+
+  /* La página se recorre cuando la columna está abierta, y el orbe con ella. */
+  :root[data-zcol='abierta'] body > .pt { padding-right: var(--rl-w, 400px); }
+  :root[data-zcol='abierta'] .pt .rl { right: calc(var(--rl-w, 400px) + 24px); }
+  :root[data-zflot='der'] .pt .rl { right: calc(var(--rl-w, 400px) + 64px); }
+  .pt .rl-columna[data-forma='flotante'] > .rl-cab { background: var(--z-surface); }
+}
+@media (min-width: 700px) and (max-width: 1023px) {
+  .pt .rl-columna[data-lado='izq'][data-forma='flotante'],
+  .pt .rl-columna[data-lado='izq'][data-forma='telefono'] { left: 24px; }
 }
 :root[data-zpanel='abierto'] body > .pt {
   padding-right: 0;
